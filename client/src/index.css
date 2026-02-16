@@ -1,0 +1,53 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ===============================
+   GLOBAL BASE
+   =============================== */
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  background-color: #f9fafb;
+}
+
+/* ===============================
+   PRINT STYLES (Invoice Pages)
+   =============================== */
+
+@page {
+  size: A4 portrait;
+  margin: 10mm;
+}
+
+@media print {
+  body {
+    background: white !important;
+    color: #000 !important;
+    font-family: "Georgia", "Times New Roman", serif !important;
+  }
+
+  /* Full width printing */
+  .print-page {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* Prevent ugly splits */
+  table,
+  tr,
+  .room-block {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* Hide navigation / layout junk if any exists */
+  nav,
+  header,
+  footer,
+  .no-print {
+    display: none !important;
+  }
+}

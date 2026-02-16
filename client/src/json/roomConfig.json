@@ -1,0 +1,446 @@
+{
+  "defaultDimensions": {
+    "height": 9,
+    "width": 1,
+    "depth": 1
+  },
+  "invoiceTypes": ["Standard", "Advanced", "Premium", "Luxury"],
+  "rooms": [
+    {
+      "name": "Bedroom",
+      "items": [
+        {
+          "name": "Bed",
+          "defaultFrame": { "height": 0, "width": 0 },
+          "defaultBox": { "height": 6.5, "width": 6, "depth": 1.5 }
+        },
+        {
+          "name": "Walk-In Wardrobe",
+          "defaultFrame": { "height": 2, "width": 2 },
+          "defaultBox": { "height": 7, "width": 2, "depth": 1.5 }
+        },
+        {
+          "name": "Seating Unit",
+          "defaultFrame": { "height": 0, "width": 0 },
+          "defaultBox": { "height": 3, "width": 5, "depth": 1.5 }
+        },
+        {
+          "name": "Wardrobe",
+          "defaultFrame": { "height": 2, "width": 2 },
+          "defaultBox": { "height": 7, "width": 2, "depth": 1.5 }
+        },
+        {
+          "name": "TV Unit",
+          "defaultFrame": { "height": 0, "width": 0 },
+          "defaultBox": { "height": 5, "width": 4, "depth": 1 }
+        },
+        {
+          "name": "Work Station",
+          "defaultFrame": { "height": 2.6, "width": 4 },
+          "defaultBox": { "height": 4.5, "width": 4, "depth": 1 }
+        },
+        {
+          "name": "Dressing Unit",
+          "defaultFrame": { "height": 0, "width": 0 },
+          "defaultBox": { "height": 7, "width": 2, "depth": 1 }
+        },
+        {
+          "name": "Arch",
+          "defaultFrame": { "height": 0, "width": 0 },
+          "defaultBox": { "height": 6.5, "width": 2, "depth": 1.5 }
+        },
+        {
+          "name": "Other"
+        }
+      ],
+      "descriptions": [
+        "Master Bedroom",
+        "Guest Bedroom",
+        "Child Bedroom",
+        "Bedroom 1",
+        "Bedroom 2",
+        "Bedroom 3",
+        "Other"
+      ],
+      "accessories": [
+        { "name": "Draw", "price": 5000 },
+        { "name": "Jewellery Box (900mm)", "price": 20000 },
+        { "name": "Charm Storage Box (900mm)", "price": 20000 },
+        { "name": "Shallow Leather Basket (900mm)", "price": 20000 },
+        { "name": "Deep Leather Basket (900mm)", "price": 20000 },
+        { "name": "Trouser Rack (900mm)", "price": 15000 },
+        { "name": "Clothes Lifting Rack", "price": 8000 },
+        { "name": "Rotating Shoe Rack 6L", "price": 25000 },
+        { "name": "Rotating Shoe Rack 12L", "price": 35000 },
+        { "name": "Tie Rack", "price": 5000 },
+        { "name": "Finger Print Safe Box", "price": 40000 },
+        { "name": "Watch Winder (3 Units)", "price": 40000 },
+        { "name": "Hanging Rod", "price": 3000 },
+        { "name": "Hanging Holder", "price": 500 },
+        { "name": "Top Pant Rant (400mm)", "price": 5000 },
+        { "name": "Rotating Clothes Rack", "price": 4000 },
+        { "name": "Side Mount 3 Shelf", "price": 15000 },
+        { "name": "Revolving Mirror", "price": 10000 },
+        { "name": "Multi-Functional Corner Rack", "price": 25000 }
+      ]
+    },
+    {
+      "name": "Living Room",
+      "items": [
+        {
+          "name": "TV Unit",
+          "defaultFrame": { "height": 0, "width": 0 },
+          "defaultBox": { "height": 9, "width": 6, "depth": 1 }
+        },
+        {
+          "name": "Arch",
+          "defaultFrame": { "height": 0, "width": 0 },
+          "defaultBox": { "height": 6.5, "width": 2, "depth": 1.5 }
+        },
+        {
+          "name": "Showcase",
+          "defaultFrame": { "height": 0, "width": 0 },
+          "defaultBox": { "height": 0, "width": 0, "depth": 1 }
+        },
+        {
+          "name": "Wall Paneling",
+          "defaultFrame": { "height": 0, "width": 0 },
+          "defaultBox": { "height": 0, "width": 0, "depth": 1 }
+        },
+        {
+          "name": "Other"
+        }
+      ],
+      "descriptions": [
+        "Living Room",
+        "Main Hall",
+        "Drawing Room",
+        "Bar Counter",
+        "Other"
+      ],
+      "accessories": []
+    },
+
+    {
+      "name": "Kitchen",
+      "items": [
+        {
+          "name": "Base Unit",
+          "defaultFrame": { "height": 2.5, "width": 8 },
+          "defaultBox": { "height": 2.5, "width": 8, "depth": 2 }
+        },
+        {
+          "name": "Wall Unit/Overhead",
+          "defaultFrame": { "height": 2, "width": 8 },
+          "defaultBox": { "height": 2, "width": 8, "depth": 1 }
+        },
+        {
+          "name": "Loft",
+          "defaultFrame": { "height": 2, "width": 8 },
+          "defaultBox": { "height": 0, "width": 0, "depth": 1 }
+        },
+        {
+          "name": "Breakfast Counter/Island table",
+          "defaultFrame": { "height": 0, "width": 0 },
+          "defaultBox": { "height": 2.5, "width": 4, "depth": 2 }
+        },
+        {
+          "name": "Tall Unit / Pantry box",
+          "defaultFrame": { "height": 0, "width": 0 },
+          "defaultBox": { "height": 7, "width": 2, "depth": 2 }
+        },
+        {
+          "name": "Other"
+        }
+      ],
+      "descriptions": ["Modular Kitchen", "Open Kitchen", "Other"],
+      "accessories": [
+        { "name": "Pantry (Small)", "price": 15000 },
+        { "name": "Pantry (Large)", "price": 20000 },
+        { "name": "Universal Magic Corner", "price": 20000 },
+        { "name": "Swing Corner", "price": 15000 },
+        { "name": "Bottle Pullout (300mm)", "price": 10000 },
+        { "name": "Mini Pantry (600mm)", "price": 12000 },
+        { "name": "Lift Up Basket (900mm)", "price": 15000 },
+        { "name": "Capri Mid Way Set (900mm)", "price": 8000 },
+        { "name": "Liquid Rack Pullout (350mm)", "price": 5000 },
+        { "name": "Wicker Basket Normal", "price": 7000 },
+        { "name": "Wicker Basket Soft Close", "price": 8000 },
+        { "name": "Dustbin Single", "price": 6000 },
+        { "name": "Dustbin Dry", "price": 12000 },
+        { "name": "Rolling Shutter PVC", "price": 20000 },
+        { "name": "Rolling Shutter Glass", "price": 25000 },
+        { "name": "Tandem Basket", "price": 5000 },
+        { "name": "Stainless Steel Basket", "price": 3500 }
+      ]
+    },
+    {
+      "name": "Dining Room",
+      "items": [
+        {
+          "name": "Crockery Unit",
+          "defaultFrame": { "height": 2.5, "width": 4 },
+          "defaultBox": { "height": 4.5, "width": 4, "depth": 1 }
+        },
+        {
+          "name": "Other"
+        }
+      ],
+      "descriptions": ["Dining Room", "Other"],
+      "accessories": [{ "name": "Draw", "price": 5000 }]
+    },
+
+    {
+      "name": "Pooja Room",
+      "items": [
+        {
+          "name": "Pooja Unit",
+          "defaultFrame": { "height": 5, "width": 4 },
+          "defaultBox": { "height": 2, "width": 4, "depth": 1.5 }
+        },
+        {
+          "name": "Other"
+        }
+      ],
+      "descriptions": ["Pooja Room", "Prayer Area", "Other"],
+      "accessories": [{ "name": "Door", "price": 20000 }]
+    },
+
+    {
+      "name": "Other",
+      "items": [
+        {
+          "name": "Utility Area",
+          "defaultFrame": { "height": 0, "width": 0 },
+          "defaultBox": { "height": 3, "width": 3, "depth": 1 }
+        },
+        {
+          "name": "Shoe Rack",
+          "defaultFrame": { "height": 0, "width": 0 },
+          "defaultBox": { "height": 3, "width": 4, "depth": 1 }
+        },
+        {
+          "name": "Wash Basin",
+          "defaultFrame": { "height": 0, "width": 0 },
+          "defaultBox": { "height": 2.5, "width": 4, "depth": 1.5 }
+        },
+        {
+          "name": "Main Door Panelling",
+          "defaultFrame": { "height": 10, "width": 3 },
+          "defaultBox": { "height": 0, "width": 0, "depth": 1 }
+        },
+        {
+          "name": "Other"
+        }
+      ],
+      "descriptions": ["Other"],
+      "accessories": [{ "name": "Mesh Door", "price": 10000 }]
+    }
+  ],
+  "extras": [
+    {
+      "key": "ceiling",
+      "label": "Ceiling",
+      "type": "ceiling",
+
+      "surfaces": [
+        { "key": "saint_gobain", "label": "Saint Gobain", "unitPrice": 85 },
+        { "key": "pop", "label": "POP", "unitPrice": 65 },
+        { "key": "pvc", "label": "PVC", "unitPrice": 135 },
+        { "key": "wooden", "label": "Wooden", "unitPrice": 700 },
+        { "key": "fluted_pvc", "label": "Fluted PVC", "unitPrice": 200 }
+      ],
+      "ceilingPainting": { "unitPrice": 40 },
+      "slabs": [
+        {
+          "min": 0,
+          "max": 1000,
+          "electricalWiring": 25000,
+          "electricianCharges": 25000,
+          "ceilingLights": 25000,
+          "profileLights": 10000
+        },
+        {
+          "min": 1000,
+          "max": 1200,
+          "electricalWiring": 30000,
+          "electricianCharges": 30000,
+          "ceilingLights": 30000,
+          "profileLights": 15000
+        },
+        {
+          "min": 1200,
+          "max": 1500,
+          "electricalWiring": 35000,
+          "electricianCharges": 35000,
+          "ceilingLights": 35000,
+          "profileLights": 20000
+        },
+        {
+          "min": 1500,
+          "max": 2000,
+          "electricalWiring": 40000,
+          "electricianCharges": 40000,
+          "ceilingLights": 40000,
+          "profileLights": 25000
+        },
+        {
+          "min": 2000,
+          "max": 2500,
+          "electricalWiring": 45000,
+          "electricianCharges": 45000,
+          "ceilingLights": 45000,
+          "profileLights": 30000
+        },
+        {
+          "min": 2500,
+          "max": 3000,
+          "electricalWiring": 50000,
+          "electricianCharges": 50000,
+          "ceilingLights": 50000,
+          "profileLights": 35000
+        },
+        {
+          "min": 3000,
+          "max": 3500,
+          "electricalWiring": 55000,
+          "electricianCharges": 55000,
+          "ceilingLights": 55000,
+          "profileLights": 40000
+        },
+        {
+          "min": 3500,
+          "max": 4000,
+          "electricalWiring": 60000,
+          "electricianCharges": 60000,
+          "ceilingLights": 60000,
+          "profileLights": 45000
+        },
+        {
+          "min": 4000,
+          "max": 4500,
+          "electricalWiring": 65000,
+          "electricianCharges": 65000,
+          "ceilingLights": 65000,
+          "profileLights": 50000
+        },
+        {
+          "min": 4500,
+          "max": 5000,
+          "electricalWiring": 70000,
+          "electricianCharges": 70000,
+          "ceilingLights": 70000,
+          "profileLights": 55000
+        }
+      ]
+    },
+    {
+      "key": "wall_painting",
+      "label": "Wall Painting",
+      "type": "area_based",
+      "unitPrice": 30
+    },
+    {
+      "key": "putty_painting",
+      "label": "Putty & Painting - Wall & Ceiling (Royale Emulsion)",
+      "type": "area_based",
+      "unitPrice": 40
+    },
+    {
+      "key": "wall_painting_royale_emulsion",
+      "label": "Wall Painting (Royale Emulsion)",
+      "type": "area_based",
+      "unitPrice": 30
+    },
+    {
+      "key": "pu_duco_polish_for_veneer",
+      "label": "PU or Duco Polish for Veneer",
+      "type": "area_based",
+      "unitPrice": 200
+    },
+    {
+      "key": "marble_granite_tiles_nano_white_quartz",
+      "label": "Marble / Granite / Tiles / Nano White / Quartz with laying charges",
+      "type": "fixed",
+      "price": 100000
+    },
+    {
+      "key": "stone_laying_charges",
+      "label": "Stone Laying Charges",
+      "type": "fixed",
+      "price": 25000
+    },
+    {
+      "key": "rods_hangers_curtains_blinds",
+      "label": "Rods / Hangers / Curtains / Blinds",
+      "type": "fixed",
+      "price": 0
+    },
+    {
+      "key": "wallpapers",
+      "label": "Wallpapers",
+      "type": "fixed",
+      "price": 0
+    },
+    {
+      "key": "sofa",
+      "label": "Sofa",
+      "type": "fixed",
+      "price": 0
+    },
+    {
+      "key": "dining_table",
+      "label": "Dining Table",
+      "type": "fixed",
+      "price": 0
+    },
+    {
+      "key": "gas_pipeline",
+      "label": "Gas Pipeline",
+      "type": "fixed",
+      "price": 5000
+    },
+    {
+      "key": "deep_cleaning",
+      "label": "Deep Cleaning",
+      "type": "fixed",
+      "price": 15000
+    },
+    {
+      "key": "home_theater_system",
+      "label": "Home Theater System",
+      "type": "fixed",
+      "price": 0
+    },
+    {
+      "key": "lift",
+      "label": "Lift",
+      "type": "fixed",
+      "price": 0
+    },
+    {
+      "key": "pergola",
+      "label": "Pergola",
+      "type": "fixed",
+      "price": 0
+    },
+    {
+      "key": "solar",
+      "label": "Solar",
+      "type": "fixed",
+      "price": 0
+    },
+    {
+      "key": "acoustics",
+      "label": "Acoustics",
+      "type": "fixed",
+      "price": 0
+    },
+    {
+      "key": "other",
+      "label": "Other",
+      "type": "area_based",
+      "unitPrice": 0
+    }
+  ]
+}
