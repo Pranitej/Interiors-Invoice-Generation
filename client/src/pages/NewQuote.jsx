@@ -7,7 +7,6 @@ import api from "../api/api";
 import { AuthContext } from "../context/AuthContext";
 import ROOM_CONFIG from "../json/roomConfig";
 import PricingSection from "../components/PricingSection";
-import AdminInvoice from "../components/AdminInvoice";
 import { formatINR, roundTo2 } from "../utils/calculations";
 import InvoicePreview from "../components/InvoicePreview";
 import { Check, FilePlusCorner, RefreshCw, X } from "lucide-react";
@@ -255,6 +254,7 @@ export default function NewQuote() {
     useCurrentLocation,
     id,
     discount,
+    invoiceType,
   ]);
 
   useEffect(() => {
@@ -266,11 +266,47 @@ export default function NewQuote() {
     if (id && !userEditedGlobalRateRef.current) return;
 
     setRooms((prev) =>
-      prev.map((room) => ({
-        ...room,
-        frameRate: globalFrameRate,
-        boxRate: globalBoxRate,
-      })),
+      prev.map((room) => {
+        const frameRate = globalFrameRate;
+        const boxRate = globalBoxRate;
+
+        const updatedItems = (room.items || []).map((item) => {
+          const frameArea =
+            Number(item.frame?.height || 0) * Number(item.frame?.width || 0);
+
+          const boxArea =
+            Number(item.box?.height || 0) *
+            Number(item.box?.width || 0) *
+            Number(item.box?.depth || 1);
+
+          const framePrice = roundTo2(frameArea * frameRate);
+          const boxPrice = roundTo2(boxArea * boxRate);
+
+          const totalPrice = roundTo2(framePrice + boxPrice);
+
+          return {
+            ...item,
+            frame: {
+              ...item.frame,
+              area: frameArea,
+              price: framePrice,
+            },
+            box: {
+              ...item.box,
+              area: boxArea,
+              price: boxPrice,
+            },
+            totalPrice,
+          };
+        });
+
+        return {
+          ...room,
+          frameRate,
+          boxRate,
+          items: updatedItems,
+        };
+      }),
     );
   }, [globalFrameRate, globalBoxRate, id]);
 
@@ -784,6 +820,8 @@ export default function NewQuote() {
                       getItemDefaults={getItemDefaults}
                       onChange={(updated) => updateRoom(index, updated)}
                       onRemoveRoom={() => removeRoom(index)}
+                      globalFrameRate={globalFrameRate}
+                      globalBoxRate={globalBoxRate}
                     />
                   </div>
                 ))
