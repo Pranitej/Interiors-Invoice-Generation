@@ -1,6 +1,7 @@
 import { useMemo, useState, useEffect, useRef } from "react";
 import { formatISTDateTime } from "../utils/dateTime";
 import { Search, ChevronDown, X, Edit } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export default function SearchableInvoiceSelect({
   label,
@@ -15,6 +16,7 @@ export default function SearchableInvoiceSelect({
   const [isFocused, setIsFocused] = useState(false);
   const dropdownRef = useRef(null);
   const inputRef = useRef(null);
+  const navigate = useNavigate();
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -57,8 +59,9 @@ export default function SearchableInvoiceSelect({
   const handleEditClick = (e, invoiceId) => {
     e.stopPropagation();
     // For now, using a dummy link. Replace with actual URL later
-    const editUrl = `/invoices/edit/${invoiceId}`;
-    window.location.href = editUrl; // Or use your router's navigation method
+    navigate(`/new-quote/${invoiceId}`);
+    // const editUrl = `/new-quote/${invoiceId}`;
+    // window.location.href = editUrl; // Or use your router's navigation method
   };
 
   const getStatusColor = (status) => {
