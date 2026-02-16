@@ -109,6 +109,8 @@ export default function RoomEditor({
   room,
   onChange = () => {},
   onRemoveRoom,
+  globalFrameRate,
+  globalBoxRate,
 }) {
   const [collapsedItems, setCollapsedItems] = useState({});
   const [isRoomCollapsed, setIsRoomCollapsed] = useState(false);
@@ -155,7 +157,15 @@ export default function RoomEditor({
     if (JSON.stringify(recalculated) !== JSON.stringify(room.items)) {
       onChange({ ...safeRoom, items: recalculated });
     }
-  }, [safeRoom.frameRate, safeRoom.boxRate, room.items]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [
+    safeRoom,
+    onChange,
+    safeRoom.frameRate,
+    safeRoom.boxRate,
+    room.items,
+    globalFrameRate,
+    globalBoxRate,
+  ]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // -----------------------------------------
   // ITEM UPDATE
