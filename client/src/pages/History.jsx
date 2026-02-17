@@ -160,16 +160,9 @@ export default function History() {
       const invoice = (await api.get(`/invoices/${id}`)).data;
       const Component = type === "admin" ? AdminInvoice : ClientInvoice;
 
-      const html = `<!DOCTYPE html>
-        <html>
-          <head>
-            <meta charset="utf-8"/>
-            <script src="https://cdn.tailwindcss.com"></script>
-          </head>
-          <body>
-            ${renderToStaticMarkup(<Component invoice={invoice} />)}
-          </body>
-        </html>`;
+      // Only send the component HTML — no wrapping document needed.
+      // pdf.js wraps it in a full HTML document with correct styles.
+      const html = renderToStaticMarkup(<Component invoice={invoice} />);
 
       const res = await api.post(
         "/pdf/render",

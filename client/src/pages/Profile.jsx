@@ -94,7 +94,7 @@ export default function Profile() {
     e.preventDefault();
     setMessage({ type: "", text: "" });
 
-    // Validate passwords if changing
+    // Validate password change
     if (profileForm.newPassword) {
       if (profileForm.newPassword !== profileForm.confirmPassword) {
         setMessage({ type: "error", text: "New passwords do not match" });
@@ -112,15 +112,13 @@ export default function Profile() {
     try {
       const payload = {
         username: profileForm.username,
-        ...(profileForm.currentPassword && {
-          currentPassword: profileForm.currentPassword,
-          newPassword: profileForm.newPassword,
+        ...(profileForm.newPassword && {
+          password: profileForm.newPassword, // ✅ ONLY send password
         }),
       };
 
       const response = await api.put(`/auth/users/${currentUser._id}`, payload);
 
-      // Update context
       setCurrentUser(response.data);
       localStorage.setItem("user", JSON.stringify(response.data));
 
@@ -129,10 +127,8 @@ export default function Profile() {
         text: "Profile updated successfully!",
       });
 
-      // Clear password fields
       setProfileForm({
         ...profileForm,
-        currentPassword: "",
         newPassword: "",
         confirmPassword: "",
       });

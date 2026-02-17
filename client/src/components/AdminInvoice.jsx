@@ -5,6 +5,8 @@ import { formatINR } from "../utils/calculations";
 const AdminInvoice = forwardRef(function AdminInvoice({ invoice }, ref) {
   if (!invoice) return null;
 
+  const logoURL = `${import.meta.env.VITE_API_BASE}/public/skanda-logo.png`;
+
   const client = invoice.client || {};
   const rooms = Array.isArray(invoice.rooms) ? invoice.rooms : [];
   const extras = Array.isArray(invoice.extras) ? invoice.extras : [];
@@ -72,6 +74,7 @@ const AdminInvoice = forwardRef(function AdminInvoice({ invoice }, ref) {
 
   const grandTotal = roomsTotal + extrasTotal;
   const safeDiscount = Math.min(discount, grandTotal);
+
   const finalPayable =
     finalPayableFromApi > 0 ? finalPayableFromApi : grandTotal - safeDiscount;
 
@@ -88,56 +91,470 @@ const AdminInvoice = forwardRef(function AdminInvoice({ invoice }, ref) {
     : "";
 
   /* ========================================================= */
-  /* COMPACT PROFESSIONAL UI START                             */
+  /* STYLE CONSTANTS                                           */
+  /* ========================================================= */
+
+  const s = {
+    // Root wrapper
+    // "bg-white p-4 text-xs text-black w-full max-w-none min-w-full print-page"
+    root: {
+      backgroundColor: "#ffffff",
+      padding: "16px",
+      fontSize: "12px",
+      color: "#000000",
+      width: "100%",
+      maxWidth: "210mm",
+      minWidth: "100%",
+      fontFamily: "'Inter', 'Segoe UI', Arial, sans-serif",
+    },
+
+    // Header section
+    // "border-b-2 border-gray-800 pb-3 mb-4"
+    header: {
+      borderBottom: "2px solid #1f2937",
+      paddingBottom: "12px",
+      marginBottom: "16px",
+    },
+    // "flex justify-between items-start"
+    headerInner: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "flex-start",
+    },
+    // "flex items-start gap-3"
+    headerLeft: {
+      display: "flex",
+      alignItems: "flex-start",
+      gap: "12px",
+    },
+    // "w-16 h-16 flex-shrink-0 mt-1"
+    logoContainer: {
+      width: "64px",
+      height: "64px",
+      flexShrink: 0,
+      marginTop: "4px",
+    },
+    // "w-full h-full object-contain"
+    logoImg: {
+      width: "100%",
+      height: "100%",
+      objectFit: "contain",
+    },
+    // "text-2xl font-bold tracking-tight"
+    companyName: {
+      fontSize: "24px",
+      fontWeight: "700",
+      letterSpacing: "-0.025em",
+      margin: 0,
+    },
+    // "text-[10px] text-gray-600 leading-tight mt-1"
+    companyAddressLine: {
+      fontSize: "10px",
+      color: "#4b5563",
+      lineHeight: "1.25",
+      marginTop: "4px",
+      marginBottom: 0,
+    },
+    // "text-[10px] text-gray-600"
+    companyInfoLine: {
+      fontSize: "10px",
+      color: "#4b5563",
+      margin: 0,
+    },
+    // "font-medium"
+    infoLabel: {
+      fontWeight: "500",
+    },
+
+    // Section block
+    // "mb-4"
+    sectionBlock: {
+      marginBottom: "16px",
+    },
+    // "mb-3"
+    sectionBlockSm: {
+      marginBottom: "12px",
+    },
+
+    // Shared table styles
+    table: {
+      width: "100%",
+      borderCollapse: "collapse",
+      fontSize: "11px",
+    },
+    tableXs: {
+      width: "100%",
+      borderCollapse: "collapse",
+      fontSize: "10px",
+      marginBottom: "4px",
+    },
+
+    // "bg-gray-100"
+    theadGray100: {
+      backgroundColor: "#f3f4f6",
+    },
+    // "bg-gray-50"
+    theadGray50: {
+      backgroundColor: "#f9fafb",
+    },
+
+    // "p-1.5 text-left font-bold border border-gray-300"
+    thSectionHeader: {
+      padding: "6px",
+      textAlign: "left",
+      fontWeight: "700",
+      border: "1px solid #d1d5db",
+    },
+    // "p-1.5 border border-gray-300 font-medium"
+    tdLabel: {
+      padding: "6px",
+      border: "1px solid #d1d5db",
+      fontWeight: "500",
+    },
+    // "p-1.5 border border-gray-300"
+    tdValue: {
+      padding: "6px",
+      border: "1px solid #d1d5db",
+    },
+    // "p-1.5 border border-gray-300 font-semibold"
+    tdValueSemibold: {
+      padding: "6px",
+      border: "1px solid #d1d5db",
+      fontWeight: "600",
+    },
+
+    // "p-1 border border-gray-300 text-left font-medium"
+    thColLeft: {
+      padding: "4px",
+      border: "1px solid #d1d5db",
+      textAlign: "left",
+      fontWeight: "500",
+    },
+    // "p-1 border border-gray-300 text-center font-medium"
+    thColCenter: {
+      padding: "4px",
+      border: "1px solid #d1d5db",
+      textAlign: "center",
+      fontWeight: "500",
+    },
+
+    // "p-1 border border-gray-300 align-top"
+    tdAlignTop: {
+      padding: "4px",
+      border: "1px solid #d1d5db",
+      verticalAlign: "top",
+    },
+    // "p-1 border border-gray-300 text-center"
+    tdCenter: {
+      padding: "4px",
+      border: "1px solid #d1d5db",
+      textAlign: "center",
+    },
+    // "p-1 border border-gray-300 text-right"
+    tdRight: {
+      padding: "4px",
+      border: "1px solid #d1d5db",
+      textAlign: "right",
+    },
+    // "p-1 border border-gray-300 align-top text-right font-semibold"
+    tdAlignTopRightSemibold: {
+      padding: "4px",
+      border: "1px solid #d1d5db",
+      verticalAlign: "top",
+      textAlign: "right",
+      fontWeight: "600",
+    },
+    // "p-1 border border-gray-300 text-right font-medium"
+    tdRightMedium: {
+      padding: "4px",
+      border: "1px solid #d1d5db",
+      textAlign: "right",
+      fontWeight: "500",
+    },
+    // "p-1 border border-gray-300"
+    tdPlain: {
+      padding: "4px",
+      border: "1px solid #d1d5db",
+    },
+
+    // Pricing table cell
+    // "p-1.5 border border-gray-300 text-center"
+    tdPricingCenter: {
+      padding: "6px",
+      border: "1px solid #d1d5db",
+      textAlign: "center",
+    },
+    // "p-1.5 border border-gray-300 text-[10px] text-gray-600"
+    tdPricingNote: {
+      padding: "6px",
+      border: "1px solid #d1d5db",
+      fontSize: "10px",
+      color: "#4b5563",
+    },
+
+    // "text-[10px] text-gray-600 ml-1"
+    invoiceTypeBadge: {
+      marginLeft: "4px",
+      fontSize: "10px",
+      fontWeight: "500",
+      color: "#4b5563",
+    },
+
+    // Location link
+    // "text-gray-700 underline"
+    locationLink: {
+      color: "#374151",
+      textDecoration: "underline",
+    },
+
+    // Room header
+    // "flex justify-between items-center mb-1 bg-gray-100 p-1.5"
+    roomHeader: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: "4px",
+      backgroundColor: "#f3f4f6",
+      padding: "6px",
+    },
+    // "font-bold text-[11px]"
+    roomTitle: {
+      fontWeight: "700",
+      fontSize: "11px",
+    },
+    // "text-[10px] text-gray-600 ml-2"
+    roomDesc: {
+      fontSize: "10px",
+      color: "#4b5563",
+      marginLeft: "8px",
+    },
+    // "flex gap-4 text-[10px]"
+    roomRates: {
+      display: "flex",
+      gap: "16px",
+      fontSize: "10px",
+    },
+    // "text-right"
+    roomRatesRight: {
+      textAlign: "right",
+    },
+
+    // "text-right text-[11px] font-bold mt-1"
+    roomTotal: {
+      textAlign: "right",
+      fontSize: "11px",
+      fontWeight: "700",
+      marginTop: "4px",
+    },
+
+    // Alternating row bg
+    rowEven: { backgroundColor: "#ffffff" },
+    rowOdd: { backgroundColor: "#f9fafb" },
+
+    // Extras section
+    // "bg-gray-100 p-1.5 mb-1"
+    extrasHeader: {
+      backgroundColor: "#f3f4f6",
+      padding: "6px",
+      marginBottom: "4px",
+    },
+    // "font-bold text-[11px]"
+    extrasSectionTitle: {
+      fontWeight: "700",
+      fontSize: "11px",
+    },
+    // "mb-2"
+    extraItem: {
+      marginBottom: "8px",
+    },
+    // "text-[10px] font-medium mb-0.5"
+    extraLabel: {
+      fontSize: "10px",
+      fontWeight: "500",
+      marginBottom: "2px",
+    },
+    // "text-right text-[10px] font-medium mb-1"
+    serviceTotal: {
+      textAlign: "right",
+      fontSize: "10px",
+      fontWeight: "500",
+      marginBottom: "4px",
+    },
+    // "text-right text-[11px] font-bold mt-2 border-t pt-1"
+    extrasTotal: {
+      textAlign: "right",
+      fontSize: "11px",
+      fontWeight: "700",
+      marginTop: "8px",
+      borderTop: "1px solid #d1d5db",
+      paddingTop: "4px",
+    },
+
+    // Summary section
+    // "mt-4"
+    summarySection: {
+      marginTop: "16px",
+    },
+    // "flex justify-end"
+    summaryFlex: {
+      display: "flex",
+      justifyContent: "flex-end",
+    },
+    // "w-64 border-collapse text-[11px]"
+    summaryTable: {
+      width: "256px",
+      borderCollapse: "collapse",
+      fontSize: "11px",
+    },
+    // summary rows
+    summaryRowPlain: {
+      // "p-1.5 border border-gray-300 font-medium"
+      label: { padding: "6px", border: "1px solid #d1d5db", fontWeight: "500" },
+      value: {
+        padding: "6px",
+        border: "1px solid #d1d5db",
+        textAlign: "right",
+      },
+    },
+    // "bg-gray-50" row
+    summaryRowGray50: {
+      label: {
+        padding: "6px",
+        border: "1px solid #d1d5db",
+        fontWeight: "500",
+        backgroundColor: "#f9fafb",
+      },
+      value: {
+        padding: "6px",
+        border: "1px solid #d1d5db",
+        textAlign: "right",
+        fontWeight: "500",
+        backgroundColor: "#f9fafb",
+      },
+    },
+    // discount row — text-red-600
+    summaryRowDiscount: {
+      label: {
+        padding: "6px",
+        border: "1px solid #d1d5db",
+        fontWeight: "500",
+        color: "#dc2626",
+      },
+      value: {
+        padding: "6px",
+        border: "1px solid #d1d5db",
+        textAlign: "right",
+        fontWeight: "500",
+        color: "#dc2626",
+      },
+    },
+    // "bg-gray-100" final row
+    summaryRowFinal: {
+      label: {
+        padding: "6px",
+        border: "1px solid #d1d5db",
+        fontWeight: "700",
+        backgroundColor: "#f3f4f6",
+      },
+      value: {
+        padding: "6px",
+        border: "1px solid #d1d5db",
+        textAlign: "right",
+        fontWeight: "700",
+        fontSize: "16px",
+        backgroundColor: "#f3f4f6",
+      },
+    },
+
+    // Footer
+    // "mt-6 pt-4 border-t border-gray-300 text-[10px] text-gray-600"
+    footer: {
+      marginTop: "24px",
+      paddingTop: "16px",
+      borderTop: "1px solid #d1d5db",
+      fontSize: "10px",
+      color: "#4b5563",
+    },
+    // "grid grid-cols-2 gap-4"
+    footerGrid: {
+      display: "grid",
+      gridTemplateColumns: "1fr 1fr",
+      gap: "16px",
+    },
+    // "font-medium mb-1"
+    footerLabel: {
+      fontWeight: "500",
+      marginBottom: "4px",
+    },
+    // "list-disc pl-4 space-y-0.5"
+    footerList: {
+      listStyleType: "disc",
+      paddingLeft: "16px",
+      margin: 0,
+    },
+    footerListItem: {
+      marginBottom: "2px",
+    },
+    // "text-right"
+    footerRight: {
+      textAlign: "right",
+    },
+    // "mt-2"
+    footerMt2: {
+      marginTop: "8px",
+    },
+    // "mt-4 border-t border-gray-300 pt-1"
+    footerSignatureBox: {
+      marginTop: "16px",
+      borderTop: "1px solid #d1d5db",
+      paddingTop: "4px",
+    },
+  };
+
+  /* ========================================================= */
+  /* RENDER                                                    */
   /* ========================================================= */
 
   return (
-    <div
-      ref={ref}
-      className=" bg-white p-4 text-xs text-black w-full max-w-none min-w-full print-page"
-      style={{ maxWidth: "210mm" }}
-    >
+    <div ref={ref} style={s.root} className="print-page">
       {/* Header */}
-      <div className="border-b-2 border-gray-800 pb-3 mb-4">
-        <div className="flex justify-between items-start">
-          <div className="flex items-start gap-3">
-            {/* Logo Container */}
-            <div className="w-16 h-16 flex-shrink-0 mt-1">
+      <div style={s.header}>
+        <div style={s.headerInner}>
+          <div style={s.headerLeft}>
+            {/* Logo */}
+            <div style={s.logoContainer}>
               <img
-                src={`${import.meta.env.VITE_API_BASE}/public/skanda-logo.png`}
+                src={logoURL}
                 alt="Skanda Industries Logo"
-                className="w-full h-full object-contain"
+                style={s.logoImg}
                 onError={(e) => {
-                  // Fallback if logo fails to load
                   e.currentTarget.style.display = "none";
                   const parent = e.currentTarget.parentElement;
                   parent.innerHTML = `
-              <div class="w-16 h-16 border border-gray-300 bg-gray-100 flex items-center justify-center">
-                <span class="text-xs font-bold text-gray-700">SKANDA</span>
-              </div>
-            `;
+                    <div style="width:64px;height:64px;border:1px solid #d1d5db;background:#f3f4f6;display:flex;align-items:center;justify-content:center;">
+                      <span style="font-size:10px;font-weight:700;color:#374151;">SKANDA</span>
+                    </div>
+                  `;
                 }}
               />
             </div>
 
             <div>
-              <h1 className="text-2xl font-bold tracking-tight">
-                SKANDA INDUSTRIES
-              </h1>
-              <p className="text-[10px] text-gray-600 leading-tight mt-1">
-                <span className="font-medium">Regd Office:</span> H.No:
+              <h1 style={s.companyName}>SKANDA INDUSTRIES</h1>
+              <p style={s.companyAddressLine}>
+                <span style={s.infoLabel}>Regd Office:</span> H.No:
                 24-7-225-15/A/2, Pragathi nagar Phase - II, Near Euro Kids,
                 Subedari, Hanamkonda
               </p>
-              <p className="text-[10px] text-gray-600">
-                <span className="font-medium">Industry:</span> Sy No. 138/A/1 &
+              <p style={s.companyInfoLine}>
+                <span style={s.infoLabel}>Industry:</span> Sy No. 138/A/1 &amp;
                 138/2, Elkurthi Road, Grama Panchayat Office, Dharmasagar,
                 Elkurthy PD, Hanumakonda, Telangana - 506142
               </p>
-              <p className="text-[10px] text-gray-600">
-                <span className="font-medium">Contact: </span>
+              <p style={s.companyInfoLine}>
+                <span style={s.infoLabel}>Contact: </span>
                 9700360963, 9866565057, 9246893307, 7799677762 |{" "}
-                <span className="font-medium">Email: </span>
+                <span style={s.infoLabel}>Email: </span>
                 industry.skanda@gmail.com
               </p>
             </div>
@@ -145,85 +562,57 @@ const AdminInvoice = forwardRef(function AdminInvoice({ invoice }, ref) {
         </div>
       </div>
 
-      {/* Client Details & Invoice Info in Compact Table */}
-      <div className="mb-4">
-        <table className="w-full border-collapse text-[11px]">
+      {/* Client Details & Invoice Info */}
+      <div style={s.sectionBlock}>
+        <table style={s.table}>
           <thead>
-            <tr className="bg-gray-100">
-              <th
-                colSpan="4"
-                className="p-1.5 text-left font-bold border border-gray-300"
-              >
-                CLIENT & INVOICE DETAILS
+            <tr style={s.theadGray100}>
+              <th colSpan="4" style={s.thSectionHeader}>
+                CLIENT &amp; INVOICE DETAILS
               </th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <td
-                className="p-1.5 border border-gray-300 font-medium"
-                width="25%"
-              >
+              <td style={s.tdLabel} width="25%">
                 Client Name
               </td>
-              <td className="p-1.5 border border-gray-300" width="25%">
+              <td style={s.tdValue} width="25%">
                 {client.name || "—"}
                 {invoice.invoiceType ? (
-                  <span className="ml-1 text-[10px] font-medium text-gray-600">
+                  <span style={s.invoiceTypeBadge}>
                     ({invoice.invoiceType})
                   </span>
                 ) : null}
               </td>
-              <td
-                className="p-1.5 border border-gray-300 font-medium"
-                width="25%"
-              >
+              <td style={s.tdLabel} width="25%">
                 Proforma Invoice No
               </td>
-              <td
-                className="p-1.5 border border-gray-300 font-semibold"
-                width="25%"
-              >
+              <td style={s.tdValueSemibold} width="25%">
                 {invoiceIdShort || "—"}
               </td>
             </tr>
             <tr>
-              <td className="p-1.5 border border-gray-300 font-medium">
-                Mobile
-              </td>
-              <td className="p-1.5 border border-gray-300">
-                {client.mobile || "—"}
-              </td>
-              <td className="p-1.5 border border-gray-300 font-medium">Date</td>
-              <td className="p-1.5 border border-gray-300">
-                {invoiceDate || "—"}
-              </td>
+              <td style={s.tdLabel}>Mobile</td>
+              <td style={s.tdValue}>{client.mobile || "—"}</td>
+              <td style={s.tdLabel}>Date</td>
+              <td style={s.tdValue}>{invoiceDate || "—"}</td>
             </tr>
             <tr>
-              <td className="p-1.5 border border-gray-300 font-medium">
-                Email
-              </td>
-              <td className="p-1.5 border border-gray-300">
-                {client.email || "—"}
-              </td>
-              <td className="p-1.5 border border-gray-300 font-medium">
-                Site Address
-              </td>
-              <td className="p-1.5 border border-gray-300">
-                {client.siteAddress || "—"}
-              </td>
+              <td style={s.tdLabel}>Email</td>
+              <td style={s.tdValue}>{client.email || "—"}</td>
+              <td style={s.tdLabel}>Site Address</td>
+              <td style={s.tdValue}>{client.siteAddress || "—"}</td>
             </tr>
             {useCurrentLocation && client.siteMapLink && (
               <tr>
-                <td className="p-1.5 border border-gray-300 font-medium">
-                  Location Map
-                </td>
-                <td colSpan="3" className="p-1.5 border border-gray-300">
+                <td style={s.tdLabel}>Location Map</td>
+                <td colSpan="3" style={s.tdValue}>
                   <a
                     href={client.siteMapLink}
                     target="_blank"
                     rel="noreferrer"
-                    className="text-gray-700 underline"
+                    style={s.locationLink}
                   >
                     {client.siteMapLink.length > 60
                       ? client.siteMapLink.substring(0, 60) + "..."
@@ -237,51 +626,39 @@ const AdminInvoice = forwardRef(function AdminInvoice({ invoice }, ref) {
       </div>
 
       {/* Pricing Summary */}
-      <div className="mb-4">
-        <table className="w-full border-collapse text-[11px]">
+      <div style={s.sectionBlock}>
+        <table style={s.table}>
           <thead>
-            <tr className="bg-gray-100">
-              <th
-                colSpan="3"
-                className="p-1.5 text-left font-bold border border-gray-300"
-              >
+            <tr style={s.theadGray100}>
+              <th colSpan="3" style={s.thSectionHeader}>
                 PRICING RATES (per sqft)
               </th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <td
-                className="p-1.5 border border-gray-300 font-medium"
-                width="33%"
-              >
+              <td style={s.tdLabel} width="33%">
                 Global Frame Rate
               </td>
-              <td
-                className="p-1.5 border border-gray-300 font-medium"
-                width="33%"
-              >
+              <td style={s.tdLabel} width="33%">
                 Global Box Rate
               </td>
-              <td
-                className="p-1.5 border border-gray-300 font-medium"
-                width="34%"
-              >
+              <td style={s.tdLabel} width="34%">
                 Note
               </td>
             </tr>
             <tr>
-              <td className="p-1.5 border border-gray-300 text-center">
+              <td style={s.tdPricingCenter}>
                 {frameworkRate ? formatINR(frameworkRate) : "—"}
               </td>
-              <td className="p-1.5 border border-gray-300 text-center">
+              <td style={s.tdPricingCenter}>
                 {boxRate
                   ? formatINR(boxRate)
                   : frameworkRate
                     ? formatINR(frameworkRate * 1.4)
                     : "—"}
               </td>
-              <td className="p-1.5 border border-gray-300 text-[10px] text-gray-600">
+              <td style={s.tdPricingNote}>
                 Room-specific rates override these when provided
               </td>
             </tr>
@@ -304,27 +681,25 @@ const AdminInvoice = forwardRef(function AdminInvoice({ invoice }, ref) {
         const roomTotal = calculateRoomTotal(room);
 
         return (
-          <div key={roomIndex} className="mb-3">
+          <div key={roomIndex} style={s.sectionBlockSm}>
             {/* Room Header */}
-            <div className="flex justify-between items-center mb-1 bg-gray-100 p-1.5">
+            <div style={s.roomHeader}>
               <div>
-                <span className="font-bold text-[11px]">
+                <span style={s.roomTitle}>
                   ROOM: {room.name || `Room ${roomIndex + 1}`}
                 </span>
                 {room.description && (
-                  <span className="text-[10px] text-gray-600 ml-2">
-                    ({room.description})
-                  </span>
+                  <span style={s.roomDesc}>({room.description})</span>
                 )}
               </div>
-              <div className="text-right">
-                <div className="flex gap-4 text-[10px]">
+              <div style={s.roomRatesRight}>
+                <div style={s.roomRates}>
                   <span>
-                    <span className="font-medium">Frame Rate:</span>{" "}
+                    <span style={s.infoLabel}>Frame Rate:</span>{" "}
                     {formatINR(roomFrameRate)}
                   </span>
                   <span>
-                    <span className="font-medium">Box Rate:</span>{" "}
+                    <span style={s.infoLabel}>Box Rate:</span>{" "}
                     {formatINR(roomBoxRate)}
                   </span>
                 </div>
@@ -333,55 +708,31 @@ const AdminInvoice = forwardRef(function AdminInvoice({ invoice }, ref) {
 
             {/* Items Table */}
             {(room.items || []).length > 0 && (
-              <table className="w-full border-collapse text-[10px] mb-1">
+              <table style={s.tableXs}>
                 <thead>
-                  <tr className="bg-gray-50">
-                    <th
-                      className="p-1 border border-gray-300 text-left font-medium"
-                      width="20%"
-                    >
+                  <tr style={s.theadGray50}>
+                    <th style={s.thColLeft} width="20%">
                       Item
                     </th>
-                    <th
-                      className="p-1 border border-gray-300 text-center font-medium"
-                      width="12%"
-                    >
+                    <th style={s.thColCenter} width="12%">
                       Work Type
                     </th>
-                    <th
-                      className="p-1 border border-gray-300 text-center font-medium"
-                      width="12%"
-                    >
+                    <th style={s.thColCenter} width="12%">
                       Width (ft)
                     </th>
-                    <th
-                      className="p-1 border border-gray-300 text-center font-medium"
-                      width="12%"
-                    >
+                    <th style={s.thColCenter} width="12%">
                       Height (ft)
                     </th>
-                    <th
-                      className="p-1 border border-gray-300 text-center font-medium"
-                      width="12%"
-                    >
+                    <th style={s.thColCenter} width="12%">
                       Depth (ft)
                     </th>
-                    <th
-                      className="p-1 border border-gray-300 text-center font-medium"
-                      width="12%"
-                    >
+                    <th style={s.thColCenter} width="12%">
                       Area (sqft)
                     </th>
-                    <th
-                      className="p-1 border border-gray-300 text-center font-medium"
-                      width="10%"
-                    >
+                    <th style={s.thColCenter} width="10%">
                       Price
                     </th>
-                    <th
-                      className="p-1 border border-gray-300 text-center font-medium"
-                      width="10%"
-                    >
+                    <th style={s.thColCenter} width="10%">
                       Total
                     </th>
                   </tr>
@@ -392,92 +743,64 @@ const AdminInvoice = forwardRef(function AdminInvoice({ invoice }, ref) {
                     const hasBox = item.box && item.box.area > 0;
                     const itemTotal = calculateItemTotal(item);
                     const rowSpan = hasFrame && hasBox ? 2 : 1;
+                    const rowBg = itemIndex % 2 === 0 ? s.rowEven : s.rowOdd;
 
                     return (
                       <React.Fragment key={itemIndex}>
                         {hasFrame && (
-                          <tr
-                            className={
-                              itemIndex % 2 === 0 ? "bg-white" : "bg-gray-50"
-                            }
-                          >
-                            {rowSpan > 1 && (
-                              <td
-                                rowSpan={rowSpan}
-                                className="p-1 border border-gray-300 align-top"
-                              >
-                                <div className="font-medium">{item.name}</div>
+                          <tr style={rowBg}>
+                            {rowSpan > 1 ? (
+                              <td rowSpan={rowSpan} style={s.tdAlignTop}>
+                                <div style={s.infoLabel}>{item.name}</div>
+                              </td>
+                            ) : (
+                              <td style={s.tdAlignTop}>
+                                <div style={s.infoLabel}>{item.name}</div>
                               </td>
                             )}
-                            {rowSpan === 1 && (
-                              <td className="p-1 border border-gray-300 align-top">
-                                <div className="font-medium">{item.name}</div>
-                              </td>
-                            )}
-                            <td className="p-1 border border-gray-300 text-center">
-                              Frame
-                            </td>
-                            <td className="p-1 border border-gray-300 text-center">
-                              {item.frame.width}
-                            </td>
-                            <td className="p-1 border border-gray-300 text-center">
-                              {item.frame.height}
-                            </td>
-                            <td className="p-1 border border-gray-300 text-center">
-                              —
-                            </td>
-                            <td className="p-1 border border-gray-300 text-center">
+                            <td style={s.tdCenter}>Frame</td>
+                            <td style={s.tdCenter}>{item.frame.width}</td>
+                            <td style={s.tdCenter}>{item.frame.height}</td>
+                            <td style={s.tdCenter}>—</td>
+                            <td style={s.tdCenter}>
                               {item.frame.area.toFixed(2)}
                             </td>
-                            <td className="p-1 border border-gray-300 text-right">
+                            <td style={s.tdRight}>
                               {formatINR(item.frame.price)}
                             </td>
-                            {rowSpan > 1 && (
+                            {rowSpan > 1 ? (
                               <td
                                 rowSpan={rowSpan}
-                                className="p-1 border border-gray-300 align-top text-right font-semibold"
+                                style={s.tdAlignTopRightSemibold}
                               >
                                 {formatINR(itemTotal)}
                               </td>
-                            )}
-                            {rowSpan === 1 && (
-                              <td className="p-1 border border-gray-300 align-top text-right font-semibold">
+                            ) : (
+                              <td style={s.tdAlignTopRightSemibold}>
                                 {formatINR(itemTotal)}
                               </td>
                             )}
                           </tr>
                         )}
                         {hasBox && (
-                          <tr
-                            className={
-                              itemIndex % 2 === 0 ? "bg-white" : "bg-gray-50"
-                            }
-                          >
+                          <tr style={rowBg}>
                             {!hasFrame && (
-                              <td className="p-1 border border-gray-300 align-top">
-                                <div className="font-medium">{item.name}</div>
+                              <td style={s.tdAlignTop}>
+                                <div style={s.infoLabel}>{item.name}</div>
                               </td>
                             )}
-                            <td className="p-1 border border-gray-300 text-center">
-                              Box
-                            </td>
-                            <td className="p-1 border border-gray-300 text-center">
-                              {item.box.width}
-                            </td>
-                            <td className="p-1 border border-gray-300 text-center">
-                              {item.box.height}
-                            </td>
-                            <td className="p-1 border border-gray-300 text-center">
-                              {item.box.depth}
-                            </td>
-                            <td className="p-1 border border-gray-300 text-center">
+                            <td style={s.tdCenter}>Box</td>
+                            <td style={s.tdCenter}>{item.box.width}</td>
+                            <td style={s.tdCenter}>{item.box.height}</td>
+                            <td style={s.tdCenter}>{item.box.depth}</td>
+                            <td style={s.tdCenter}>
                               {item.box.area.toFixed(2)}
                             </td>
-                            <td className="p-1 border border-gray-300 text-right">
+                            <td style={s.tdRight}>
                               {formatINR(item.box.price)}
                             </td>
                             {!hasFrame && (
-                              <td className="p-1 border border-gray-300 align-top text-right font-semibold">
+                              <td style={s.tdAlignTopRightSemibold}>
                                 {formatINR(itemTotal)}
                               </td>
                             )}
@@ -492,39 +815,24 @@ const AdminInvoice = forwardRef(function AdminInvoice({ invoice }, ref) {
 
             {/* Accessories Table */}
             {room.accessories?.length > 0 && (
-              <table className="w-full border-collapse text-[10px] mb-1">
+              <table style={s.tableXs}>
                 <thead>
-                  <tr className="bg-gray-50">
-                    <th
-                      colSpan="4"
-                      className="p-1 border border-gray-300 text-left font-medium"
-                    >
+                  <tr style={s.theadGray50}>
+                    <th colSpan="4" style={s.thColLeft}>
                       ACCESSORIES
                     </th>
                   </tr>
-                  <tr className="bg-gray-100">
-                    <th
-                      className="p-1 border border-gray-300 text-left font-medium"
-                      width="50%"
-                    >
+                  <tr style={s.theadGray100}>
+                    <th style={s.thColLeft} width="50%">
                       Name
                     </th>
-                    <th
-                      className="p-1 border border-gray-300 text-center font-medium"
-                      width="17%"
-                    >
+                    <th style={s.thColCenter} width="17%">
                       Unit Price
                     </th>
-                    <th
-                      className="p-1 border border-gray-300 text-center font-medium"
-                      width="16%"
-                    >
+                    <th style={s.thColCenter} width="16%">
                       Qty
                     </th>
-                    <th
-                      className="p-1 border border-gray-300 text-center font-medium"
-                      width="17%"
-                    >
+                    <th style={s.thColCenter} width="17%">
                       Total
                     </th>
                   </tr>
@@ -535,20 +843,12 @@ const AdminInvoice = forwardRef(function AdminInvoice({ invoice }, ref) {
                     return (
                       <tr
                         key={idx}
-                        className={idx % 2 === 0 ? "bg-white" : "bg-gray-50"}
+                        style={idx % 2 === 0 ? s.rowEven : s.rowOdd}
                       >
-                        <td className="p-1 border border-gray-300">
-                          {acc.name}
-                        </td>
-                        <td className="p-1 border border-gray-300 text-right">
-                          {formatINR(acc.price)}
-                        </td>
-                        <td className="p-1 border border-gray-300 text-center">
-                          {acc.qty}
-                        </td>
-                        <td className="p-1 border border-gray-300 text-right font-medium">
-                          {formatINR(total)}
-                        </td>
+                        <td style={s.tdPlain}>{acc.name}</td>
+                        <td style={s.tdRight}>{formatINR(acc.price)}</td>
+                        <td style={s.tdCenter}>{acc.qty}</td>
+                        <td style={s.tdRightMedium}>{formatINR(total)}</td>
                       </tr>
                     );
                   })}
@@ -557,18 +857,16 @@ const AdminInvoice = forwardRef(function AdminInvoice({ invoice }, ref) {
             )}
 
             {/* Room Total */}
-            <div className="text-right text-[11px] font-bold mt-1">
-              Room Total: {formatINR(roomTotal)}
-            </div>
+            <div style={s.roomTotal}>Room Total: {formatINR(roomTotal)}</div>
           </div>
         );
       })}
 
       {/* Extras Section */}
       {extras.length > 0 && (
-        <div className="mb-4">
-          <div className="bg-gray-100 p-1.5 mb-1">
-            <span className="font-bold text-[11px]">ADDITIONAL SERVICES</span>
+        <div style={s.sectionBlock}>
+          <div style={s.extrasHeader}>
+            <span style={s.extrasSectionTitle}>ADDITIONAL SERVICES</span>
           </div>
 
           {extras.map((ex) => {
@@ -576,8 +874,8 @@ const AdminInvoice = forwardRef(function AdminInvoice({ invoice }, ref) {
             const key = ex._id || ex.id || ex.key;
 
             return (
-              <div key={key} className="mb-2">
-                <div className="text-[10px] font-medium mb-0.5">
+              <div key={key} style={s.extraItem}>
+                <div style={s.extraLabel}>
                   {ex.label} (
                   {ex.type === "ceiling"
                     ? "Ceiling Work"
@@ -588,57 +886,39 @@ const AdminInvoice = forwardRef(function AdminInvoice({ invoice }, ref) {
                 </div>
 
                 {ex.type === "ceiling" && (
-                  <div className="pl-0">
+                  <div>
                     {/* Surfaces */}
                     {inputs.surfaces.length > 0 && (
-                      <table className="w-full border-collapse text-[10px] mb-1">
+                      <table style={s.tableXs}>
                         <thead>
-                          <tr className="bg-gray-50">
-                            <th
-                              className="p-1 border border-gray-300 text-left"
-                              width="40%"
-                            >
+                          <tr style={s.theadGray50}>
+                            <th style={s.thColLeft} width="40%">
                               Surface
                             </th>
-                            <th
-                              className="p-1 border border-gray-300 text-center"
-                              width="20%"
-                            >
+                            <th style={s.thColCenter} width="20%">
                               Area (sqft)
                             </th>
-                            <th
-                              className="p-1 border border-gray-300 text-center"
-                              width="20%"
-                            >
+                            <th style={s.thColCenter} width="20%">
                               Unit Price
                             </th>
-                            <th
-                              className="p-1 border border-gray-300 text-center"
-                              width="20%"
-                            >
+                            <th style={s.thColCenter} width="20%">
                               Total
                             </th>
                           </tr>
                         </thead>
                         <tbody>
-                          {inputs.surfaces.map((s, i) => (
+                          {inputs.surfaces.map((surf, i) => (
                             <tr
                               key={i}
-                              className={
-                                i % 2 === 0 ? "bg-white" : "bg-gray-50"
-                              }
+                              style={i % 2 === 0 ? s.rowEven : s.rowOdd}
                             >
-                              <td className="p-1 border border-gray-300">
-                                {s.label}
+                              <td style={s.tdPlain}>{surf.label}</td>
+                              <td style={s.tdCenter}>{surf.area}</td>
+                              <td style={s.tdRight}>
+                                {formatINR(surf.unitPrice)}
                               </td>
-                              <td className="p-1 border border-gray-300 text-center">
-                                {s.area}
-                              </td>
-                              <td className="p-1 border border-gray-300 text-right">
-                                {formatINR(s.unitPrice)}
-                              </td>
-                              <td className="p-1 border border-gray-300 text-right font-medium">
-                                {formatINR(s.price)}
+                              <td style={s.tdRightMedium}>
+                                {formatINR(surf.price)}
                               </td>
                             </tr>
                           ))}
@@ -647,47 +927,35 @@ const AdminInvoice = forwardRef(function AdminInvoice({ invoice }, ref) {
                     )}
 
                     {/* Electrical Details */}
-                    <table className="w-full border-collapse text-[10px] mb-1">
+                    <table style={s.tableXs}>
                       <thead>
-                        <tr className="bg-gray-50">
-                          <th
-                            className="p-1 border border-gray-300 text-center"
-                            width="25%"
-                          >
+                        <tr style={s.theadGray50}>
+                          <th style={s.thColCenter} width="25%">
                             Electrical Wiring
                           </th>
-                          <th
-                            className="p-1 border border-gray-300 text-center"
-                            width="25%"
-                          >
+                          <th style={s.thColCenter} width="25%">
                             Electrician Charges
                           </th>
-                          <th
-                            className="p-1 border border-gray-300 text-center"
-                            width="25%"
-                          >
+                          <th style={s.thColCenter} width="25%">
                             Ceiling Lights
                           </th>
-                          <th
-                            className="p-1 border border-gray-300 text-center"
-                            width="25%"
-                          >
+                          <th style={s.thColCenter} width="25%">
                             Profile Lights
                           </th>
                         </tr>
                       </thead>
                       <tbody>
                         <tr>
-                          <td className="p-1 border border-gray-300 text-center">
+                          <td style={s.tdCenter}>
                             {formatINR(inputs.electricalWiring)}
                           </td>
-                          <td className="p-1 border border-gray-300 text-center">
+                          <td style={s.tdCenter}>
                             {formatINR(inputs.electricianCharges)}
                           </td>
-                          <td className="p-1 border border-gray-300 text-center">
+                          <td style={s.tdCenter}>
                             {formatINR(inputs.ceilingLights)}
                           </td>
-                          <td className="p-1 border border-gray-300 text-center">
+                          <td style={s.tdCenter}>
                             {formatINR(inputs.profileLights)}
                           </td>
                         </tr>
@@ -696,38 +964,29 @@ const AdminInvoice = forwardRef(function AdminInvoice({ invoice }, ref) {
 
                     {/* Painting Details */}
                     {inputs.ceilingPaintingArea > 0 && (
-                      <table className="w-full border-collapse text-[10px] mb-1">
+                      <table style={s.tableXs}>
                         <thead>
-                          <tr className="bg-gray-50">
-                            <th
-                              className="p-1 border border-gray-300 text-center"
-                              width="34%"
-                            >
+                          <tr style={s.theadGray50}>
+                            <th style={s.thColCenter} width="34%">
                               Painting Area (sqft)
                             </th>
-                            <th
-                              className="p-1 border border-gray-300 text-center"
-                              width="33%"
-                            >
+                            <th style={s.thColCenter} width="33%">
                               Unit Price
                             </th>
-                            <th
-                              className="p-1 border border-gray-300 text-center"
-                              width="33%"
-                            >
+                            <th style={s.thColCenter} width="33%">
                               Painting Total
                             </th>
                           </tr>
                         </thead>
                         <tbody>
                           <tr>
-                            <td className="p-1 border border-gray-300 text-center">
+                            <td style={s.tdCenter}>
                               {inputs.ceilingPaintingArea}
                             </td>
-                            <td className="p-1 border border-gray-300 text-right">
+                            <td style={s.tdRight}>
                               {formatINR(inputs.ceilingPaintingUnitPrice)}
                             </td>
-                            <td className="p-1 border border-gray-300 text-right font-medium">
+                            <td style={s.tdRightMedium}>
                               {formatINR(inputs.ceilingPaintingPrice)}
                             </td>
                           </tr>
@@ -738,38 +997,25 @@ const AdminInvoice = forwardRef(function AdminInvoice({ invoice }, ref) {
                 )}
 
                 {ex.type === "area_based" && (
-                  <table className="w-full border-collapse text-[10px] mb-1">
+                  <table style={s.tableXs}>
                     <thead>
-                      <tr className="bg-gray-50">
-                        <th
-                          className="p-1 border border-gray-300 text-center"
-                          width="34%"
-                        >
+                      <tr style={s.theadGray50}>
+                        <th style={s.thColCenter} width="34%">
                           Area (sqft)
                         </th>
-                        <th
-                          className="p-1 border border-gray-300 text-center"
-                          width="33%"
-                        >
+                        <th style={s.thColCenter} width="33%">
                           Unit Price
                         </th>
-                        <th
-                          className="p-1 border border-gray-300 text-center"
-                          width="33%"
-                        >
+                        <th style={s.thColCenter} width="33%">
                           Total
                         </th>
                       </tr>
                     </thead>
                     <tbody>
                       <tr>
-                        <td className="p-1 border border-gray-300 text-center">
-                          {inputs.area}
-                        </td>
-                        <td className="p-1 border border-gray-300 text-right">
-                          {formatINR(inputs.unitPrice)}
-                        </td>
-                        <td className="p-1 border border-gray-300 text-right font-semibold">
+                        <td style={s.tdCenter}>{inputs.area}</td>
+                        <td style={s.tdRight}>{formatINR(inputs.unitPrice)}</td>
+                        <td style={{ ...s.tdRight, fontWeight: "600" }}>
                           {formatINR(ex.total)}
                         </td>
                       </tr>
@@ -778,17 +1024,15 @@ const AdminInvoice = forwardRef(function AdminInvoice({ invoice }, ref) {
                 )}
 
                 {ex.type === "fixed" && (
-                  <table className="w-full border-collapse text-[10px] mb-1">
+                  <table style={s.tableXs}>
                     <thead>
-                      <tr className="bg-gray-50">
-                        <th className="p-1 border border-gray-300 text-center">
-                          Fixed Price
-                        </th>
+                      <tr style={s.theadGray50}>
+                        <th style={s.thColCenter}>Fixed Price</th>
                       </tr>
                     </thead>
                     <tbody>
                       <tr>
-                        <td className="p-1 border border-gray-300 text-center font-semibold">
+                        <td style={{ ...s.tdCenter, fontWeight: "600" }}>
                           {formatINR(inputs.price)}
                         </td>
                       </tr>
@@ -796,16 +1040,15 @@ const AdminInvoice = forwardRef(function AdminInvoice({ invoice }, ref) {
                   </table>
                 )}
 
-                <div className="text-right text-[10px] font-medium mb-1">
+                <div style={s.serviceTotal}>
                   Service Total: {formatINR(ex.total)}
                 </div>
               </div>
             );
           })}
 
-          {/* Extras Total */}
           {extras.length > 0 && (
-            <div className="text-right text-[11px] font-bold mt-2 border-t pt-1">
+            <div style={s.extrasTotal}>
               Extras Total: {formatINR(extrasTotal)}
             </div>
           )}
@@ -813,56 +1056,39 @@ const AdminInvoice = forwardRef(function AdminInvoice({ invoice }, ref) {
       )}
 
       {/* Summary Section */}
-      <div className="mt-4">
-        <div className="flex justify-end">
-          <table className="w-64 border-collapse text-[11px]">
+      <div style={s.summarySection}>
+        <div style={s.summaryFlex}>
+          <table style={s.summaryTable}>
             <tbody>
               <tr>
-                <td className="p-1.5 border border-gray-300 font-medium">
-                  Rooms Total
-                </td>
-                <td className="p-1.5 border border-gray-300 text-right">
-                  {formatINR(roomsTotal)}
-                </td>
+                <td style={s.summaryRowPlain.label}>Rooms Total</td>
+                <td style={s.summaryRowPlain.value}>{formatINR(roomsTotal)}</td>
               </tr>
               {extras.length > 0 && (
                 <tr>
-                  <td className="p-1.5 border border-gray-300 font-medium">
-                    Extras Total
-                  </td>
-                  <td className="p-1.5 border border-gray-300 text-right">
+                  <td style={s.summaryRowPlain.label}>Extras Total</td>
+                  <td style={s.summaryRowPlain.value}>
                     {formatINR(extrasTotal)}
                   </td>
                 </tr>
               )}
-              {/* Sub Total */}
-              <tr className="bg-gray-50">
-                <td className="p-1.5 border border-gray-300 font-medium">
-                  Sub Total
-                </td>
-                <td className="p-1.5 border border-gray-300 text-right font-medium">
+              <tr>
+                <td style={s.summaryRowGray50.label}>Sub Total</td>
+                <td style={s.summaryRowGray50.value}>
                   {formatINR(grandTotal)}
                 </td>
               </tr>
-
-              {/* Discount */}
               {safeDiscount > 0 && (
                 <tr>
-                  <td className="p-1.5 border border-gray-300 font-medium text-red-600">
-                    Discount
-                  </td>
-                  <td className="p-1.5 border border-gray-300 text-right font-medium text-red-600">
+                  <td style={s.summaryRowDiscount.label}>Discount</td>
+                  <td style={s.summaryRowDiscount.value}>
                     - {formatINR(safeDiscount)}
                   </td>
                 </tr>
               )}
-
-              {/* Final Payable */}
-              <tr className="bg-gray-100">
-                <td className="p-1.5 border border-gray-300 font-bold">
-                  FINAL AMOUNT
-                </td>
-                <td className="p-1.5 border border-gray-300 text-right font-bold text-base">
+              <tr>
+                <td style={s.summaryRowFinal.label}>FINAL AMOUNT</td>
+                <td style={s.summaryRowFinal.value}>
                   {formatINR(finalPayable)}
                 </td>
               </tr>
@@ -872,21 +1098,25 @@ const AdminInvoice = forwardRef(function AdminInvoice({ invoice }, ref) {
       </div>
 
       {/* Footer Notes */}
-      <div className="mt-6 pt-4 border-t border-gray-300 text-[10px] text-gray-600">
-        <div className="grid grid-cols-2 gap-4">
+      <div style={s.footer}>
+        <div style={s.footerGrid}>
           <div>
-            <p className="font-medium mb-1">Terms & Conditions:</p>
-            <ul className="list-disc pl-4 space-y-0.5">
-              <li>Payment: 50% advance, balance before delivery</li>
-              <li>GST included in all prices</li>
-              <li>1 year warranty on workmanship</li>
-              <li>Delivery: 30-45 days from advance</li>
+            <p style={s.footerLabel}>Terms &amp; Conditions:</p>
+            <ul style={s.footerList}>
+              <li style={s.footerListItem}>
+                Payment: 50% advance, balance before delivery
+              </li>
+              <li style={s.footerListItem}>GST included in all prices</li>
+              <li style={s.footerListItem}>1 year warranty on workmanship</li>
+              <li style={s.footerListItem}>
+                Delivery: 30-45 days from advance
+              </li>
             </ul>
           </div>
-          <div className="text-right">
-            <p className="font-medium">For Skanda Industries</p>
-            <p className="mt-2">Authorized Signatory</p>
-            <div className="mt-4 border-t border-gray-300 pt-1">
+          <div style={s.footerRight}>
+            <p style={s.footerLabel}>For Skanda Industries</p>
+            <p style={s.footerMt2}>Authorized Signatory</p>
+            <div style={s.footerSignatureBox}>
               <p>Computer Generated Invoice - Valid without signature</p>
             </div>
           </div>
