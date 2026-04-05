@@ -1,11 +1,12 @@
 // src/components/AdminInvoice.jsx
 import React, { forwardRef } from "react";
 import { formatINR } from "../utils/calculations";
+import companyConfig from "../config.js";
 
 const AdminInvoice = forwardRef(function AdminInvoice({ invoice }, ref) {
   if (!invoice) return null;
 
-  const logoURL = `${import.meta.env.VITE_API_BASE}/public/skanda-logo.png`;
+  const logoURL = `${import.meta.env.VITE_API_BASE}/public/${companyConfig.logoFile}`;
 
   const client = invoice.client || {};
   const rooms = Array.isArray(invoice.rooms) ? invoice.rooms : [];
@@ -525,37 +526,31 @@ const AdminInvoice = forwardRef(function AdminInvoice({ invoice }, ref) {
             <div style={s.logoContainer}>
               <img
                 src={logoURL}
-                alt="Skanda Industries Logo"
+                alt={`${companyConfig.name} Logo`}
                 style={s.logoImg}
                 onError={(e) => {
                   e.currentTarget.style.display = "none";
                   const parent = e.currentTarget.parentElement;
-                  parent.innerHTML = `
-                    <div style="width:64px;height:64px;border:1px solid #d1d5db;background:#f3f4f6;display:flex;align-items:center;justify-content:center;">
-                      <span style="font-size:10px;font-weight:700;color:#374151;">SKANDA</span>
-                    </div>
-                  `;
+                  parent.innerHTML = `<div style="width:64px;height:64px;border:1px solid #d1d5db;background:#f3f4f6;display:flex;align-items:center;justify-content:center;"><span style="font-size:10px;font-weight:700;color:#374151;">No Logo</span></div>`;
                 }}
               />
             </div>
 
             <div>
-              <h1 style={s.companyName}>SKANDA INDUSTRIES</h1>
+              <h1 style={s.companyName}>{companyConfig.name}</h1>
               <p style={s.companyAddressLine}>
-                <span style={s.infoLabel}>Regd Office:</span> H.No:
-                24-7-225-15/A/2, Pragathi nagar Phase - II, Near Euro Kids,
-                Subedari, Hanamkonda
+                <span style={s.infoLabel}>Regd Office:</span>{" "}
+                {companyConfig.registeredOffice}
               </p>
               <p style={s.companyInfoLine}>
-                <span style={s.infoLabel}>Industry:</span> Sy No. 138/A/1 &amp;
-                138/2, Elkurthi Road, Grama Panchayat Office, Dharmasagar,
-                Elkurthy PD, Hanumakonda, Telangana - 506142
+                <span style={s.infoLabel}>Industry:</span>{" "}
+                {companyConfig.industryAddress}
               </p>
               <p style={s.companyInfoLine}>
                 <span style={s.infoLabel}>Contact: </span>
-                9700360963, 9866565057, 9246893307, 7799677762 |{" "}
+                {companyConfig.phones.join(", ")} |{" "}
                 <span style={s.infoLabel}>Email: </span>
-                industry.skanda@gmail.com
+                {companyConfig.email}
               </p>
             </div>
           </div>
@@ -1114,7 +1109,7 @@ const AdminInvoice = forwardRef(function AdminInvoice({ invoice }, ref) {
             </ul>
           </div>
           <div style={s.footerRight}>
-            <p style={s.footerLabel}>For Skanda Industries</p>
+            <p style={s.footerLabel}>For {companyConfig.name}</p>
             <p style={s.footerMt2}>Authorized Signatory</p>
             <div style={s.footerSignatureBox}>
               <p>Computer Generated Invoice - Valid without signature</p>
