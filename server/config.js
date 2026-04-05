@@ -7,7 +7,7 @@
 // ─────────────────────────────────────────────────────────────────
 
 const companyConfig = {
-  name: "Skanda Industries",
+  name: "Nova Interiors",
 };
 
 export default companyConfig;
