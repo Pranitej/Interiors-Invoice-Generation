@@ -37,7 +37,7 @@ const companyConfig = {
   name: "SKANDA INDUSTRIES",        // Display name (ALL CAPS for invoice header)
   tagline: "Your Dream, Our Design", // Shown on login page
   address: "123, Main Street, Bengaluru - 560001",
-  phone: "+91 98765 43210",
+  phones: ["+91 98765 43210", "+91 91234 56789"], // array — supports multiple contact numbers
   email: "industry.skanda@gmail.com",
   website: "",                       // Optional — leave empty to hide
   logoFile: "logo.png",             // Filename served from server/public/
@@ -87,18 +87,18 @@ export default companyConfig;
 - Replace hardcoded logo URL: `${VITE_API_BASE}/public/${companyConfig.logoFile}`
 - Replace `SKANDA INDUSTRIES` → `companyConfig.name`
 - Replace hardcoded address → `companyConfig.address`
-- Replace hardcoded phone → `companyConfig.phone`
+- Replace hardcoded phone → render `companyConfig.phones` joined as `" / "` (e.g. `+91 98765 43210 / +91 91234 56789`)
 - Replace hardcoded email → `companyConfig.email`
 - Replace footer `"For Skanda Industries"` → `"For ${companyConfig.name}"`
 - Add `onError` logo fallback (see Logo Fallback section)
 
 #### `client/src/components/ClientInvoice.jsx`
-- Same substitutions as AdminInvoice
+- Same substitutions as AdminInvoice (phones rendered as joined string)
 - Replace thank-you line: `"Thank you for considering ${companyConfig.name}..."`
 - Footer email → `companyConfig.email`
 
 #### `client/src/components/ClientInvoiceTemp.jsx`
-- Same substitutions as AdminInvoice
+- Same substitutions as AdminInvoice (phones rendered as joined string)
 - Replace thank-you line: `"Thank you for considering ${companyConfig.name}..."`
 - Footer email → `companyConfig.email`
 
