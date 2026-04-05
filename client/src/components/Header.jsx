@@ -2,6 +2,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useContext, useState, useRef, useEffect } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { History, Plus, Scale, User, UserStar } from "lucide-react";
+import companyConfig from "../config.js";
 
 export default function Header({ theme, toggleTheme }) {
   const { user, logout } = useContext(AuthContext);
@@ -106,7 +107,7 @@ export default function Header({ theme, toggleTheme }) {
               </div>
               <div className="flex flex-col">
                 <span className="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
-                  Skanda Industries
+                  {companyConfig.name}
                 </span>
                 <span className="text-xs text-gray-500 dark:text-gray-400 -mt-1">
                   Professional Quoting
