@@ -103,14 +103,14 @@ export default function Header({ theme, toggleTheme }) {
               onClick={handleMobileLinkClick}
             >
               <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-600 to-blue-500 dark:from-blue-500 dark:to-blue-400 flex items-center justify-center shadow-md">
-                <span className="text-white font-bold text-base">S</span>
+                <span className="text-white font-bold text-base">{companyConfig.name[0]}</span>
               </div>
               <div className="flex flex-col">
                 <span className="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
                   {companyConfig.name}
                 </span>
                 <span className="text-xs text-gray-500 dark:text-gray-400 -mt-1">
-                  Professional Quoting
+                  {companyConfig.tagline}
                 </span>
               </div>
             </Link>
