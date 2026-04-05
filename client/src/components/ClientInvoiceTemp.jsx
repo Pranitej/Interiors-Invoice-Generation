@@ -1,6 +1,7 @@
 // src/components/ClientInvoice.jsx
 import { forwardRef } from "react";
 import { formatINR } from "../utils/calculations";
+import companyConfig from "../config.js";
 
 const ClientInvoice = forwardRef(({ invoice }, ref) => {
   if (!invoice) return null;
@@ -113,41 +114,34 @@ const ClientInvoice = forwardRef(({ invoice }, ref) => {
             {/* Logo Container */}
             <div className="w-16 h-16 flex-shrink-0 mt-1">
               <img
-                src={`${import.meta.env.VITE_API_BASE}/public/skanda-logo.png`}
-                alt="Skanda Industries Logo"
+                src={`${import.meta.env.VITE_API_BASE}/public/${companyConfig.logoFile}`}
+                alt={`${companyConfig.name} Logo`}
                 className="w-full h-full object-contain"
                 onError={(e) => {
-                  // Fallback if logo fails to load
                   e.currentTarget.style.display = "none";
                   const parent = e.currentTarget.parentElement;
-                  parent.innerHTML = `
-              <div class="w-16 h-16 border border-gray-300 bg-gray-100 flex items-center justify-center">
-                <span class="text-xs font-bold text-gray-700">SKANDA</span>
-              </div>
-            `;
+                  parent.innerHTML = `<div class="w-16 h-16 border border-gray-300 bg-gray-100 flex items-center justify-center"><span class="text-xs font-bold text-gray-700">No Logo</span></div>`;
                 }}
               />
             </div>
 
             <div>
               <h1 className="text-2xl font-bold tracking-tight">
-                SKANDA INDUSTRIES
+                {companyConfig.name}
               </h1>
               <p className="text-[10px] text-gray-600 leading-tight mt-1">
-                <span className="font-medium">Regd Office:</span> H.No:
-                24-7-225-15/A/2, Pragathi nagar Phase - II, Near Euro Kids,
-                Subedari, Hanamkonda
+                <span className="font-medium">Regd Office:</span>{" "}
+                {companyConfig.registeredOffice}
               </p>
               <p className="text-[10px] text-gray-600">
-                <span className="font-medium">Industry:</span> Sy No. 138/A/1 &
-                138/2, Elkurthi Road, Grama Panchayat Office, Dharmasagar,
-                Elkurthy PD, Hanumakonda, Telangana - 506142
+                <span className="font-medium">Industry:</span>{" "}
+                {companyConfig.industryAddress}
               </p>
               <p className="text-[10px] text-gray-600">
                 <span className="font-medium">Contact: </span>
-                9700360963, 9866565057, 9246893307, 7799677762 |{" "}
+                {companyConfig.phones.join(", ")} |{" "}
                 <span className="font-medium">Email: </span>
-                industry.skanda@gmail.com
+                {companyConfig.email}
               </p>
             </div>
           </div>
@@ -551,8 +545,8 @@ const ClientInvoice = forwardRef(({ invoice }, ref) => {
         <div className="grid grid-cols-2 gap-4 text-[10px] text-gray-600">
           <div>
             <p className="font-medium mb-1">Contact Details:</p>
-            <p>9700360963 | 9866565057 | 9246893307 | 7799677762</p>
-            <p>interior.skanda@gmail.com</p>
+            <p>{companyConfig.phones.join(" | ")}</p>
+            <p>{companyConfig.email}</p>
           </div>
           <div>
             <p className="font-medium mb-1">Terms:</p>
@@ -565,7 +559,7 @@ const ClientInvoice = forwardRef(({ invoice }, ref) => {
         </div>
         <div className="mt-4 text-center text-[10px] text-gray-500">
           <p>
-            Thank you for considering Skanda Industries. We look forward to
+            Thank you for considering {companyConfig.name}. We look forward to
             serving you.
           </p>
         </div>
