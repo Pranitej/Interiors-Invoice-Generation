@@ -3,6 +3,7 @@ import api from "../api/api";
 import { AuthContext } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { formatINR } from "../utils/calculations";
+import companyConfig from "../config.js";
 import { renderToStaticMarkup } from "react-dom/server";
 import AdminInvoice from "../components/AdminInvoice";
 import ClientInvoice from "../components/ClientInvoice";
@@ -175,7 +176,7 @@ export default function History() {
 
       const a = document.createElement("a");
       a.href = url;
-      a.download = `Skanda-${type}-Invoice-${id.slice(-6)}.pdf`;
+      a.download = `${companyConfig.name}-${type}-Invoice-${id.slice(-6)}.pdf`;
       document.body.appendChild(a);
       a.click();
       a.remove();

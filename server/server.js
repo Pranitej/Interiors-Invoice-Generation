@@ -6,6 +6,7 @@ import seeding from "./database/seeding.js";
 import invoicesRouter from "./routes/invoices.js";
 import authRouter from "./routes/auth.js";
 import pdfRoutes from "./routes/pdf.js";
+import companyConfig from "./config.js";
 
 dotenv.config();
 
@@ -26,7 +27,7 @@ app.use("/api/auth", authRouter);
 app.use("/api/pdf", pdfRoutes);
 
 app.get("/", (_, res) =>
-  res.send({ ok: true, message: "Skanda Industries API" })
+  res.send({ ok: true, message: `${companyConfig.name} API` })
 );
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
