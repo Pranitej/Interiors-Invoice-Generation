@@ -120,7 +120,7 @@ const ClientInvoice = forwardRef(({ invoice }, ref) => {
                 onError={(e) => {
                   e.currentTarget.style.display = "none";
                   const parent = e.currentTarget.parentElement;
-                  parent.innerHTML = `<div class="w-16 h-16 border border-gray-300 bg-gray-100 flex items-center justify-center"><span class="text-xs font-bold text-gray-700">No Logo</span></div>`;
+                  parent.innerHTML = `<div style="width:64px;height:64px;border:1px solid #e2e8f0;background:#f8fafc;display:flex;align-items:center;justify-content:center;border-radius:6px;"><svg xmlns='http://www.w3.org/2000/svg' width='36' height='36' viewBox='0 0 24 24' fill='none' stroke='#94a3b8' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><path d='M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z'/><polyline points='9 22 9 12 15 12 15 22'/></svg></div>`;
                 }}
               />
             </div>
