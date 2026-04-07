@@ -1,13 +1,14 @@
 // server/config.js
-// ─────────────────────────────────────────────────────────────────
-// Server-side company identity — used in API responses only.
-// For full rebranding (name, addresses, logo, etc.), edit client/src/config.js.
-// The name here can differ in casing from the client config
-// (e.g. title case for API messages vs ALL CAPS for invoice headers).
-// ─────────────────────────────────────────────────────────────────
+// Single source of truth for platform identity and role constants.
+// Super admin credentials live in .env — not here.
 
-const companyConfig = {
-  name: "Nova Interiors",
+const config = {
+  platform: { name: "Interiors SaaS" },
+  roles: {
+    SUPER_ADMIN: "super_admin",
+    COMPANY_ADMIN: "company_admin",
+    COMPANY_USER: "company_user",
+  },
 };
 
-export default companyConfig;
+export default config;
