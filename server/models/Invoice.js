@@ -128,8 +128,16 @@ const InvoiceSchema = new mongoose.Schema(
 
     finalPayableAfterDiscount: { type: Number, default: 0 },
 
-    createdBy: { type: String },
-    role: { type: String },
+    companyId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Company",
+      required: true,
+    },
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
   },
   { timestamps: true },
 );
