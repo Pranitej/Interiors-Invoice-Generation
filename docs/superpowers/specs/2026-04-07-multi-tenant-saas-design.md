@@ -26,20 +26,33 @@ All companies share one MongoDB database. Every `User` and `Invoice` document ca
 
 ---
 
-## 3. Configuration (`server/config.js`)
+## 3. Configuration
 
-Single source of truth for platform identity, super admin seed credentials, and role constants.
+### `server/config.js`
+
+Single source of truth for platform identity and role constants. **No credentials here.**
 
 ```js
 export default {
   platform: { name: "Interiors SaaS" },
-  superAdmin: { username: "superadmin", password: "changeme123" },
   roles: {
     SUPER_ADMIN: "super_admin",
     COMPANY_ADMIN: "company_admin",
     COMPANY_USER: "company_user",
   }
 }
+```
+
+### `.env` (server)
+
+Super admin seed credentials live in `.env` — never committed to git.
+
+```
+MONGO_URI=...
+JWT_SECRET=...
+PORT=5000
+SUPER_ADMIN_USERNAME=superadmin
+SUPER_ADMIN_PASSWORD=changeme123
 ```
 
 `client/src/config.js` becomes the super admin dashboard's platform branding (name, logo, etc.). Individual company branding is stored in the Company document in MongoDB and fetched dynamically at login.
@@ -92,10 +105,10 @@ Invoice {
 
 ### 4.4 Seeding
 
-Only the super admin is seeded at startup. Credentials come from `server/config.js`:
+Only the super admin is seeded at startup. Credentials come from `.env` via `process.env`:
 
 ```js
-{ username: config.superAdmin.username, password: bcrypt(config.superAdmin.password), role: "super_admin", companyId: null }
+{ username: process.env.SUPER_ADMIN_USERNAME, password: bcrypt(process.env.SUPER_ADMIN_PASSWORD), role: "super_admin", companyId: null }
 ```
 
 Super admin creates all companies and their first admin user via the dashboard. No company or regular user seeding.
@@ -243,6 +256,8 @@ Stores `{ user, token, company }`. On login:
 MONGO_URI=...
 JWT_SECRET=...
 PORT=5000
+SUPER_ADMIN_USERNAME=...
+SUPER_ADMIN_PASSWORD=...
 ```
 
 ---
