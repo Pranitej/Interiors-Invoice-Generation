@@ -20,6 +20,15 @@ function App() {
     return stored ? JSON.parse(stored) : null;
   });
 
+  const [token, setToken] = useState(() => {
+    return localStorage.getItem("token") || null;
+  });
+
+  const [company, setCompany] = useState(() => {
+    const stored = localStorage.getItem("company");
+    return stored ? JSON.parse(stored) : null;
+  });
+
   const toggleTheme = () => {
     setTheme((prev) => {
       const next = prev === "light" ? "dark" : "light";
@@ -31,11 +40,15 @@ function App() {
 
   const logout = () => {
     setUser(null);
+    setToken(null);
+    setCompany(null);
     localStorage.removeItem("user");
+    localStorage.removeItem("token");
+    localStorage.removeItem("company");
   };
 
   return (
-    <AuthContext.Provider value={{ user, setUser, logout }}>
+    <AuthContext.Provider value={{ user, setUser, token, setToken, company, setCompany, logout }}>
       <div
         className={`${theme} min-h-screen bg-gray-50 dark:bg-slate-900 text-gray-900 dark:text-gray-100`}
       >
