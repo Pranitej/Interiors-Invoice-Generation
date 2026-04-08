@@ -8,7 +8,7 @@ import invoiceRouter from "./routes/invoice.routes.js";
 import authRouter from "./routes/auth.routes.js";
 import pdfRoutes from "./routes/pdf.js";
 import companyRouter from "./routes/company.routes.js";
-import superAdminRouter from "./routes/superAdmin.js";
+import superAdminRouter from "./routes/superAdmin.routes.js";
 import uploadRouter from "./routes/upload.js";
 import config from "./config.js";
 
