@@ -41,6 +41,7 @@ export async function renderPdf(req, res) {
   } catch (err) {
     console.error(`[PDF] Failed ${requestId}: ${err.message}`);
     if (!res.headersSent) {
+      res.setHeader("X-Request-Id", requestId);
       sendError(res, 500, "PDF generation failed");
     }
   } finally {
