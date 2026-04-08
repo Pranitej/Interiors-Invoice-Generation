@@ -16,6 +16,8 @@ export async function listInvoices({
   page = 1,
   limit = 50,
 }) {
+  const ALLOWED_SORT_FIELDS = new Set(["createdAt", "updatedAt", "client.name", "grandTotalBeforeDiscount"]);
+  const safeSortBy = ALLOWED_SORT_FIELDS.has(sortBy) ? sortBy : "createdAt";
   const baseFilter = companyId ? { companyId } : {};
   const searchFilter = q
     ? {
@@ -30,8 +32,8 @@ export async function listInvoices({
 
   const [invoices, total] = await Promise.all([
     Invoice.find(query)
-      .sort({ [sortBy]: order === "asc" ? 1 : -1 })
-      .skip((page - 1) * Number(limit))
+      .sort({ [safeSortBy]: order === "asc" ? 1 : -1 })
+      .skip((Number(page) - 1) * Number(limit))
       .limit(Number(limit)),
     Invoice.countDocuments(query),
   ]);
@@ -48,9 +50,10 @@ export async function getInvoiceById(id, companyId) {
 }
 
 export async function updateInvoice(id, companyId, data) {
+  const { companyId: _c, createdBy: _u, _id: _i, ...safeData } = data;
   const filter = { _id: id };
   if (companyId) filter.companyId = companyId;
-  const invoice = await Invoice.findOneAndUpdate(filter, data, {
+  const invoice = await Invoice.findOneAndUpdate(filter, safeData, {
     new: true,
     runValidators: true,
   });

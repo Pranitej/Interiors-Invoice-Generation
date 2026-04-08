@@ -4,7 +4,7 @@ import AppError from "../utils/AppError.js";
 
 export async function createInvoice(req, res, next) {
   try {
-    if (!req.body || Object.keys(req.body).length === 0)
+    if (!req.body || typeof req.body !== "object" || Object.keys(req.body).length === 0)
       throw new AppError(400, "Request body is required");
 
     const invoice = await InvoiceService.createInvoice({
@@ -20,7 +20,9 @@ export async function createInvoice(req, res, next) {
 
 export async function listInvoices(req, res, next) {
   try {
-    const { q, sortBy, order, page, limit } = req.query;
+    const { q, sortBy, order } = req.query;
+    const page  = Math.max(1, parseInt(req.query.page, 10)  || 1);
+    const limit = Math.min(100, parseInt(req.query.limit, 10) || 50);
     const { invoices, total } = await InvoiceService.listInvoices({
       companyId: req.companyId,
       q,
