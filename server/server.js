@@ -4,11 +4,12 @@ import cors from "cors";
 import dotenv from "dotenv";
 import connectDB from "./database/db.js";
 import seeding from "./database/seeding.js";
-import invoicesRouter from "./routes/invoices.js";
+import invoiceRouter from "./routes/invoice.routes.js";
 import authRouter from "./routes/auth.js";
 import pdfRoutes from "./routes/pdf.js";
 import companiesRouter from "./routes/companies.js";
 import superAdminRouter from "./routes/superAdmin.js";
+import uploadRouter from "./routes/upload.js";
 import config from "./config.js";
 
 dotenv.config();
@@ -24,11 +25,12 @@ const PORT = process.env.PORT || 5000;
 await connectDB();
 await seeding();
 
-app.use("/api/invoices", invoicesRouter);
+app.use("/api/invoices", invoiceRouter);
 app.use("/api/auth", authRouter);
 app.use("/api/pdf", pdfRoutes);
 app.use("/api/companies", companiesRouter);
 app.use("/api/super-admin", superAdminRouter);
+app.use("/api/upload", uploadRouter);
 
 app.get("/", (_, res) =>
   res.send({ ok: true, message: `${config.platform.name} API` })
