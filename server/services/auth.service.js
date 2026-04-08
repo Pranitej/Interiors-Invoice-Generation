@@ -5,6 +5,9 @@ import bcrypt from "bcryptjs";
 import User from "../models/User.js";
 import Company from "../models/Company.js";
 import AppError from "../utils/AppError.js";
+import config from "../config.js";
+
+const { jwtSecret, jwtExpiresInDays, bcryptRounds } = config.auth;
 
 export async function login(username, password) {
   const user = await User.findOne({ username });
@@ -15,8 +18,8 @@ export async function login(username, password) {
 
   const token = jwt.sign(
     { userId: user._id, role: user.role, companyId: user.companyId ?? null },
-    process.env.JWT_SECRET,
-    { expiresIn: "7d" }
+    jwtSecret,
+    { expiresIn: `${jwtExpiresInDays}d` }
   );
 
   let company = null;
@@ -46,7 +49,7 @@ export async function createUser({ username, password, role, companyId }) {
   const existing = await User.findOne({ username });
   if (existing) throw new AppError(400, "Username already exists");
 
-  const hashedPassword = await bcrypt.hash(password, 10);
+  const hashedPassword = await bcrypt.hash(password, bcryptRounds);
   const newUser = await User.create({
     username,
     password: hashedPassword,
@@ -84,7 +87,7 @@ export async function updateUser(id, companyId, body) {
   const { username, password } = body;
   const updateData = {};
   if (username !== undefined) updateData.username = username;
-  if (password) updateData.password = await bcrypt.hash(password, 10);
+  if (password) updateData.password = await bcrypt.hash(password, bcryptRounds);
 
   const filter = { _id: id };
   if (companyId) filter.companyId = companyId;
