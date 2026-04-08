@@ -3,6 +3,8 @@ import Company from "../models/Company.js";
 import User from "../models/User.js";
 import Invoice from "../models/Invoice.js";
 import config from "../config.js";
+import mongoose from "mongoose";
+import AppError from "../utils/AppError.js";
 
 export async function getPlatformStats() {
   const [totalCompanies, activeCompanies, totalUsers, totalInvoices] =
@@ -16,9 +18,17 @@ export async function getPlatformStats() {
 }
 
 export async function getCompanyInvoices(companyId) {
-  return Invoice.find({ companyId }).sort({ createdAt: -1 });
+  if (!mongoose.Types.ObjectId.isValid(companyId))
+    throw new AppError(400, "Invalid company ID");
+  const exists = await Company.exists({ _id: companyId });
+  if (!exists) throw new AppError(404, "Company not found");
+  return Invoice.find({ companyId }).sort({ createdAt: -1 }).limit(100);
 }
 
 export async function getCompanyUsers(companyId) {
+  if (!mongoose.Types.ObjectId.isValid(companyId))
+    throw new AppError(400, "Invalid company ID");
+  const exists = await Company.exists({ _id: companyId });
+  if (!exists) throw new AppError(404, "Company not found");
   return User.find({ companyId }).select("-password");
 }
