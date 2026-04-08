@@ -10,6 +10,7 @@ import pdfRouter from "./routes/pdf.routes.js";
 import companyRouter from "./routes/company.routes.js";
 import superAdminRouter from "./routes/superAdmin.routes.js";
 import uploadRouter from "./routes/upload.routes.js";
+import errorHandler from "./middleware/errorHandler.js";
 import config from "./config.js";
 
 dotenv.config();
@@ -35,5 +36,8 @@ app.use("/api/upload", uploadRouter);
 app.get("/", (_, res) =>
   res.send({ ok: true, message: `${config.platform.name} API` })
 );
+
+// Global error handler — must be mounted AFTER all routes
+app.use(errorHandler);
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
