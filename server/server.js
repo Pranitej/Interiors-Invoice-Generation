@@ -9,7 +9,7 @@ import authRouter from "./routes/auth.routes.js";
 import pdfRouter from "./routes/pdf.routes.js";
 import companyRouter from "./routes/company.routes.js";
 import superAdminRouter from "./routes/superAdmin.routes.js";
-import uploadRouter from "./routes/upload.js";
+import uploadRouter from "./routes/upload.routes.js";
 import config from "./config.js";
 
 dotenv.config();
