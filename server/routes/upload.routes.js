@@ -18,12 +18,14 @@ const storage = multer.diskStorage({
   },
 });
 
+const ALLOWED_MIME = new Set(["image/jpeg", "image/png", "image/gif", "image/webp"]);
+
 const upload = multer({
   storage,
   limits: { fileSize: 2 * 1024 * 1024 }, // 2 MB
   fileFilter: (req, file, cb) => {
-    if (file.mimetype.startsWith("image/")) cb(null, true);
-    else cb(new Error("Only image files are allowed"));
+    if (ALLOWED_MIME.has(file.mimetype)) cb(null, true);
+    else cb(new Error("Only JPEG, PNG, GIF, and WebP images are allowed"));
   },
 });
 
@@ -34,5 +36,14 @@ router.post(
   upload.single("logo"),
   UploadController.uploadLogo
 );
+
+// Handle multer errors (file size, type rejection) with a JSON response
+router.use((err, _req, res, next) => {
+  if (err.code === "LIMIT_FILE_SIZE")
+    return res.status(400).json({ success: false, message: "File exceeds 2 MB limit" });
+  if (err.message)
+    return res.status(400).json({ success: false, message: err.message });
+  next(err);
+});
 
 export default router;
