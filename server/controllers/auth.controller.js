@@ -56,7 +56,7 @@ export async function listUsers(req, res, next) {
 
 export async function getUserById(req, res, next) {
   try {
-    const user = await AuthService.getUserById(req.params.id);
+    const user = await AuthService.getUserById(req.params.id, req.companyId);
     res.json({ success: true, data: user });
   } catch (err) {
     next(err);
@@ -65,7 +65,7 @@ export async function getUserById(req, res, next) {
 
 export async function updateUser(req, res, next) {
   try {
-    const user = await AuthService.updateUser(req.params.id, req.body);
+    const user = await AuthService.updateUser(req.params.id, req.companyId, req.body);
     res.json({ success: true, data: user });
   } catch (err) {
     next(err);
@@ -74,7 +74,7 @@ export async function updateUser(req, res, next) {
 
 export async function deleteUser(req, res, next) {
   try {
-    await AuthService.deleteUser(req.params.id);
+    await AuthService.deleteUser(req.params.id, req.companyId);
     res.json({ success: true, message: "User deleted successfully" });
   } catch (err) {
     next(err);

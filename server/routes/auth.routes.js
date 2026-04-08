@@ -30,18 +30,21 @@ router.get(
   "/users/:id",
   authenticate,
   requireRole(COMPANY_ADMIN, SUPER_ADMIN),
+  scopeToCompany,
   AuthController.getUserById
 );
 router.put(
   "/users/:id",
   authenticate,
   requireRole(COMPANY_ADMIN, SUPER_ADMIN),
+  scopeToCompany,
   AuthController.updateUser
 );
 router.delete(
   "/users/:id",
   authenticate,
   requireRole(COMPANY_ADMIN, SUPER_ADMIN),
+  scopeToCompany,
   AuthController.deleteUser
 );
 

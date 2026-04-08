@@ -67,23 +67,31 @@ export async function listUsers(companyId) {
   return User.find(query).select("-password");
 }
 
-export async function getUserById(id) {
-  const user = await User.findById(id).select("-password");
+export async function getUserById(id, companyId) {
+  const filter = { _id: id };
+  if (companyId) filter.companyId = companyId;
+  const user = await User.findOne(filter).select("-password");
   if (!user) throw new AppError(404, "User not found");
   return user;
 }
 
-export async function updateUser(id, { password, ...rest }) {
-  const updateData = { ...rest };
-  if (password) {
-    updateData.password = await bcrypt.hash(password, 10);
-  }
-  const user = await User.findByIdAndUpdate(id, updateData, { new: true }).select("-password");
+export async function updateUser(id, companyId, body) {
+  const { username, password } = body;
+  const updateData = {};
+  if (username !== undefined) updateData.username = username;
+  if (password) updateData.password = await bcrypt.hash(password, 10);
+
+  const filter = { _id: id };
+  if (companyId) filter.companyId = companyId;
+
+  const user = await User.findOneAndUpdate(filter, updateData, { new: true }).select("-password");
   if (!user) throw new AppError(404, "User not found");
   return user;
 }
 
-export async function deleteUser(id) {
-  const user = await User.findByIdAndDelete(id);
+export async function deleteUser(id, companyId) {
+  const filter = { _id: id };
+  if (companyId) filter.companyId = companyId;
+  const user = await User.findOneAndDelete(filter);
   if (!user) throw new AppError(404, "User not found");
 }
