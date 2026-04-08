@@ -6,6 +6,7 @@ import * as CompanyController from "../controllers/company.controller.js";
 import config from "../config.js";
 
 const { SUPER_ADMIN } = config.roles;
+
 const router = express.Router();
 
 router.use(authenticate, requireRole(SUPER_ADMIN));
