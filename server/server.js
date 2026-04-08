@@ -7,7 +7,7 @@ import seeding from "./database/seeding.js";
 import invoiceRouter from "./routes/invoice.routes.js";
 import authRouter from "./routes/auth.routes.js";
 import pdfRoutes from "./routes/pdf.js";
-import companiesRouter from "./routes/companies.js";
+import companyRouter from "./routes/company.routes.js";
 import superAdminRouter from "./routes/superAdmin.js";
 import uploadRouter from "./routes/upload.js";
 import config from "./config.js";
@@ -28,7 +28,7 @@ await seeding();
 app.use("/api/invoices", invoiceRouter);
 app.use("/api/auth", authRouter);
 app.use("/api/pdf", pdfRoutes);
-app.use("/api/companies", companiesRouter);
+app.use("/api/companies", companyRouter);
 app.use("/api/super-admin", superAdminRouter);
 app.use("/api/upload", uploadRouter);
 
