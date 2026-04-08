@@ -18,10 +18,8 @@ dotenv.config();
 const app = express();
 
 app.use(cors());
-app.use(express.json({ limit: "5mb" }));
+app.use(express.json({ limit: `${config.server.bodyLimitMb}mb` }));
 app.use("/public", express.static("public"));
-
-const PORT = process.env.PORT || 5000;
 
 await connectDB();
 await seeding();
@@ -37,7 +35,8 @@ app.get("/", (_, res) =>
   res.send({ ok: true, message: `${config.platform.name} API` })
 );
 
-// Global error handler — must be mounted AFTER all routes
 app.use(errorHandler);
 
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(config.server.port, () =>
+  console.log(`Server running on port ${config.server.port}`)
+);
