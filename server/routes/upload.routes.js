@@ -21,13 +21,14 @@ const storage = multer.diskStorage({
 });
 
 const allowedMimeSet = new Set(allowedMimeTypes);
+const allowedLabel = allowedMimeTypes.map((t) => t.split("/")[1].toUpperCase()).join(", ");
 
 const upload = multer({
   storage,
   limits: { fileSize: maxFileSizeMb * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
     if (allowedMimeSet.has(file.mimetype)) cb(null, true);
-    else cb(new Error("Only JPEG, PNG, GIF, and WebP images are allowed"));
+    else cb(new Error(`Only ${allowedLabel} images are allowed`));
   },
 });
 
