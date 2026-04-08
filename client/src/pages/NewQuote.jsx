@@ -44,7 +44,7 @@ function getItemDefaults(roomName, itemName) {
 export default function NewQuote() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { user } = useContext(AuthContext);
+  const { user, company } = useContext(AuthContext);
 
   const prevIdRef = useRef(id);
   const isEditingRef = useRef(!!id);
@@ -964,6 +964,7 @@ export default function NewQuote() {
             finalPayable={finalPayable}
             collapsedSections={collapsedSections}
             toggleSection={toggleSection}
+            company={company}
           />
         </div>
       </div>

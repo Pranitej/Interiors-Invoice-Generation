@@ -1,9 +1,7 @@
 // src/components/ClientInvoice.jsx
 import React, { forwardRef } from "react";
 import { formatINR } from "../utils/calculations";
-import companyConfig from "../config.js";
-
-const ClientInvoice = forwardRef(({ invoice }, ref) => {
+const ClientInvoice = forwardRef(({ invoice, company }, ref) => {
   if (!invoice) return null;
 
   const client = invoice.client || {};
@@ -540,8 +538,8 @@ const ClientInvoice = forwardRef(({ invoice }, ref) => {
             {/* Logo */}
             <div style={s.logoContainer}>
               <img
-                src={`${import.meta.env.VITE_API_BASE}/public/${companyConfig.logoFile}`}
-                alt={`${companyConfig.name} Logo`}
+                src={`${import.meta.env.VITE_API_BASE}/public/${company?.logoFile}`}
+                alt={`${company?.name} Logo`}
                 style={s.logoImg}
                 onError={(e) => {
                   e.currentTarget.style.display = "none";
@@ -552,20 +550,20 @@ const ClientInvoice = forwardRef(({ invoice }, ref) => {
             </div>
 
             <div>
-              <h1 style={s.companyName}>{companyConfig.name}</h1>
+              <h1 style={s.companyName}>{company?.name}</h1>
               <p style={s.companyAddressLine}>
                 <span style={s.infoLabel}>Regd Office:</span>{" "}
-                {companyConfig.registeredOffice}
+                {company?.registeredOffice}
               </p>
               <p style={s.companyInfoLine}>
                 <span style={s.infoLabel}>Industry:</span>{" "}
-                {companyConfig.industryAddress}
+                {company?.industryAddress}
               </p>
               <p style={s.companyInfoLine}>
                 <span style={s.infoLabel}>Contact: </span>
-                {companyConfig.phones.join(", ")} |{" "}
+                {company?.phones.join(", ")} |{" "}
                 <span style={s.infoLabel}>Email: </span>
-                {companyConfig.email}
+                {company?.email}
               </p>
             </div>
           </div>
@@ -960,8 +958,8 @@ const ClientInvoice = forwardRef(({ invoice }, ref) => {
         <div style={s.footerGrid}>
           <div>
             <p style={s.footerLabel}>Contact Details:</p>
-            <p style={{ margin: 0 }}>{companyConfig.phones.join(" | ")}</p>
-            <p style={{ margin: 0 }}>{companyConfig.email}</p>
+            <p style={{ margin: 0 }}>{company?.phones.join(" | ")}</p>
+            <p style={{ margin: 0 }}>{company?.email}</p>
           </div>
           <div>
             <p style={s.footerLabel}>Terms:</p>
@@ -974,7 +972,7 @@ const ClientInvoice = forwardRef(({ invoice }, ref) => {
         </div>
         <div style={s.footerNote}>
           <p style={{ margin: 0 }}>
-            Thank you for considering {companyConfig.name}. We look forward to
+            Thank you for considering {company?.name}. We look forward to
             serving you.
           </p>
         </div>

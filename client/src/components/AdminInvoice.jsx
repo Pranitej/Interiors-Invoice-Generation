@@ -1,12 +1,12 @@
 // src/components/AdminInvoice.jsx
 import React, { forwardRef } from "react";
 import { formatINR } from "../utils/calculations";
-import companyConfig from "../config.js";
-
-const AdminInvoice = forwardRef(function AdminInvoice({ invoice }, ref) {
+const AdminInvoice = forwardRef(function AdminInvoice({ invoice, company }, ref) {
   if (!invoice) return null;
 
-  const logoURL = `${import.meta.env.VITE_API_BASE}/public/${companyConfig.logoFile}`;
+  const logoURL = company?.logoFile
+    ? `${import.meta.env.VITE_API_BASE}/public/${company.logoFile}`
+    : null;
 
   const client = invoice.client || {};
   const rooms = Array.isArray(invoice.rooms) ? invoice.rooms : [];
@@ -526,7 +526,7 @@ const AdminInvoice = forwardRef(function AdminInvoice({ invoice }, ref) {
             <div style={s.logoContainer}>
               <img
                 src={logoURL}
-                alt={`${companyConfig.name} Logo`}
+                alt={`${company?.name} Logo`}
                 style={s.logoImg}
                 onError={(e) => {
                   e.currentTarget.style.display = "none";
@@ -537,20 +537,20 @@ const AdminInvoice = forwardRef(function AdminInvoice({ invoice }, ref) {
             </div>
 
             <div>
-              <h1 style={s.companyName}>{companyConfig.name}</h1>
+              <h1 style={s.companyName}>{company?.name}</h1>
               <p style={s.companyAddressLine}>
                 <span style={s.infoLabel}>Regd Office:</span>{" "}
-                {companyConfig.registeredOffice}
+                {company?.registeredOffice}
               </p>
               <p style={s.companyInfoLine}>
                 <span style={s.infoLabel}>Industry:</span>{" "}
-                {companyConfig.industryAddress}
+                {company?.industryAddress}
               </p>
               <p style={s.companyInfoLine}>
                 <span style={s.infoLabel}>Contact: </span>
-                {companyConfig.phones.join(", ")} |{" "}
+                {company?.phones.join(", ")} |{" "}
                 <span style={s.infoLabel}>Email: </span>
-                {companyConfig.email}
+                {company?.email}
               </p>
             </div>
           </div>
@@ -1109,7 +1109,7 @@ const AdminInvoice = forwardRef(function AdminInvoice({ invoice }, ref) {
             </ul>
           </div>
           <div style={s.footerRight}>
-            <p style={s.footerLabel}>For {companyConfig.name}</p>
+            <p style={s.footerLabel}>For {company?.name}</p>
             <p style={s.footerMt2}>Authorized Signatory</p>
             <div style={s.footerSignatureBox}>
               <p>Computer Generated Invoice - Valid without signature</p>
