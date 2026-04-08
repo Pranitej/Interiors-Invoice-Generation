@@ -1,14 +1,13 @@
 // server/middleware/authenticate.js
 import jwt from "jsonwebtoken";
+import { sendError } from "../utils/response.js";
 import config from "../config.js";
 
 export default function authenticate(req, res, next) {
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return res
-      .status(401)
-      .json({ success: false, message: "No token provided" });
+    return sendError(res, 401, "No token provided");
   }
 
   const token = authHeader.split(" ")[1];
@@ -22,8 +21,6 @@ export default function authenticate(req, res, next) {
     };
     next();
   } catch {
-    return res
-      .status(401)
-      .json({ success: false, message: "Invalid or expired token" });
+    return sendError(res, 401, "Invalid or expired token");
   }
 }
