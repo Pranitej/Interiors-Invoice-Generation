@@ -3,7 +3,7 @@ import api from "../api/api";
 import { AuthContext } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { formatINR } from "../utils/calculations";
-import companyConfig from "../config.js";
+import platformConfig from "../config.js";
 import { renderToStaticMarkup } from "react-dom/server";
 import AdminInvoice from "../components/AdminInvoice";
 import ClientInvoice from "../components/ClientInvoice";
@@ -57,7 +57,7 @@ function buildSearchIndex(inv) {
 // Component
 // -------------------------
 export default function History() {
-  const { user } = useContext(AuthContext);
+  const { user, company } = useContext(AuthContext);
   const [invoices, setInvoices] = useState([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
@@ -163,7 +163,7 @@ export default function History() {
 
       // Only send the component HTML — no wrapping document needed.
       // pdf.js wraps it in a full HTML document with correct styles.
-      const html = renderToStaticMarkup(<Component invoice={invoice} />);
+      const html = renderToStaticMarkup(<Component invoice={invoice} company={company} />);
 
       const res = await api.post(
         "/pdf/render",
@@ -176,7 +176,7 @@ export default function History() {
 
       const a = document.createElement("a");
       a.href = url;
-      a.download = `${companyConfig.name}-${type}-Invoice-${id.slice(-6)}.pdf`;
+      a.download = `${(company?.name ?? platformConfig.name).replace(/\s+/g, "-")}-${type}-Invoice-${id.slice(-6)}.pdf`;
       document.body.appendChild(a);
       a.click();
       a.remove();
