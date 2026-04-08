@@ -11,7 +11,7 @@ export default function Login() {
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
-  const { user, setUser } = useContext(AuthContext);
+  const { user, setUser, setToken, setCompany } = useContext(AuthContext);
 
   useEffect(() => {
     if (user) {
@@ -36,17 +36,27 @@ export default function Login() {
       if (res.data.success) {
         const userData = {
           _id: res.data.user._id,
-          username,
-          isAdmin: res.data.user.isAdmin,
+          username: res.data.user.username,
+          role: res.data.user.role,
           createdAt: res.data.user.createdAt,
         };
 
         localStorage.setItem("user", JSON.stringify(userData));
-        setUser(userData);
+        localStorage.setItem("token", res.data.token);
+        if (res.data.company) {
+          localStorage.setItem("company", JSON.stringify(res.data.company));
+        }
 
-        // Show success animation before redirect
+        setUser(userData);
+        setToken(res.data.token);
+        setCompany(res.data.company ?? null);
+
         setTimeout(() => {
-          navigate("/new-quote");
+          if (userData.role === "super_admin") {
+            navigate("/dashboard");
+          } else {
+            navigate("/new-quote");
+          }
         }, 300);
       } else {
         setError(
