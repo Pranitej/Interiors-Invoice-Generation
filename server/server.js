@@ -5,7 +5,7 @@ import dotenv from "dotenv";
 import connectDB from "./database/db.js";
 import seeding from "./database/seeding.js";
 import invoiceRouter from "./routes/invoice.routes.js";
-import authRouter from "./routes/auth.js";
+import authRouter from "./routes/auth.routes.js";
 import pdfRoutes from "./routes/pdf.js";
 import companiesRouter from "./routes/companies.js";
 import superAdminRouter from "./routes/superAdmin.js";
