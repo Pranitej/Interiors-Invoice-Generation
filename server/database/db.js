@@ -1,11 +1,10 @@
+// server/database/db.js
 import mongoose from "mongoose";
-import dotenv from "dotenv";
+import config from "../config.js";
 
-dotenv.config();
+const { uri, maxPoolSize, serverSelectionTimeoutSec, socketTimeoutSec } = config.db;
 
-const MONGO_URI = process.env.MONGO_URI;
-
-if (!MONGO_URI) {
+if (!uri) {
   throw new Error("MONGO_URI is not defined");
 }
 
@@ -19,11 +18,11 @@ export default async function connectDB() {
   if (cached.conn) return cached.conn;
 
   if (!cached.promise) {
-    cached.promise = mongoose.connect(MONGO_URI, {
-      maxPoolSize: 5, // low pool for edge environments
-      serverSelectionTimeoutMS: 5000,
-      socketTimeoutMS: 45000,
-      family: 4, // IPv4 only (avoids edge DNS stalls)
+    cached.promise = mongoose.connect(uri, {
+      maxPoolSize,
+      serverSelectionTimeoutMS: serverSelectionTimeoutSec * 1000,
+      socketTimeoutMS: socketTimeoutSec * 1000,
+      family: 4,
     });
   }
 
