@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import API from "../api/api";
+import { AuthContext } from "../context/AuthContext";
 import SearchableInvoiceSelect from "../components/SearchableInvoiceSelect";
 import CompareInvoices from "../components/CompareInvoices";
 import { InvoiceComparisonReport } from "../components/CompareInvoices";
@@ -16,6 +17,7 @@ import {
 } from "lucide-react";
 
 export default function ComparePage() {
+  const { company } = useContext(AuthContext);
   const [invoiceAId, setInvoiceAId] = useState("");
   const [invoiceBId, setInvoiceBId] = useState("");
   const [invoiceAData, setInvoiceAData] = useState(null);
@@ -431,6 +433,7 @@ export default function ComparePage() {
                       invoiceBId={invoiceBId}
                       onLoadedA={setInvoiceAData}
                       onLoadedB={setInvoiceBData}
+                      company={company}
                     />
                   </div>
                 </div>

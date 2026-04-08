@@ -2,7 +2,7 @@ import { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../api/api";
 import { AuthContext } from "../context/AuthContext";
-import companyConfig from "../config.js";
+import platformConfig from "../config.js";
 
 export default function Login() {
   const [username, setUsername] = useState("");
@@ -11,7 +11,7 @@ export default function Login() {
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
-  const { user, setUser } = useContext(AuthContext);
+  const { user, setUser, setToken, setCompany } = useContext(AuthContext);
 
   useEffect(() => {
     if (user) {
@@ -36,17 +36,27 @@ export default function Login() {
       if (res.data.success) {
         const userData = {
           _id: res.data.user._id,
-          username,
-          isAdmin: res.data.user.isAdmin,
+          username: res.data.user.username,
+          role: res.data.user.role,
           createdAt: res.data.user.createdAt,
         };
 
         localStorage.setItem("user", JSON.stringify(userData));
-        setUser(userData);
+        localStorage.setItem("token", res.data.token);
+        if (res.data.company) {
+          localStorage.setItem("company", JSON.stringify(res.data.company));
+        }
 
-        // Show success animation before redirect
+        setUser(userData);
+        setToken(res.data.token);
+        setCompany(res.data.company ?? null);
+
         setTimeout(() => {
-          navigate("/new-quote");
+          if (userData.role === "super_admin") {
+            navigate("/dashboard");
+          } else {
+            navigate("/new-quote");
+          }
         }, 300);
       } else {
         setError(
@@ -70,13 +80,13 @@ export default function Login() {
         {/* Logo/Brand Section */}
         <div className="text-center mb-8">
           <div className="w-20 h-20 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg flex items-center justify-center">
-            <span className="text-3xl font-bold text-white">{companyConfig.name[0]}</span>
+            <span className="text-3xl font-bold text-white">{platformConfig.name[0]}</span>
           </div>
           <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
-            {companyConfig.name}
+            {platformConfig.name}
           </h1>
           <p className="text-gray-600 dark:text-gray-400 mt-2">
-            {companyConfig.tagline}
+            {platformConfig.tagline}
           </p>
         </div>
 

@@ -17,6 +17,7 @@ export default function InvoicePreview({
   finalPayable,
   collapsedSections,
   toggleSection,
+  company,
 }) {
   const [viewMode, setViewMode] = useState("admin"); // 'admin' or 'client'
 
@@ -180,6 +181,7 @@ export default function InvoicePreview({
               <div className="min-w-[210mm]">
                 {viewMode === "admin" ? (
                   <AdminInvoice
+                    company={company}
                     invoice={{
                       ...(id ? { _id: id } : {}),
                       client,
@@ -200,6 +202,7 @@ export default function InvoicePreview({
                   />
                 ) : (
                   <ClientInvoice
+                    company={company}
                     invoice={{
                       ...(id ? { _id: id } : {}),
                       client,

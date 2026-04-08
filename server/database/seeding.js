@@ -1,26 +1,25 @@
+// server/database/seeding.js
+import bcrypt from "bcryptjs";
 import User from "../models/User.js";
 
 export default async function seedDatabase() {
   try {
-    if ((await User.countDocuments()) === 0) {
-      console.log("No users found...");
-      await User.create([
-        {
-          username: "admin",
-          password: "12345",
-          isAdmin: true,
-        },
-        {
-          username: "user",
-          password: "12345",
-          isAdmin: false,
-        },
-      ]);
-      console.log("Users seeded...");
+    const superAdminExists = await User.findOne({ role: "super_admin" });
+    if (!superAdminExists) {
+      const hashedPassword = await bcrypt.hash(
+        process.env.SUPER_ADMIN_PASSWORD,
+        10
+      );
+      await User.create({
+        username: process.env.SUPER_ADMIN_USERNAME,
+        password: hashedPassword,
+        role: "super_admin",
+        companyId: null,
+      });
+      console.log("Super admin seeded...");
     }
-    // process.exit(0);
   } catch (error) {
-    console.error("Error:", error);
+    console.error("Seeding error:", error);
     process.exit(1);
   }
 }
