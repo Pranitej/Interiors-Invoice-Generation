@@ -7,6 +7,10 @@ const { username, password } = config.superAdmin;
 const { bcryptRounds } = config.auth;
 const { SUPER_ADMIN } = config.roles;
 
+if (!username || !password) {
+  throw new Error("SUPER_ADMIN_USERNAME and SUPER_ADMIN_PASSWORD must be set in .env");
+}
+
 export default async function seedDatabase() {
   try {
     const superAdminExists = await User.findOne({ role: SUPER_ADMIN });
