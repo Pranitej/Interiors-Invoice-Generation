@@ -77,7 +77,7 @@ export default function History() {
     (async () => {
       try {
         const res = await api.get("/invoices");
-        setInvoices(Array.isArray(res.data) ? res.data : res.data?.data || []);
+        setInvoices(res.data?.data?.invoices || []);
       } catch (error) {
         console.error("Failed to fetch invoices:", error);
       } finally {

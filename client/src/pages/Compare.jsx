@@ -36,7 +36,7 @@ export default function ComparePage() {
     setError(null);
     try {
       const res = await API.get("/invoices");
-      const data = Array.isArray(res.data) ? res.data : res.data?.data || [];
+      const data = res.data?.data?.invoices || [];
       setInvoices(data);
     } catch (error) {
       console.error("Failed to fetch invoices:", error);

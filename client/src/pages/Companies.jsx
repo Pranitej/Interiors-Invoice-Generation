@@ -22,7 +22,7 @@ async function uploadLogo(file) {
   const res = await API.post("/upload/logo", data, {
     headers: { "Content-Type": "multipart/form-data" },
   });
-  return res.data.filename;
+  return res.data.data.filename;
 }
 
 export default function Companies() {

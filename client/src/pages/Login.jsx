@@ -15,7 +15,11 @@ export default function Login() {
 
   useEffect(() => {
     if (user) {
-      navigate("/new-quote");
+      if (user.role === "super_admin") {
+        navigate("/dashboard");
+      } else {
+        navigate("/new-quote");
+      }
     }
   }, [navigate, user]);
 
@@ -34,22 +38,24 @@ export default function Login() {
       const res = await api.post("/auth/login", { username, password });
 
       if (res.data.success) {
+        const { token, user, company } = res.data.data;
+
         const userData = {
-          _id: res.data.user._id,
-          username: res.data.user.username,
-          role: res.data.user.role,
-          createdAt: res.data.user.createdAt,
+          _id: user._id,
+          username: user.username,
+          role: user.role,
+          createdAt: user.createdAt,
         };
 
         localStorage.setItem("user", JSON.stringify(userData));
-        localStorage.setItem("token", res.data.token);
-        if (res.data.company) {
-          localStorage.setItem("company", JSON.stringify(res.data.company));
+        localStorage.setItem("token", token);
+        if (company) {
+          localStorage.setItem("company", JSON.stringify(company));
         }
 
         setUser(userData);
-        setToken(res.data.token);
-        setCompany(res.data.company ?? null);
+        setToken(token);
+        setCompany(company ?? null);
 
         setTimeout(() => {
           if (userData.role === "super_admin") {
