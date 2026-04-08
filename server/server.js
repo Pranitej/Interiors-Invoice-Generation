@@ -6,7 +6,7 @@ import connectDB from "./database/db.js";
 import seeding from "./database/seeding.js";
 import invoiceRouter from "./routes/invoice.routes.js";
 import authRouter from "./routes/auth.routes.js";
-import pdfRoutes from "./routes/pdf.js";
+import pdfRouter from "./routes/pdf.routes.js";
 import companyRouter from "./routes/company.routes.js";
 import superAdminRouter from "./routes/superAdmin.routes.js";
 import uploadRouter from "./routes/upload.js";
@@ -27,7 +27,7 @@ await seeding();
 
 app.use("/api/invoices", invoiceRouter);
 app.use("/api/auth", authRouter);
-app.use("/api/pdf", pdfRoutes);
+app.use("/api/pdf", pdfRouter);
 app.use("/api/companies", companyRouter);
 app.use("/api/super-admin", superAdminRouter);
 app.use("/api/upload", uploadRouter);
