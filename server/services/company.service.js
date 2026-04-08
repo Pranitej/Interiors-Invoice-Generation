@@ -69,7 +69,8 @@ export async function getCompanyById(id) {
 }
 
 export async function updateCompany(id, data) {
-  const company = await Company.findByIdAndUpdate(id, data, {
+  const { isActive, _id, __v, ...safeData } = data;
+  const company = await Company.findByIdAndUpdate(id, safeData, {
     new: true,
     runValidators: true,
   });
