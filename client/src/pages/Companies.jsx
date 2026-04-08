@@ -16,19 +16,29 @@ const emptyForm = {
   adminPassword: "",
 };
 
+async function uploadLogo(file) {
+  const data = new FormData();
+  data.append("logo", file);
+  const res = await API.post("/upload/logo", data, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  return res.data.filename;
+}
+
 export default function Companies() {
   const [companies, setCompanies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(emptyForm);
   const [submitting, setSubmitting] = useState(false);
+  const [logoUploading, setLogoUploading] = useState(false);
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
   const fetchCompanies = () => {
     setLoading(true);
     API.get("/companies")
-      .then((res) => setCompanies(res.data.companies))
+      .then((res) => setCompanies(res.data.data))
       .catch(() => setError("Failed to load companies"))
       .finally(() => setLoading(false));
   };
@@ -42,7 +52,7 @@ export default function Companies() {
       const res = await API.patch(`/companies/${id}/toggle-active`);
       setCompanies((prev) =>
         prev.map((c) =>
-          c._id === id ? { ...c, isActive: res.data.company.isActive } : c
+          c._id === id ? { ...c, isActive: res.data.data.isActive } : c
         )
       );
     } catch {
@@ -116,7 +126,6 @@ export default function Companies() {
               { key: "registeredOffice", label: "Registered Office", placeholder: "Plot 42, Jubilee Hills..." },
               { key: "industryAddress", label: "Industry Address", placeholder: "Survey No. 201..." },
               { key: "website", label: "Website", placeholder: "https://..." },
-              { key: "logoFile", label: "Logo Filename", placeholder: "logo.png" },
               { key: "adminUsername", label: "Admin Username *", placeholder: "admin" },
               { key: "adminPassword", label: "Admin Password *", placeholder: "••••••••" },
             ].map(({ key, label, placeholder }) => (
@@ -134,10 +143,46 @@ export default function Companies() {
                 />
               </div>
             ))}
+
+            {/* Logo upload */}
+            <div className="md:col-span-2">
+              <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+                Company Logo
+              </label>
+              <div className="flex items-center gap-3">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={async (e) => {
+                    const file = e.target.files[0];
+                    if (!file) return;
+                    setLogoUploading(true);
+                    setError("");
+                    try {
+                      const filename = await uploadLogo(file);
+                      setForm((f) => ({ ...f, logoFile: filename }));
+                    } catch {
+                      setError("Failed to upload logo");
+                    } finally {
+                      setLogoUploading(false);
+                    }
+                  }}
+                  className="block w-full text-sm text-gray-600 dark:text-gray-300 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 dark:file:bg-blue-900/30 dark:file:text-blue-400 hover:file:bg-blue-100 cursor-pointer"
+                />
+                {logoUploading && (
+                  <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin flex-shrink-0" />
+                )}
+                {form.logoFile && !logoUploading && (
+                  <span className="text-xs text-green-600 dark:text-green-400 flex-shrink-0">
+                    ✓ {form.logoFile}
+                  </span>
+                )}
+              </div>
+            </div>
           </div>
           <button
             type="submit"
-            disabled={submitting}
+            disabled={submitting || logoUploading}
             className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium disabled:opacity-50"
           >
             {submitting ? "Creating..." : "Create Company"}

@@ -164,7 +164,7 @@ export default function NewQuote() {
           preview: false,
         });
         const res = await api.get(`/invoices/${id}`);
-        const invoice = res.data;
+        const invoice = res.data.data;
 
         setClient(invoice.client);
         setDiscount(Number(invoice.discount || 0));

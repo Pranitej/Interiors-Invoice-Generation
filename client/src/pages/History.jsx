@@ -158,7 +158,7 @@ export default function History() {
       setIsDownloading(true);
       setActiveInvoice(id);
 
-      const invoice = (await api.get(`/invoices/${id}`)).data;
+      const invoice = (await api.get(`/invoices/${id}`)).data.data;
       const Component = type === "admin" ? AdminInvoice : ClientInvoice;
 
       // Only send the component HTML — no wrapping document needed.

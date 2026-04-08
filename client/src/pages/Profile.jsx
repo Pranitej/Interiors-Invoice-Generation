@@ -81,7 +81,7 @@ export default function Profile() {
     try {
       setLoading(true);
       const response = await api.get("/auth/users");
-      setUsers(response.data.users || []);
+      setUsers(response.data.data || []);
     } catch (error) {
       console.error("Failed to fetch users:", error);
       setMessage({ type: "error", text: "Failed to load users" });
@@ -119,8 +119,8 @@ export default function Profile() {
 
       const response = await api.put(`/auth/users/${currentUser._id}`, payload);
 
-      setCurrentUser(response.data);
-      localStorage.setItem("user", JSON.stringify(response.data));
+      setCurrentUser(response.data.data);
+      localStorage.setItem("user", JSON.stringify(response.data.data));
 
       setMessage({
         type: "success",

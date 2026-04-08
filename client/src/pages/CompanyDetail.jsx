@@ -18,9 +18,9 @@ export default function CompanyDetail() {
       API.get(`/super-admin/companies/${id}/invoices`),
     ])
       .then(([companyRes, usersRes, invoicesRes]) => {
-        setCompany(companyRes.data.company);
-        setUsers(usersRes.data.users);
-        setInvoices(invoicesRes.data.invoices);
+        setCompany(companyRes.data.data);
+        setUsers(usersRes.data.data);
+        setInvoices(invoicesRes.data.data);
       })
       .finally(() => setLoading(false));
   }, [id]);

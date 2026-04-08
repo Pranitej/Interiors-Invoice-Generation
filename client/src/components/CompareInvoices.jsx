@@ -26,10 +26,10 @@ const CompareInvoices = forwardRef(
             api.get(`/invoices/${invoiceAId}`),
             api.get(`/invoices/${invoiceBId}`),
           ]);
-          setInvoiceA(resA.data);
-          setInvoiceB(resB.data);
-          onLoadedA?.(resA.data);
-          onLoadedB?.(resB.data);
+          setInvoiceA(resA.data.data);
+          setInvoiceB(resB.data.data);
+          onLoadedA?.(resA.data.data);
+          onLoadedB?.(resB.data.data);
         } catch (err) {
           console.error("Failed to load invoices", err);
           setError("Failed to load invoices. Please try again.");

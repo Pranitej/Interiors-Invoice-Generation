@@ -10,7 +10,7 @@ export default function SuperAdminDashboard() {
 
   useEffect(() => {
     API.get("/super-admin/stats")
-      .then((res) => setStats(res.data.stats))
+      .then((res) => setStats(res.data.data))
       .catch(() => setError("Failed to load stats"))
       .finally(() => setLoading(false));
   }, []);
