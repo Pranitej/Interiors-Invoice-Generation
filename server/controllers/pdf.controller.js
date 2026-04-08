@@ -1,5 +1,6 @@
 // server/controllers/pdf.controller.js
 import crypto from "crypto";
+import { sendSuccess, sendError } from "../utils/response.js";
 import {
   renderState,
   generatePDFWithTimeout,
@@ -7,7 +8,7 @@ import {
 } from "../services/pdf.service.js";
 
 export function getStatus(req, res) {
-  res.json({
+  sendSuccess(res, {
     activeRenders: renderState.active,
     maxConcurrent: renderState.maxConcurrent,
     available: renderState.maxConcurrent - renderState.active,
@@ -18,7 +19,6 @@ export async function renderPdf(req, res) {
   const requestId = crypto.randomUUID();
   renderState.increment();
 
-  // Safety lease — force-releases slot if finally block never runs (OOM, SIGTERM, etc.)
   const leaseTimer = setTimeout(() => {
     console.error(`[PDF] SAFETY RESET — slot leaked for ${requestId}`);
     renderState.decrement();
@@ -41,7 +41,7 @@ export async function renderPdf(req, res) {
   } catch (err) {
     console.error(`[PDF] Failed ${requestId}: ${err.message}`);
     if (!res.headersSent) {
-      res.status(500).json({ success: false, message: "PDF generation failed", requestId });
+      sendError(res, 500, "PDF generation failed");
     }
   } finally {
     clearTimeout(leaseTimer);

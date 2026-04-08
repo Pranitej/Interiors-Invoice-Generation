@@ -1,6 +1,10 @@
 // server/controllers/invoice.controller.js
 import * as InvoiceService from "../services/invoice.service.js";
 import AppError from "../utils/AppError.js";
+import { sendSuccess } from "../utils/response.js";
+import config from "../config.js";
+
+const { defaultPage, defaultLimit, maxLimit } = config.invoice;
 
 export async function createInvoice(req, res, next) {
   try {
@@ -12,7 +16,7 @@ export async function createInvoice(req, res, next) {
       companyId: req.companyId,
       userId: req.user.userId,
     });
-    res.status(201).json({ success: true, data: invoice });
+    sendSuccess(res, invoice, 201);
   } catch (err) {
     next(err);
   }
@@ -21,8 +25,8 @@ export async function createInvoice(req, res, next) {
 export async function listInvoices(req, res, next) {
   try {
     const { q, sortBy, order } = req.query;
-    const page  = Math.max(1, parseInt(req.query.page, 10)  || 1);
-    const limit = Math.min(100, parseInt(req.query.limit, 10) || 50);
+    const page  = Math.max(1, parseInt(req.query.page, 10)  || defaultPage);
+    const limit = Math.min(maxLimit, parseInt(req.query.limit, 10) || defaultLimit);
     const { invoices, total } = await InvoiceService.listInvoices({
       companyId: req.companyId,
       q,
@@ -31,7 +35,7 @@ export async function listInvoices(req, res, next) {
       page,
       limit,
     });
-    res.json({ success: true, data: invoices, total });
+    sendSuccess(res, { invoices, total });
   } catch (err) {
     next(err);
   }
@@ -43,7 +47,7 @@ export async function getInvoice(req, res, next) {
       req.params.id,
       req.companyId
     );
-    res.json({ success: true, data: invoice });
+    sendSuccess(res, invoice);
   } catch (err) {
     next(err);
   }
@@ -56,7 +60,7 @@ export async function updateInvoice(req, res, next) {
       req.companyId,
       req.body
     );
-    res.json({ success: true, data: invoice });
+    sendSuccess(res, invoice);
   } catch (err) {
     next(err);
   }
@@ -65,7 +69,7 @@ export async function updateInvoice(req, res, next) {
 export async function deleteInvoice(req, res, next) {
   try {
     await InvoiceService.deleteInvoice(req.params.id, req.companyId);
-    res.json({ success: true, message: "Invoice deleted successfully" });
+    sendSuccess(res, null, 200, "Invoice deleted successfully");
   } catch (err) {
     next(err);
   }

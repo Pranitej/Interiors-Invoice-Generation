@@ -1,10 +1,11 @@
 // server/controllers/superAdmin.controller.js
 import * as SuperAdminService from "../services/superAdmin.service.js";
+import { sendSuccess } from "../utils/response.js";
 
 export async function getPlatformStats(req, res, next) {
   try {
     const stats = await SuperAdminService.getPlatformStats();
-    res.json({ success: true, data: stats });
+    sendSuccess(res, stats);
   } catch (err) {
     next(err);
   }
@@ -13,7 +14,7 @@ export async function getPlatformStats(req, res, next) {
 export async function getCompanyInvoices(req, res, next) {
   try {
     const invoices = await SuperAdminService.getCompanyInvoices(req.params.id);
-    res.json({ success: true, data: invoices });
+    sendSuccess(res, invoices);
   } catch (err) {
     next(err);
   }
@@ -22,7 +23,7 @@ export async function getCompanyInvoices(req, res, next) {
 export async function getCompanyUsers(req, res, next) {
   try {
     const users = await SuperAdminService.getCompanyUsers(req.params.id);
-    res.json({ success: true, data: users });
+    sendSuccess(res, users);
   } catch (err) {
     next(err);
   }
