@@ -72,7 +72,6 @@ export default function Login() {
     } catch (err) {
       const errorMessage =
         err.response?.data?.message ||
-        err.response?.data?.error ||
         "Unable to connect to the server. Please try again.";
       setError(errorMessage);
     } finally {

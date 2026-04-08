@@ -10,6 +10,7 @@ import companyRouter from "./routes/company.routes.js";
 import superAdminRouter from "./routes/superAdmin.routes.js";
 import uploadRouter from "./routes/upload.routes.js";
 import errorHandler from "./middleware/errorHandler.js";
+import { sendSuccess } from "./utils/response.js";
 import config from "./config.js";
 
 const app = express();
@@ -28,9 +29,7 @@ app.use("/api/companies", companyRouter);
 app.use("/api/super-admin", superAdminRouter);
 app.use("/api/upload", uploadRouter);
 
-app.get("/", (_, res) =>
-  res.send({ ok: true, message: `${config.platform.name} API` })
-);
+app.get("/", (_, res) => sendSuccess(res, null, 200, `${config.platform.name} API`));
 
 app.use(errorHandler);
 
