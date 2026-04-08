@@ -3,6 +3,9 @@
 // All process.env reads happen here. All magic numbers live here.
 // Rule: store human-readable values; code performs unit derivations (e.g. * 1000, * 1024 * 1024).
 
+import dotenv from "dotenv";
+dotenv.config();
+
 const config = {
   platform: { name: "Interiors SaaS" },
 
@@ -42,6 +45,7 @@ const config = {
     retryCount: 2,
     retryDelayBaseMs: 600,        // used as attempt * retryDelayBaseMs
     maxHtmlBytes: 512_000,
+    slotLeaseBufferSec: 10,       // added to pdfTimeoutSec for SLOT_LEASE_MS in pdf.service.js
   },
 
   upload: {

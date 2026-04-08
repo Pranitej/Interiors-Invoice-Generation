@@ -9,13 +9,14 @@ const {
   retryCount,
   retryDelayBaseMs,
   maxHtmlBytes,
+  slotLeaseBufferSec,
 } = config.pdf;
 
 const PDF_TIMEOUT_MS = pdfTimeoutSec * 1000;
 const BROWSER_TIMEOUT_MS = browserTimeoutSec * 1000;
 
 export { maxHtmlBytes as MAX_HTML_BYTES };
-export const SLOT_LEASE_MS = PDF_TIMEOUT_MS + 10_000;
+export const SLOT_LEASE_MS = PDF_TIMEOUT_MS + slotLeaseBufferSec * 1000;
 
 export const renderState = {
   active: 0,

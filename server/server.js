@@ -1,7 +1,6 @@
 // server/server.js
 import express from "express";
 import cors from "cors";
-import dotenv from "dotenv";
 import connectDB from "./database/db.js";
 import seeding from "./database/seeding.js";
 import invoiceRouter from "./routes/invoice.routes.js";
@@ -12,8 +11,6 @@ import superAdminRouter from "./routes/superAdmin.routes.js";
 import uploadRouter from "./routes/upload.routes.js";
 import errorHandler from "./middleware/errorHandler.js";
 import config from "./config.js";
-
-dotenv.config();
 
 const app = express();
 
