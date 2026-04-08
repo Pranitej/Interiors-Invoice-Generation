@@ -1,31 +1,39 @@
 // server/services/pdf.service.js
 import puppeteer from "puppeteer";
+import config from "../config.js";
 
-const MAX_CONCURRENT = 2;
-const PDF_TIMEOUT_MS = 45_000;
-const BROWSER_TIMEOUT_MS = 60_000;
-const RETRY_COUNT = 2;
+const {
+  maxConcurrent,
+  pdfTimeoutSec,
+  browserTimeoutSec,
+  retryCount,
+  retryDelayBaseMs,
+  maxHtmlBytes,
+} = config.pdf;
 
-export const MAX_HTML_BYTES = 512_000;
-export const SLOT_LEASE_MS = PDF_TIMEOUT_MS + 10_000; // 55s safety reset
+const PDF_TIMEOUT_MS = pdfTimeoutSec * 1000;
+const BROWSER_TIMEOUT_MS = browserTimeoutSec * 1000;
+
+export { maxHtmlBytes as MAX_HTML_BYTES };
+export const SLOT_LEASE_MS = PDF_TIMEOUT_MS + 10_000;
 
 export const renderState = {
   active: 0,
   increment() {
-    this.active = Math.min(this.active + 1, MAX_CONCURRENT + 10);
+    this.active = Math.min(this.active + 1, maxConcurrent + 10);
   },
   decrement() {
     this.active = Math.max(this.active - 1, 0);
   },
   isBusy() {
-    return this.active >= MAX_CONCURRENT;
+    return this.active >= maxConcurrent;
   },
   get maxConcurrent() {
-    return MAX_CONCURRENT;
+    return maxConcurrent;
   },
 };
 
-async function generatePDF(html, retries = RETRY_COUNT) {
+async function generatePDF(html, retries = retryCount) {
   let browser = null;
 
   for (let attempt = 1; attempt <= retries; attempt++) {
@@ -79,7 +87,7 @@ async function generatePDF(html, retries = RETRY_COUNT) {
         browser = null;
       }
       if (attempt === retries) throw err;
-      await new Promise((r) => setTimeout(r, attempt * 600));
+      await new Promise((r) => setTimeout(r, attempt * retryDelayBaseMs));
     }
   }
 }
