@@ -1,4 +1,5 @@
 // server/services/invoice.service.js
+import mongoose from "mongoose";
 import Invoice from "../models/Invoice.js";
 import AppError from "../utils/AppError.js";
 
@@ -42,6 +43,8 @@ export async function listInvoices({
 }
 
 export async function getInvoiceById(id, companyId) {
+  if (!mongoose.Types.ObjectId.isValid(id))
+    throw new AppError(400, "Invalid invoice ID");
   const filter = { _id: id };
   if (companyId) filter.companyId = companyId;
   const invoice = await Invoice.findOne(filter);
@@ -50,6 +53,8 @@ export async function getInvoiceById(id, companyId) {
 }
 
 export async function updateInvoice(id, companyId, data) {
+  if (!mongoose.Types.ObjectId.isValid(id))
+    throw new AppError(400, "Invalid invoice ID");
   const { companyId: _c, createdBy: _u, _id: _i, ...safeData } = data;
   const filter = { _id: id };
   if (companyId) filter.companyId = companyId;
@@ -62,6 +67,8 @@ export async function updateInvoice(id, companyId, data) {
 }
 
 export async function deleteInvoice(id, companyId) {
+  if (!mongoose.Types.ObjectId.isValid(id))
+    throw new AppError(400, "Invalid invoice ID");
   const filter = { _id: id };
   if (companyId) filter.companyId = companyId;
   const invoice = await Invoice.findOneAndDelete(filter);

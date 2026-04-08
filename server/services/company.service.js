@@ -1,4 +1,5 @@
 // server/services/company.service.js
+import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 import Company from "../models/Company.js";
 import User from "../models/User.js";
@@ -63,12 +64,16 @@ export async function listCompanies() {
 }
 
 export async function getCompanyById(id) {
+  if (!mongoose.Types.ObjectId.isValid(id))
+    throw new AppError(400, "Invalid company ID");
   const company = await Company.findById(id);
   if (!company) throw new AppError(404, "Company not found");
   return company;
 }
 
 export async function updateCompany(id, data) {
+  if (!mongoose.Types.ObjectId.isValid(id))
+    throw new AppError(400, "Invalid company ID");
   const { isActive, _id, __v, ...safeData } = data;
   const company = await Company.findByIdAndUpdate(id, safeData, {
     new: true,
@@ -79,6 +84,8 @@ export async function updateCompany(id, data) {
 }
 
 export async function deleteCompany(id) {
+  if (!mongoose.Types.ObjectId.isValid(id))
+    throw new AppError(400, "Invalid company ID");
   const company = await Company.findByIdAndDelete(id);
   if (!company) throw new AppError(404, "Company not found");
   await Promise.all([
@@ -88,6 +95,8 @@ export async function deleteCompany(id) {
 }
 
 export async function toggleCompanyActive(id) {
+  if (!mongoose.Types.ObjectId.isValid(id))
+    throw new AppError(400, "Invalid company ID");
   const company = await Company.findById(id);
   if (!company) throw new AppError(404, "Company not found");
   company.isActive = !company.isActive;

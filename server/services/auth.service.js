@@ -1,4 +1,5 @@
 // server/services/auth.service.js
+import mongoose from "mongoose";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import User from "../models/User.js";
@@ -68,6 +69,8 @@ export async function listUsers(companyId) {
 }
 
 export async function getUserById(id, companyId) {
+  if (!mongoose.Types.ObjectId.isValid(id))
+    throw new AppError(400, "Invalid user ID");
   const filter = { _id: id };
   if (companyId) filter.companyId = companyId;
   const user = await User.findOne(filter).select("-password");
@@ -76,6 +79,8 @@ export async function getUserById(id, companyId) {
 }
 
 export async function updateUser(id, companyId, body) {
+  if (!mongoose.Types.ObjectId.isValid(id))
+    throw new AppError(400, "Invalid user ID");
   const { username, password } = body;
   const updateData = {};
   if (username !== undefined) updateData.username = username;
@@ -90,6 +95,8 @@ export async function updateUser(id, companyId, body) {
 }
 
 export async function deleteUser(id, companyId) {
+  if (!mongoose.Types.ObjectId.isValid(id))
+    throw new AppError(400, "Invalid user ID");
   const filter = { _id: id };
   if (companyId) filter.companyId = companyId;
   const user = await User.findOneAndDelete(filter);

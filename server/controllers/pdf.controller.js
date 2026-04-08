@@ -41,7 +41,7 @@ export async function renderPdf(req, res) {
   } catch (err) {
     console.error(`[PDF] Failed ${requestId}: ${err.message}`);
     if (!res.headersSent) {
-      res.status(500).json({ error: "PDF generation failed", requestId });
+      res.status(500).json({ success: false, message: "PDF generation failed", requestId });
     }
   } finally {
     clearTimeout(leaseTimer);

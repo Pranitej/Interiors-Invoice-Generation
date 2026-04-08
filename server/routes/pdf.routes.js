@@ -2,6 +2,7 @@
 import express from "express";
 import { renderState, MAX_HTML_BYTES } from "../services/pdf.service.js";
 import * as PdfController from "../controllers/pdf.controller.js";
+import authenticate from "../middleware/authenticate.js";
 
 const router = express.Router();
 
@@ -33,6 +34,6 @@ const concurrencyGuard = (req, res, next) => {
 };
 
 router.get("/status", PdfController.getStatus);
-router.post("/render", validatePayload, concurrencyGuard, PdfController.renderPdf);
+router.post("/render", authenticate, validatePayload, concurrencyGuard, PdfController.renderPdf);
 
 export default router;
