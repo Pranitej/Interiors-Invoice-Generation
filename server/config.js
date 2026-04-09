@@ -59,6 +59,14 @@ const config = {
     defaultLimit: 50,
     maxLimit: 100,
   },
+
+  security: {
+    rateLimit: {
+      windowMinutes: 15,      // * 60 * 1000 in server.js
+      maxRequests: 100,       // requests per window per IP
+      authMaxRequests: 20,    // stricter limit for /api/auth routes
+    },
+  },
 };
 
 export default config;
