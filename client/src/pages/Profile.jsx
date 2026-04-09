@@ -550,7 +550,7 @@ export default function Profile() {
             )}
 
             {/* Manage Users Tab */}
-            {activeTab === "users" && currentUser?.isAdmin && (
+            {activeTab === "users" && currentUser?.role === config.roles.COMPANY_ADMIN && (
               <div className="space-y-5">
                 <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5 shadow-sm">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
@@ -687,7 +687,7 @@ export default function Profile() {
             )}
 
             {/* Create User Tab */}
-            {activeTab === "create-user" && currentUser?.isAdmin && (
+            {activeTab === "create-user" && currentUser?.role === config.roles.COMPANY_ADMIN && (
               <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
                 <div className="p-5 border-b border-gray-200 dark:border-gray-700">
                   <div className="flex items-center gap-3">
