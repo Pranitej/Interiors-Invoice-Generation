@@ -58,6 +58,7 @@ const config = {
     defaultPage: 1,
     defaultLimit: 50,
     maxLimit: 100,
+    trashRetentionDays: 30,       // * 24 * 60 * 60 * 1000 in invoice.service.js
   },
 
   security: {

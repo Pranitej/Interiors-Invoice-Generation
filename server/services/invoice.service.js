@@ -2,6 +2,7 @@
 import mongoose from "mongoose";
 import Invoice from "../models/Invoice.js";
 import AppError from "../utils/AppError.js";
+import config from "../config.js";
 
 export async function createInvoice({ body, companyId, userId }) {
   const invoice = new Invoice({ ...body, companyId, createdBy: userId });
@@ -82,7 +83,7 @@ export async function deleteInvoice(id, companyId) {
 }
 
 export async function listTrash(companyId) {
-  const cutoff = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+  const cutoff = new Date(Date.now() - config.invoice.trashRetentionDays * 24 * 60 * 60 * 1000);
   const filter = companyId ? { companyId } : {};
   await Invoice.deleteMany({ ...filter, deletedAt: { $lt: cutoff } });
   return Invoice.find({ ...filter, deletedAt: { $ne: null } }).sort({ deletedAt: -1 });
