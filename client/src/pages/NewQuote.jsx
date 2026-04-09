@@ -171,6 +171,15 @@ export default function NewQuote() {
         const res = await api.get(`/invoices/${id}`);
         const invoice = res.data.data;
 
+        if (
+          user.role === config.roles.COMPANY_USER &&
+          invoice.createdBy !== user._id
+        ) {
+          alert("You can only edit invoices you created.");
+          navigate("/history");
+          return;
+        }
+
         setClient(invoice.client);
         setDiscount(Number(invoice.discount || 0));
         setInvoiceType(invoice.invoiceType || "");
