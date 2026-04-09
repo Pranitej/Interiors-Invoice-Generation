@@ -184,7 +184,9 @@ export default function History() {
 
       // Only send the component HTML — no wrapping document needed.
       // pdf.js wraps it in a full HTML document with correct styles.
-      const html = renderToStaticMarkup(<Component invoice={invoice} company={company} />);
+      const html = renderToStaticMarkup(
+        <Component invoice={invoice} company={company} />,
+      );
 
       const res = await api.post(
         "/pdf/render",
@@ -334,7 +336,10 @@ export default function History() {
           <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-3 mb-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
+                <Search
+                  className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                  size={16}
+                />
                 <input
                   className="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-transparent"
                   placeholder="Search invoices..."
@@ -351,9 +356,14 @@ export default function History() {
                   <option value="all">All Invoices</option>
                   <option value="recent">Last 30 days</option>
                   <option value="high-value">High value (&gt; ₹50k)</option>
-                  {user?.isAdmin && <option value="admin-only">Admin only</option>}
+                  {user?.isAdmin && (
+                    <option value="admin-only">Admin only</option>
+                  )}
                 </select>
-                <ChevronDown className="absolute right-2.5 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" size={14} />
+                <ChevronDown
+                  className="absolute right-2.5 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"
+                  size={14}
+                />
               </div>
               <div className="relative">
                 <select
@@ -368,11 +378,18 @@ export default function History() {
                   <option value="amount-high-low">Amount High → Low</option>
                   <option value="amount-low-high">Amount Low → High</option>
                 </select>
-                <ChevronDown className="absolute right-2.5 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" size={14} />
+                <ChevronDown
+                  className="absolute right-2.5 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"
+                  size={14}
+                />
               </div>
               <div className="flex items-center justify-center sm:justify-end">
                 <div className="text-sm text-gray-600 dark:text-gray-400">
-                  Showing <span className="font-semibold text-gray-900 dark:text-white">{sortedInvoices.length}</span> results
+                  Showing{" "}
+                  <span className="font-semibold text-gray-900 dark:text-white">
+                    {sortedInvoices.length}
+                  </span>{" "}
+                  results
                 </div>
               </div>
             </div>
@@ -382,14 +399,20 @@ export default function History() {
           {loading ? (
             <div className="flex items-center justify-center py-12">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-              <span className="ml-3 text-gray-600 dark:text-gray-300">Loading invoices...</span>
+              <span className="ml-3 text-gray-600 dark:text-gray-300">
+                Loading invoices...
+              </span>
             </div>
           ) : sortedInvoices.length === 0 ? (
             <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-8 text-center">
               <FileText className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No invoices found</h3>
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+                No invoices found
+              </h3>
               <p className="text-gray-600 dark:text-gray-400 mb-4">
-                {search ? "Try a different search term" : "Create your first invoice to get started"}
+                {search
+                  ? "Try a different search term"
+                  : "Create your first invoice to get started"}
               </p>
               {!search && (
                 <button
@@ -412,45 +435,98 @@ export default function History() {
                   <div className="hidden lg:flex items-center p-4">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
-                        <User size={14} className="text-gray-400 flex-shrink-0" />
-                        <span className="font-medium text-gray-900 dark:text-white truncate">{invoice.client?.name || "Unnamed Client"}</span>
+                        <User
+                          size={14}
+                          className="text-gray-400 flex-shrink-0"
+                        />
+                        <span className="font-medium text-gray-900 dark:text-white truncate">
+                          {invoice.client?.name || "Unnamed Client"}
+                        </span>
                       </div>
                       <div className="flex gap-2 items-center text-md">
                         <button
                           onClick={() => copyToClipboard(invoice._id)}
                           className="inline-flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors cursor-pointer"
                         >
-                          {copiedId === invoice._id ? <><Check size={12} />Copied!</> : <><Copy size={12} />#{invoice._id.slice(-8)}</>}
+                          {copiedId === invoice._id ? (
+                            <>
+                              <Check size={12} />
+                              Copied!
+                            </>
+                          ) : (
+                            <>
+                              <Copy size={12} />#{invoice._id.slice(-8)}
+                            </>
+                          )}
                         </button>
-                        <small className="text-gray-600">({invoice.invoiceType})</small>
+                        <small className="text-gray-600">
+                          ({invoice.invoiceType})
+                        </small>
                       </div>
                     </div>
                     <div className="flex-shrink-0 px-4 min-w-[160px] max-w-[200px]">
                       <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
                         <MapPin size={12} className="flex-shrink-0" />
-                        <span className="truncate">{invoice.client.siteAddress || "—"}</span>
+                        <span className="truncate">
+                          {invoice.client.siteAddress || "—"}
+                        </span>
                       </div>
                     </div>
                     <div className="flex-shrink-0 px-4 min-w-[120px] text-center">
-                      <div className="text-xs text-gray-900 dark:text-white">{formatISTDate(invoice.createdAt)}</div>
-                      <div className="text-xs text-gray-500 dark:text-gray-400">{formatISTTime(invoice.createdAt)}</div>
+                      <div className="text-xs text-gray-900 dark:text-white">
+                        {formatISTDate(invoice.createdAt)}
+                      </div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400">
+                        {formatISTTime(invoice.createdAt)}
+                      </div>
                     </div>
                     <div className="flex-shrink-0 px-4 min-w-[100px] text-right">
-                      <div className="font-semibold text-green-600 dark:text-green-400 truncate">{formatINR(invoice.finalPayableAfterDiscount)}</div>
+                      <div className="font-semibold text-green-600 dark:text-green-400 truncate">
+                        {formatINR(invoice.finalPayableAfterDiscount)}
+                      </div>
                     </div>
                     <div className="flex-shrink-0 px-4 min-w-[180px]">
                       <div className="flex items-center justify-end gap-2">
-                        <button onClick={() => handleDownload(invoice._id, "client")} disabled={isDownloading && activeInvoice === invoice._id} className="inline-flex items-center gap-1 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/20 dark:hover:bg-blue-900/40 text-blue-600 dark:text-blue-400 text-sm font-medium rounded transition-colors disabled:opacity-50 whitespace-nowrap">
-                          {isDownloading && activeInvoice === invoice._id ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
+                        <button
+                          onClick={() => handleDownload(invoice._id, "client")}
+                          disabled={
+                            isDownloading && activeInvoice === invoice._id
+                          }
+                          className="inline-flex items-center gap-1 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/20 dark:hover:bg-blue-900/40 text-blue-600 dark:text-blue-400 text-sm font-medium rounded transition-colors disabled:opacity-50 whitespace-nowrap"
+                        >
+                          {isDownloading && activeInvoice === invoice._id ? (
+                            <Loader2 size={14} className="animate-spin" />
+                          ) : (
+                            <Download size={14} />
+                          )}
                           Client
                         </button>
-                        <button onClick={() => handleDownload(invoice._id, "admin")} disabled={isDownloading && activeInvoice === invoice._id} className="inline-flex items-center gap-1 px-3 py-1.5 bg-purple-50 hover:bg-purple-100 dark:bg-purple-900/20 dark:hover:bg-purple-900/40 text-purple-600 dark:text-purple-400 text-sm font-medium rounded transition-colors disabled:opacity-50 whitespace-nowrap">
-                          <Download size={14} />Admin
+                        <button
+                          onClick={() => handleDownload(invoice._id, "admin")}
+                          disabled={
+                            isDownloading && activeInvoice === invoice._id
+                          }
+                          className="inline-flex items-center gap-1 px-3 py-1.5 bg-purple-50 hover:bg-purple-100 dark:bg-purple-900/20 dark:hover:bg-purple-900/40 text-purple-600 dark:text-purple-400 text-sm font-medium rounded transition-colors disabled:opacity-50 whitespace-nowrap"
+                        >
+                          <Download size={14} />
+                          Admin
                         </button>
                         {user?.isAdmin && (
                           <>
-                            <button onClick={() => handleEdit(invoice._id)} className="p-1.5 text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded transition-colors flex-shrink-0" title="Edit"><Edit size={16} /></button>
-                            <button onClick={() => handleDelete(invoice._id)} className="p-1.5 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors flex-shrink-0" title="Delete"><Trash size={16} /></button>
+                            <button
+                              onClick={() => handleEdit(invoice._id)}
+                              className="p-1.5 text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded transition-colors flex-shrink-0"
+                              title="Edit"
+                            >
+                              <Edit size={16} />
+                            </button>
+                            <button
+                              onClick={() => handleDelete(invoice._id)}
+                              className="p-1.5 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors flex-shrink-0"
+                              title="Delete"
+                            >
+                              <Trash size={16} />
+                            </button>
                           </>
                         )}
                       </div>
@@ -462,41 +538,102 @@ export default function History() {
                     <div className="flex items-start justify-between mb-1">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
-                          <User size={14} className="text-gray-400 flex-shrink-0" />
-                          <span className="font-medium text-gray-900 dark:text-white">{invoice.client?.name || "Unnamed Client"}</span>
+                          <User
+                            size={14}
+                            className="text-gray-400 flex-shrink-0"
+                          />
+                          <span className="font-medium text-gray-900 dark:text-white">
+                            {invoice.client?.name || "Unnamed Client"}
+                          </span>
                         </div>
                         <div className="flex items-center gap-2 text-sm">
-                          <MapPin size={12} className="text-gray-400 flex-shrink-0" />
-                          <span className="text-gray-600 dark:text-gray-300 truncate">{invoice.client.siteAddress || "—"}</span>
+                          <MapPin
+                            size={12}
+                            className="text-gray-400 flex-shrink-0"
+                          />
+                          <span className="text-gray-600 dark:text-gray-300 truncate">
+                            {invoice.client.siteAddress || "—"}
+                          </span>
                         </div>
                       </div>
                       <div className="text-right">
-                        <div className="font-semibold text-green-600 dark:text-green-400 mb-1">{formatINR(invoice.finalPayableAfterDiscount)}</div>
-                        <button onClick={() => copyToClipboard(invoice._id)} className="cursor-pointer inline-flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
-                          {copiedId === invoice._id ? <><Check size={12} />Copied!</> : <><Copy size={12} />#{invoice._id.slice(-8)}</>}
+                        <div className="font-semibold text-green-600 dark:text-green-400 mb-1">
+                          {formatINR(invoice.finalPayableAfterDiscount)}
+                        </div>
+                        <button
+                          onClick={() => copyToClipboard(invoice._id)}
+                          className="cursor-pointer inline-flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                        >
+                          {copiedId === invoice._id ? (
+                            <>
+                              <Check size={12} />
+                              Copied!
+                            </>
+                          ) : (
+                            <>
+                              <Copy size={12} />#{invoice._id.slice(-8)}
+                            </>
+                          )}
                         </button>
                       </div>
                     </div>
                     <div className="space-y-2 mb-3 flex justify-between">
                       <div className="flex items-center gap-2 text-sm">
-                        <Calendar size={12} className="text-gray-400 flex-shrink-0" />
-                        <span className="text-gray-600 dark:text-gray-300">{formatISTDateTime(invoice.createdAt)}</span>
+                        <Calendar
+                          size={12}
+                          className="text-gray-400 flex-shrink-0"
+                        />
+                        <span className="text-gray-600 dark:text-gray-300">
+                          {formatISTDateTime(invoice.createdAt)}
+                        </span>
                       </div>
-                      <div className="items-center gap-2 text-sm text-gray-600"><p>({invoice.invoiceType})</p></div>
+                      <div className="items-center gap-2 text-sm text-gray-600">
+                        <p>({invoice.invoiceType})</p>
+                      </div>
                     </div>
                     <div className="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-gray-700">
                       <div className="flex items-center gap-2">
-                        <button onClick={() => handleDownload(invoice._id, "client")} disabled={isDownloading && activeInvoice === invoice._id} className="inline-flex items-center gap-1 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/20 dark:hover:bg-blue-900/40 text-blue-600 dark:text-blue-400 text-sm font-medium rounded transition-colors disabled:opacity-50">
-                          {isDownloading && activeInvoice === invoice._id ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}Client
+                        <button
+                          onClick={() => handleDownload(invoice._id, "client")}
+                          disabled={
+                            isDownloading && activeInvoice === invoice._id
+                          }
+                          className="inline-flex items-center gap-1 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/20 dark:hover:bg-blue-900/40 text-blue-600 dark:text-blue-400 text-sm font-medium rounded transition-colors disabled:opacity-50"
+                        >
+                          {isDownloading && activeInvoice === invoice._id ? (
+                            <Loader2 size={14} className="animate-spin" />
+                          ) : (
+                            <Download size={14} />
+                          )}
+                          Client
                         </button>
-                        <button onClick={() => handleDownload(invoice._id, "admin")} disabled={isDownloading && activeInvoice === invoice._id} className="inline-flex items-center gap-1 px-3 py-1.5 bg-purple-50 hover:bg-purple-100 dark:bg-purple-900/20 dark:hover:bg-purple-900/40 text-purple-600 dark:text-purple-400 text-sm font-medium rounded transition-colors disabled:opacity-50">
-                          <Download size={14} />Admin
+                        <button
+                          onClick={() => handleDownload(invoice._id, "admin")}
+                          disabled={
+                            isDownloading && activeInvoice === invoice._id
+                          }
+                          className="inline-flex items-center gap-1 px-3 py-1.5 bg-purple-50 hover:bg-purple-100 dark:bg-purple-900/20 dark:hover:bg-purple-900/40 text-purple-600 dark:text-purple-400 text-sm font-medium rounded transition-colors disabled:opacity-50"
+                        >
+                          <Download size={14} />
+                          Admin
                         </button>
                       </div>
                       {user?.isAdmin && (
                         <div className="flex items-center gap-2">
-                          <button onClick={() => handleEdit(invoice._id)} className="p-1.5 text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded transition-colors" title="Edit"><Edit size={16} /></button>
-                          <button onClick={() => handleDelete(invoice._id)} className="p-1.5 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors" title="Delete"><Trash size={16} /></button>
+                          <button
+                            onClick={() => handleEdit(invoice._id)}
+                            className="p-1.5 text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded transition-colors"
+                            title="Edit"
+                          >
+                            <Edit size={16} />
+                          </button>
+                          <button
+                            onClick={() => handleDelete(invoice._id)}
+                            className="p-1.5 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
+                            title="Delete"
+                          >
+                            <Trash size={16} />
+                          </button>
                         </div>
                       )}
                     </div>
@@ -513,13 +650,19 @@ export default function History() {
           {loadingTrash ? (
             <div className="flex items-center justify-center py-12">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-500"></div>
-              <span className="ml-3 text-gray-600 dark:text-gray-300">Loading trash...</span>
+              <span className="ml-3 text-gray-600 dark:text-gray-300">
+                Loading trash...
+              </span>
             </div>
           ) : trashedInvoices.length === 0 ? (
             <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-8 text-center">
               <Trash className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">Trash is empty</h3>
-              <p className="text-gray-500 dark:text-gray-400">Deleted invoices will appear here for 30 days.</p>
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+                Trash is empty
+              </h3>
+              <p className="text-gray-500 dark:text-gray-400">
+                Deleted invoices will appear here for 30 days.
+              </p>
             </div>
           ) : (
             <div className="space-y-3">
@@ -531,8 +674,13 @@ export default function History() {
                   <div className="flex items-center p-4 gap-4 flex-wrap">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
-                        <User size={14} className="text-gray-400 flex-shrink-0" />
-                        <span className="font-medium text-gray-900 dark:text-white truncate">{invoice.client?.name || "Unnamed Client"}</span>
+                        <User
+                          size={14}
+                          className="text-gray-400 flex-shrink-0"
+                        />
+                        <span className="font-medium text-gray-900 dark:text-white truncate">
+                          {invoice.client?.name || "Unnamed Client"}
+                        </span>
                         <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 flex-shrink-0">
                           {daysLeft(invoice.deletedAt)}d left
                         </span>
@@ -541,7 +689,9 @@ export default function History() {
                         <Calendar size={11} />
                         <span>Deleted {formatISTDate(invoice.deletedAt)}</span>
                         <span className="mx-1">•</span>
-                        <span className="font-medium text-green-600 dark:text-green-400">{formatINR(invoice.finalPayableAfterDiscount)}</span>
+                        <span className="font-medium text-green-600 dark:text-green-400">
+                          {formatINR(invoice.finalPayableAfterDiscount)}
+                        </span>
                       </div>
                     </div>
                     <div className="flex items-center gap-2 flex-shrink-0">
@@ -603,7 +753,8 @@ export default function History() {
                 Delete Invoice?
               </h3>
               <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
-                Invoice will be moved to trash. You can restore it within 30 days.
+                Invoice will be moved to trash. You can restore it within 30
+                days.
               </p>
               <div className="flex gap-2">
                 <button
@@ -644,7 +795,10 @@ export default function History() {
               </p>
               <div className="flex gap-2">
                 <button
-                  onClick={() => { setShowPermDeleteConfirm(false); setPermDeleteTarget(null); }}
+                  onClick={() => {
+                    setShowPermDeleteConfirm(false);
+                    setPermDeleteTarget(null);
+                  }}
                   className="flex-1 px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                 >
                   Cancel

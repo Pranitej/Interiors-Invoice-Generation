@@ -1,6 +1,7 @@
 // server/database/seeding.js
 import bcrypt from "bcryptjs";
 import User from "../models/User.js";
+import Invoice from "../models/Invoice.js";
 import config from "../config.js";
 
 const { username, password } = config.superAdmin;
@@ -24,6 +25,14 @@ export default async function seedDatabase() {
       });
       console.log("Super admin seeded...");
     }
+
+    // Backfill deletedAt: null on invoices created before soft-delete was added
+    const { modifiedCount } = await Invoice.updateMany(
+      { deletedAt: { $exists: false } },
+      { $set: { deletedAt: null } }
+    );
+    if (modifiedCount > 0)
+      console.log(`Backfilled deletedAt on ${modifiedCount} invoice(s).`);
   } catch (error) {
     console.error("Seeding error:", error);
     process.exit(1);
