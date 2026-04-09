@@ -80,3 +80,33 @@ export async function deleteInvoice(id, companyId) {
   );
   if (!invoice) throw new AppError(404, "Invoice not found");
 }
+
+export async function listTrash(companyId) {
+  const cutoff = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+  const filter = companyId ? { companyId } : {};
+  await Invoice.deleteMany({ ...filter, deletedAt: { $lt: cutoff } });
+  return Invoice.find({ ...filter, deletedAt: { $ne: null } }).sort({ deletedAt: -1 });
+}
+
+export async function restoreInvoice(id, companyId) {
+  if (!mongoose.Types.ObjectId.isValid(id))
+    throw new AppError(400, "Invalid invoice ID");
+  const filter = { _id: id, deletedAt: { $ne: null } };
+  if (companyId) filter.companyId = companyId;
+  const invoice = await Invoice.findOneAndUpdate(
+    filter,
+    { deletedAt: null },
+    { new: true }
+  );
+  if (!invoice) throw new AppError(404, "Invoice not found in trash");
+  return invoice;
+}
+
+export async function permanentDelete(id, companyId) {
+  if (!mongoose.Types.ObjectId.isValid(id))
+    throw new AppError(400, "Invalid invoice ID");
+  const filter = { _id: id, deletedAt: { $ne: null } };
+  if (companyId) filter.companyId = companyId;
+  const invoice = await Invoice.findOneAndDelete(filter);
+  if (!invoice) throw new AppError(404, "Invoice not found in trash");
+}
