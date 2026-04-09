@@ -3,7 +3,7 @@ import api from "../api/api";
 import { AuthContext } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { formatINR } from "../utils/calculations";
-import platformConfig from "../config.js";
+import config from "../config.js";
 import { renderToStaticMarkup } from "react-dom/server";
 import AdminInvoice from "../components/AdminInvoice";
 import ClientInvoice from "../components/ClientInvoice";
@@ -127,7 +127,7 @@ export default function History() {
     }
 
     if (selectedFilter === "admin-only") {
-      return matchesSearch && user?.isAdmin;
+      return matchesSearch && user?.role === config.roles.COMPANY_ADMIN;
     }
 
     return matchesSearch;
@@ -199,7 +199,7 @@ export default function History() {
 
       const a = document.createElement("a");
       a.href = url;
-      a.download = `${(company?.name ?? platformConfig.name).replace(/\s+/g, "-")}-${type}-Invoice-${id.slice(-6)}.pdf`;
+      a.download = `${(company?.name ?? config.platform.name).replace(/\s+/g, "-")}-${type}-Invoice-${id.slice(-6)}.pdf`;
       document.body.appendChild(a);
       a.click();
       a.remove();
@@ -213,12 +213,24 @@ export default function History() {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (!user?.isAdmin) {
+  const canEditInvoice = (inv) =>
+    user?.role === config.roles.COMPANY_ADMIN ||
+    (user?.role === config.roles.COMPANY_USER &&
+      config.permissions.companyUser.canEditOwnInvoices &&
+      inv?.createdBy === user?._id);
+
+  const canDeleteInvoice = (inv) =>
+    user?.role === config.roles.COMPANY_ADMIN ||
+    (user?.role === config.roles.COMPANY_USER &&
+      config.permissions.companyUser.canSoftDeleteOwnInvoices &&
+      inv?.createdBy === user?._id);
+
+  const handleDelete = (id) => {
+    const invoice = invoices.find((i) => i._id === id);
+    if (!canDeleteInvoice(invoice)) {
       alert("Access denied");
       return;
     }
-
     setActiveInvoice(id);
     setShowDeleteConfirm(true);
   };
@@ -238,7 +250,10 @@ export default function History() {
     }
   };
 
-  const handleEdit = (id) => user?.isAdmin && navigate(`/new-quote/${id}`);
+  const handleEdit = (id) => {
+    const invoice = invoices.find((i) => i._id === id);
+    if (canEditInvoice(invoice)) navigate(`/new-quote/${id}`);
+  };
 
   const handleRestore = async (id) => {
     try {
@@ -356,7 +371,7 @@ export default function History() {
                   <option value="all">All Invoices</option>
                   <option value="recent">Last 30 days</option>
                   <option value="high-value">High value (&gt; ₹50k)</option>
-                  {user?.isAdmin && (
+                  {user?.role === config.roles.COMPANY_ADMIN && (
                     <option value="admin-only">Admin only</option>
                   )}
                 </select>
@@ -511,23 +526,23 @@ export default function History() {
                           <Download size={14} />
                           Admin
                         </button>
-                        {user?.isAdmin && (
-                          <>
-                            <button
-                              onClick={() => handleEdit(invoice._id)}
-                              className="p-1.5 text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded transition-colors flex-shrink-0"
-                              title="Edit"
-                            >
-                              <Edit size={16} />
-                            </button>
-                            <button
-                              onClick={() => handleDelete(invoice._id)}
-                              className="p-1.5 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors flex-shrink-0"
-                              title="Delete"
-                            >
-                              <Trash size={16} />
-                            </button>
-                          </>
+                        {canEditInvoice(invoice) && (
+                          <button
+                            onClick={() => handleEdit(invoice._id)}
+                            className="p-1.5 text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded transition-colors flex-shrink-0"
+                            title="Edit"
+                          >
+                            <Edit size={16} />
+                          </button>
+                        )}
+                        {canDeleteInvoice(invoice) && (
+                          <button
+                            onClick={() => handleDelete(invoice._id)}
+                            className="p-1.5 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors flex-shrink-0"
+                            title="Delete"
+                          >
+                            <Trash size={16} />
+                          </button>
                         )}
                       </div>
                     </div>
@@ -618,8 +633,8 @@ export default function History() {
                           Admin
                         </button>
                       </div>
-                      {user?.isAdmin && (
-                        <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2">
+                        {canEditInvoice(invoice) && (
                           <button
                             onClick={() => handleEdit(invoice._id)}
                             className="p-1.5 text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded transition-colors"
@@ -627,6 +642,8 @@ export default function History() {
                           >
                             <Edit size={16} />
                           </button>
+                        )}
+                        {canDeleteInvoice(invoice) && (
                           <button
                             onClick={() => handleDelete(invoice._id)}
                             className="p-1.5 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
@@ -634,8 +651,8 @@ export default function History() {
                           >
                             <Trash size={16} />
                           </button>
-                        </div>
-                      )}
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -701,7 +718,7 @@ export default function History() {
                       >
                         Restore
                       </button>
-                      {user?.isAdmin && (
+                      {user?.role === config.roles.COMPANY_ADMIN && (
                         <button
                           onClick={() => handlePermDelete(invoice._id)}
                           className="inline-flex items-center gap-1 px-3 py-1.5 bg-red-50 hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/40 text-red-700 dark:text-red-400 text-sm font-medium rounded transition-colors"
