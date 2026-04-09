@@ -78,18 +78,20 @@ export default function History() {
   // -------------------------
   // Fetch
   // -------------------------
-  useEffect(() => {
-    (async () => {
-      try {
-        const res = await api.get("/invoices");
-        setInvoices(res.data?.data?.invoices || []);
-      } catch (error) {
-        console.error("Failed to fetch invoices:", error);
-      } finally {
-        setLoading(false);
-      }
-    })();
+  const fetchInvoices = useCallback(async () => {
+    try {
+      const res = await api.get("/invoices");
+      setInvoices(res.data?.data?.invoices || []);
+    } catch (error) {
+      console.error("Failed to fetch invoices:", error);
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    fetchInvoices();
+  }, [fetchInvoices]);
 
   const fetchTrash = useCallback(async () => {
     setLoadingTrash(true);
@@ -259,6 +261,7 @@ export default function History() {
     try {
       await api.patch(`/invoices/${id}/restore`);
       setTrashedInvoices((p) => p.filter((i) => i._id !== id));
+      await fetchInvoices();
     } catch (err) {
       console.error("Restore failed:", err);
       alert("Failed to restore invoice");
