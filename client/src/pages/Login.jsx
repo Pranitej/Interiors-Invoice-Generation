@@ -2,7 +2,7 @@ import { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../api/api";
 import { AuthContext } from "../context/AuthContext";
-import platformConfig from "../config.js";
+import config from "../config.js";
 
 export default function Login() {
   const [username, setUsername] = useState("");
@@ -85,13 +85,13 @@ export default function Login() {
         {/* Logo/Brand Section */}
         <div className="text-center mb-8">
           <div className="w-20 h-20 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg flex items-center justify-center">
-            <span className="text-3xl font-bold text-white">{platformConfig.name[0]}</span>
+            <span className="text-3xl font-bold text-white">{config.platform.name[0]}</span>
           </div>
           <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
-            {platformConfig.name}
+            {config.platform.name}
           </h1>
           <p className="text-gray-600 dark:text-gray-400 mt-2">
-            {platformConfig.tagline}
+            {config.platform.tagline}
           </p>
         </div>
 
