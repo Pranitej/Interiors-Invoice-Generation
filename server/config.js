@@ -63,8 +63,8 @@ const config = {
   security: {
     rateLimit: {
       windowMinutes: 15,      // * 60 * 1000 in server.js
-      maxRequests: 100,       // requests per window per IP
-      authMaxRequests: 20,    // stricter limit for /api/auth routes
+      maxRequests: 200,       // requests per window per IP
+      authMaxRequests: 30,    // stricter limit for /api/auth routes
     },
   },
 };
