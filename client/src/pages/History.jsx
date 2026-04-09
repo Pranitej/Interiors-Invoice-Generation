@@ -1,4 +1,4 @@
-import { useEffect, useState, useContext } from "react";
+import { useEffect, useState, useContext, useCallback } from "react";
 import api from "../api/api";
 import { AuthContext } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
@@ -91,7 +91,7 @@ export default function History() {
     })();
   }, []);
 
-  const fetchTrash = async () => {
+  const fetchTrash = useCallback(async () => {
     setLoadingTrash(true);
     try {
       const res = await api.get("/invoices/trash");
@@ -101,7 +101,7 @@ export default function History() {
     } finally {
       setLoadingTrash(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     if (activeTab === "trash") fetchTrash();
