@@ -55,12 +55,13 @@ export async function getInvoiceById(id, companyId) {
   return invoice;
 }
 
-export async function updateInvoice(id, companyId, data) {
+export async function updateInvoice(id, companyId, data, ownerId = null) {
   if (!mongoose.Types.ObjectId.isValid(id))
     throw new AppError(400, "Invalid invoice ID");
   const { companyId: _c, createdBy: _u, _id: _i, ...safeData } = data;
   const filter = { _id: id, deletedAt: null };
   if (companyId) filter.companyId = companyId;
+  if (ownerId) filter.createdBy = ownerId;
   const invoice = await Invoice.findOneAndUpdate(filter, safeData, {
     new: true,
     runValidators: true,
@@ -69,11 +70,12 @@ export async function updateInvoice(id, companyId, data) {
   return invoice;
 }
 
-export async function deleteInvoice(id, companyId) {
+export async function deleteInvoice(id, companyId, ownerId = null) {
   if (!mongoose.Types.ObjectId.isValid(id))
     throw new AppError(400, "Invalid invoice ID");
   const filter = { _id: id, deletedAt: null };
   if (companyId) filter.companyId = companyId;
+  if (ownerId) filter.createdBy = ownerId;
   const invoice = await Invoice.findOneAndUpdate(
     filter,
     { deletedAt: new Date() },
@@ -103,11 +105,12 @@ export async function restoreInvoice(id, companyId) {
   return invoice;
 }
 
-export async function permanentDelete(id, companyId) {
+export async function permanentDelete(id, companyId, ownerId = null) {
   if (!mongoose.Types.ObjectId.isValid(id))
     throw new AppError(400, "Invalid invoice ID");
   const filter = { _id: id, deletedAt: { $ne: null } };
   if (companyId) filter.companyId = companyId;
+  if (ownerId) filter.createdBy = ownerId;
   const invoice = await Invoice.findOneAndDelete(filter);
   if (!invoice) throw new AppError(404, "Invoice not found in trash");
 }
