@@ -105,7 +105,7 @@ export default function History() {
 
   useEffect(() => {
     if (activeTab === "trash") fetchTrash();
-  }, [activeTab]);
+  }, [activeTab, fetchTrash]);
 
   // -------------------------
   // Filtering + Search
@@ -268,7 +268,7 @@ export default function History() {
   };
 
   const daysLeft = (deletedAt) =>
-    30 - Math.floor((Date.now() - new Date(deletedAt)) / 86400000);
+    Math.max(0, 30 - Math.floor((Date.now() - new Date(deletedAt)) / 86400000));
 
   const copyToClipboard = (id) => {
     navigator.clipboard.writeText(id);
@@ -603,7 +603,7 @@ export default function History() {
                 Delete Invoice?
               </h3>
               <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
-                This action cannot be undone.
+                Invoice will be moved to trash. You can restore it within 30 days.
               </p>
               <div className="flex gap-2">
                 <button
