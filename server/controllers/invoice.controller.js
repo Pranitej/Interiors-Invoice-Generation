@@ -74,3 +74,30 @@ export async function deleteInvoice(req, res, next) {
     next(err);
   }
 }
+
+export async function listTrash(req, res, next) {
+  try {
+    const invoices = await InvoiceService.listTrash(req.companyId);
+    sendSuccess(res, invoices);
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function restoreInvoice(req, res, next) {
+  try {
+    const invoice = await InvoiceService.restoreInvoice(req.params.id, req.companyId);
+    sendSuccess(res, invoice, 200, "Invoice restored");
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function permanentDeleteInvoice(req, res, next) {
+  try {
+    await InvoiceService.permanentDelete(req.params.id, req.companyId);
+    sendSuccess(res, null, 200, "Invoice permanently deleted");
+  } catch (err) {
+    next(err);
+  }
+}
