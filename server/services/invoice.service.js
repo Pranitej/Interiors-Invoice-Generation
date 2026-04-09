@@ -19,7 +19,9 @@ export async function listInvoices({
 }) {
   const ALLOWED_SORT_FIELDS = new Set(["createdAt", "updatedAt", "client.name", "grandTotalBeforeDiscount"]);
   const safeSortBy = ALLOWED_SORT_FIELDS.has(sortBy) ? sortBy : "createdAt";
-  const baseFilter = companyId ? { companyId } : {};
+  const baseFilter = companyId
+    ? { companyId, deletedAt: null }
+    : { deletedAt: null };
   const searchFilter = q
     ? {
         $or: [
@@ -45,7 +47,7 @@ export async function listInvoices({
 export async function getInvoiceById(id, companyId) {
   if (!mongoose.Types.ObjectId.isValid(id))
     throw new AppError(400, "Invalid invoice ID");
-  const filter = { _id: id };
+  const filter = { _id: id, deletedAt: null };
   if (companyId) filter.companyId = companyId;
   const invoice = await Invoice.findOne(filter);
   if (!invoice) throw new AppError(404, "Invoice not found");
@@ -56,7 +58,7 @@ export async function updateInvoice(id, companyId, data) {
   if (!mongoose.Types.ObjectId.isValid(id))
     throw new AppError(400, "Invalid invoice ID");
   const { companyId: _c, createdBy: _u, _id: _i, ...safeData } = data;
-  const filter = { _id: id };
+  const filter = { _id: id, deletedAt: null };
   if (companyId) filter.companyId = companyId;
   const invoice = await Invoice.findOneAndUpdate(filter, safeData, {
     new: true,
@@ -69,8 +71,12 @@ export async function updateInvoice(id, companyId, data) {
 export async function deleteInvoice(id, companyId) {
   if (!mongoose.Types.ObjectId.isValid(id))
     throw new AppError(400, "Invalid invoice ID");
-  const filter = { _id: id };
+  const filter = { _id: id, deletedAt: null };
   if (companyId) filter.companyId = companyId;
-  const invoice = await Invoice.findOneAndDelete(filter);
+  const invoice = await Invoice.findOneAndUpdate(
+    filter,
+    { deletedAt: new Date() },
+    { new: true }
+  );
   if (!invoice) throw new AppError(404, "Invoice not found");
 }
