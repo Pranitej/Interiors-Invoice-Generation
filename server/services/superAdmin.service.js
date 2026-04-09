@@ -12,7 +12,7 @@ export async function getPlatformStats() {
       Company.countDocuments(),
       Company.countDocuments({ isActive: true }),
       User.countDocuments({ role: { $ne: config.roles.SUPER_ADMIN } }),
-      Invoice.countDocuments(),
+      Invoice.countDocuments({ deletedAt: null }),
     ]);
   return { totalCompanies, activeCompanies, totalUsers, totalInvoices };
 }
@@ -22,7 +22,7 @@ export async function getCompanyInvoices(companyId) {
     throw new AppError(400, "Invalid company ID");
   const exists = await Company.exists({ _id: companyId });
   if (!exists) throw new AppError(404, "Company not found");
-  return Invoice.find({ companyId }).sort({ createdAt: -1 }).limit(100);
+  return Invoice.find({ companyId, deletedAt: null }).sort({ createdAt: -1 }).limit(100);
 }
 
 export async function getCompanyUsers(companyId) {

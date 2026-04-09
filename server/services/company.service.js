@@ -56,7 +56,7 @@ export async function listCompanies() {
     companies.map(async (company) => {
       const [userCount, invoiceCount] = await Promise.all([
         User.countDocuments({ companyId: company._id }),
-        Invoice.countDocuments({ companyId: company._id }),
+        Invoice.countDocuments({ companyId: company._id, deletedAt: null }),
       ]);
       return { ...company.toObject(), userCount, invoiceCount };
     })
