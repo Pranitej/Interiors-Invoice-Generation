@@ -28,8 +28,6 @@ export async function createInvoice(req, res, next) {
 
 export async function listInvoices(req, res, next) {
   try {
-    console.log("Hello");
-
     const { q, sortBy, order } = req.query;
     const page = Math.max(1, parseInt(req.query.page, 10) || defaultPage);
     const limit = Math.min(
@@ -46,7 +44,6 @@ export async function listInvoices(req, res, next) {
     });
     sendSuccess(res, { invoices, total });
   } catch (err) {
-    console.log(err);
     next(err);
   }
 }
