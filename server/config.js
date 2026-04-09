@@ -61,6 +61,14 @@ const config = {
     trashRetentionDays: 30,       // * 24 * 60 * 60 * 1000 in invoice.service.js
   },
 
+  permissions: {
+    companyUser: {
+      canEditOwnInvoices: true,            // company_user can PUT their own invoices
+      canSoftDeleteOwnInvoices: false,     // company_user can soft-delete (trash) their own invoices
+      canPermanentDeleteOwnInvoices: false, // company_user can permanently delete their own invoices
+    },
+  },
+
   security: {
     rateLimit: {
       windowMinutes: 15,      // * 60 * 1000 in server.js
