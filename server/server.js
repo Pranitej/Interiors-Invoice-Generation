@@ -25,7 +25,19 @@ app.use(helmet());
 app.use(express.json({ limit: `${config.server.bodyLimitMb}mb` }));
 app.use(express.urlencoded({ extended: true }));
 app.use(hpp());
-app.use(mongoSanitize());
+app.use((req, _res, next) => {
+  if (req.body) req.body = mongoSanitize.sanitize(req.body);
+  if (req.params) req.params = mongoSanitize.sanitize(req.params);
+  // Express 5 defines req.query as a getter-only property, so direct assignment throws.
+  // Shadow it with a sanitized value via Object.defineProperty instead.
+  const sanitizedQuery = mongoSanitize.sanitize(req.query);
+  Object.defineProperty(req, "query", {
+    value: sanitizedQuery,
+    writable: true,
+    configurable: true,
+  });
+  next();
+});
 app.use((req, _res, next) => {
   if (req.body) {
     const sanitize = (obj) => {
