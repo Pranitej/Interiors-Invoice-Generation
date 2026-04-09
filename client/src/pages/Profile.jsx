@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { formatISTDateTime } from "../utils/dateTime";
+import config from "../config.js";
 
 export default function Profile() {
   const { user: currentUser, setUser: setCurrentUser } =
@@ -45,7 +46,7 @@ export default function Profile() {
   const [newUserForm, setNewUserForm] = useState({
     username: "",
     password: "",
-    isAdmin: false,
+    role: config.roles.COMPANY_USER,
   });
   const [editingUser, setEditingUser] = useState(null);
   const [showPassword, setShowPassword] = useState({
@@ -70,7 +71,7 @@ export default function Profile() {
     });
 
     // Load all users if admin
-    if (currentUser.isAdmin) {
+    if (currentUser.role === config.roles.COMPANY_ADMIN) {
       fetchUsers();
     } else {
       setLoading(false);
@@ -172,7 +173,7 @@ export default function Profile() {
       setNewUserForm({
         username: "",
         password: "",
-        isAdmin: false,
+        role: config.roles.COMPANY_USER,
       });
 
       fetchUsers();
@@ -189,7 +190,7 @@ export default function Profile() {
     e.preventDefault();
     setMessage({ type: "", text: "" });
 
-    if (editingUser._id === currentUser._id && !editingUser.isAdmin) {
+    if (editingUser._id === currentUser._id && editingUser.role !== config.roles.COMPANY_ADMIN) {
       setMessage({
         type: "error",
         text: "You cannot revoke your own admin rights",
@@ -200,7 +201,7 @@ export default function Profile() {
     try {
       const payload = {
         username: editingUser.username,
-        isAdmin: editingUser.isAdmin,
+        role: editingUser.role,
         ...(editingUser.password && { password: editingUser.password }),
       };
 
@@ -273,7 +274,7 @@ export default function Profile() {
 
   const tabs = [
     { id: "profile", label: "My Profile", icon: User, color: "blue" },
-    ...(currentUser?.isAdmin
+    ...(currentUser?.role === config.roles.COMPANY_ADMIN
       ? [
           { id: "users", label: "Manage Users", icon: Users, color: "purple" },
           {
