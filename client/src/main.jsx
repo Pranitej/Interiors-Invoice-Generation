@@ -2,9 +2,9 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
 import App from "./App.jsx";
-import platformConfig from "./config.js";
+import config from "./config.js";
 
-document.title = platformConfig.name;
+document.title = config.platform.name;
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>

@@ -2,11 +2,11 @@ import { Link, useNavigate } from "react-router-dom";
 import { useContext, useState, useRef, useEffect } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { History, Plus, Scale, User, UserStar } from "lucide-react";
-import platformConfig from "../config.js";
+import config from "../config.js";
 
 export default function Header({ theme, toggleTheme }) {
   const { user, logout, company } = useContext(AuthContext);
-  const brandConfig = company ?? platformConfig;
+  const brandConfig = company ?? config.platform;
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const mobileMenuRef = useRef(null);
