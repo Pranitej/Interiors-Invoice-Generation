@@ -353,7 +353,7 @@ export default function Profile() {
                       {currentUser?.username}
                     </h3>
                     <div className="flex items-center gap-1">
-                      {currentUser?.isAdmin ? (
+                      {currentUser?.role === config.roles.COMPANY_ADMIN ? (
                         <>
                           <Shield className="w-3 h-3 text-purple-500" />
                           <span className="text-xs text-purple-600 dark:text-purple-400">
@@ -602,7 +602,7 @@ export default function Profile() {
                               <div className="flex items-center gap-2">
                                 <div
                                   className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-semibold ${
-                                    user.isAdmin
+                                    user.role === config.roles.COMPANY_ADMIN
                                       ? "bg-gradient-to-br from-purple-500 to-purple-600"
                                       : "bg-gradient-to-br from-blue-500 to-blue-600"
                                   }`}
@@ -627,13 +627,13 @@ export default function Profile() {
                             <td className="py-3 px-4">
                               <div
                                 className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${
-                                  user.isAdmin
+                                  user.role === config.roles.COMPANY_ADMIN
                                     ? "bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300"
                                     : "bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300"
                                 }`}
                               >
-                                {user.isAdmin && <Shield className="w-3 h-3" />}
-                                {user.isAdmin ? "Admin" : "User"}
+                                {user.role === config.roles.COMPANY_ADMIN && <Shield className="w-3 h-3" />}
+                                {user.role === config.roles.COMPANY_ADMIN ? "Admin" : "User"}
                               </div>
                             </td>
                             <td className="py-3 px-4 text-xs text-gray-700 dark:text-gray-300">
@@ -780,10 +780,10 @@ export default function Profile() {
                         <button
                           type="button"
                           onClick={() =>
-                            setNewUserForm({ ...newUserForm, isAdmin: false })
+                            setNewUserForm({ ...newUserForm, role: config.roles.COMPANY_USER })
                           }
                           className={`p-3 rounded-lg border transition-all ${
-                            !newUserForm.isAdmin
+                            newUserForm.role === config.roles.COMPANY_USER
                               ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20"
                               : "border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500"
                           }`}
@@ -791,12 +791,12 @@ export default function Profile() {
                           <div className="flex items-center gap-2.5">
                             <div
                               className={`w-5 h-5 rounded-full border flex items-center justify-center ${
-                                !newUserForm.isAdmin
+                                newUserForm.role === config.roles.COMPANY_USER
                                   ? "border-blue-500 bg-blue-500"
                                   : "border-gray-300 dark:border-gray-600"
                               }`}
                             >
-                              {!newUserForm.isAdmin && (
+                              {newUserForm.role === config.roles.COMPANY_USER && (
                                 <div className="w-1.5 h-1.5 rounded-full bg-white"></div>
                               )}
                             </div>
@@ -815,10 +815,10 @@ export default function Profile() {
                         <button
                           type="button"
                           onClick={() =>
-                            setNewUserForm({ ...newUserForm, isAdmin: true })
+                            setNewUserForm({ ...newUserForm, role: config.roles.COMPANY_ADMIN })
                           }
                           className={`p-3 rounded-lg border transition-all ${
-                            newUserForm.isAdmin
+                            newUserForm.role === config.roles.COMPANY_ADMIN
                               ? "border-purple-500 bg-purple-50 dark:bg-purple-900/20"
                               : "border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500"
                           }`}
@@ -826,12 +826,12 @@ export default function Profile() {
                           <div className="flex items-center gap-2.5">
                             <div
                               className={`w-5 h-5 rounded-full border flex items-center justify-center ${
-                                newUserForm.isAdmin
+                                newUserForm.role === config.roles.COMPANY_ADMIN
                                   ? "border-purple-500 bg-purple-500"
                                   : "border-gray-300 dark:border-gray-600"
                               }`}
                             >
-                              {newUserForm.isAdmin && (
+                              {newUserForm.role === config.roles.COMPANY_ADMIN && (
                                 <div className="w-1.5 h-1.5 rounded-full bg-white"></div>
                               )}
                             </div>
@@ -939,23 +939,23 @@ export default function Profile() {
                     <div className="relative">
                       <input
                         type="checkbox"
-                        checked={editingUser.isAdmin}
+                        checked={editingUser.role === config.roles.COMPANY_ADMIN}
                         onChange={(e) =>
                           setEditingUser({
                             ...editingUser,
-                            isAdmin: e.target.checked,
+                            role: e.target.checked ? config.roles.COMPANY_ADMIN : config.roles.COMPANY_USER,
                           })
                         }
                         className="sr-only"
                       />
                       <div
                         className={`w-5 h-5 rounded border flex items-center justify-center transition-all ${
-                          editingUser.isAdmin
+                          editingUser.role === config.roles.COMPANY_ADMIN
                             ? "border-purple-500 bg-purple-500"
                             : "border-gray-300 dark:border-gray-600"
                         }`}
                       >
-                        {editingUser.isAdmin && (
+                        {editingUser.role === config.roles.COMPANY_ADMIN && (
                           <CheckCircle className="w-3.5 h-3.5 text-white" />
                         )}
                       </div>
