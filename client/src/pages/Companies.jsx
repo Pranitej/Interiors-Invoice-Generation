@@ -1,6 +1,7 @@
 // client/src/pages/Companies.jsx
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Trash } from "lucide-react";
 import API from "../api/api";
 
 const emptyForm = {
@@ -33,6 +34,7 @@ export default function Companies() {
   const [submitting, setSubmitting] = useState(false);
   const [logoUploading, setLogoUploading] = useState(false);
   const [error, setError] = useState("");
+  const [deleteTarget, setDeleteTarget] = useState(null); // { id, name }
   const navigate = useNavigate();
 
   const fetchCompanies = () => {
@@ -60,13 +62,19 @@ export default function Companies() {
     }
   };
 
-  const handleDelete = async (id, name) => {
-    if (!confirm(`Delete "${name}" and all its users/invoices? This cannot be undone.`)) return;
+  const handleDelete = (id, name) => {
+    setDeleteTarget({ id, name });
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
     try {
-      await API.delete(`/companies/${id}`);
-      setCompanies((prev) => prev.filter((c) => c._id !== id));
+      await API.delete(`/companies/${deleteTarget.id}`);
+      setCompanies((prev) => prev.filter((c) => c._id !== deleteTarget.id));
     } catch {
       alert("Failed to delete company");
+    } finally {
+      setDeleteTarget(null);
     }
   };
 
@@ -269,6 +277,40 @@ export default function Companies() {
           </tbody>
         </table>
       </div>
+
+      {/* Delete Company Confirmation Modal */}
+      {deleteTarget && (
+        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-5 max-w-sm w-full mx-4 shadow-xl">
+            <div className="text-center">
+              <div className="mx-auto w-12 h-12 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mb-4">
+                <Trash className="text-red-600 dark:text-red-400" size={20} />
+              </div>
+              <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-2">
+                Delete &quot;{deleteTarget.name}&quot;?
+              </h3>
+              <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
+                This will permanently delete all users and invoices for this company. This cannot be undone.
+              </p>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setDeleteTarget(null)}
+                  className="flex-1 px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={confirmDelete}
+                  className="flex-1 px-3 py-2 text-sm bg-red-600 hover:bg-red-700 text-white rounded transition-colors flex items-center justify-center gap-1"
+                >
+                  <Trash size={14} />
+                  Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
