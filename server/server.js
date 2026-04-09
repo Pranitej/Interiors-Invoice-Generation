@@ -12,12 +12,54 @@ import uploadRouter from "./routes/upload.routes.js";
 import errorHandler from "./middleware/errorHandler.js";
 import { sendSuccess } from "./utils/response.js";
 import config from "./config.js";
+import mongoSanitize from "express-mongo-sanitize";
+import helmet from "helmet";
+import rateLimit from "express-rate-limit";
+import hpp from "hpp";
+import xss from "xss";
 
 const app = express();
 
 app.use(cors());
+app.use(helmet());
 app.use(express.json({ limit: `${config.server.bodyLimitMb}mb` }));
+app.use(express.urlencoded({ extended: true }));
+app.use(hpp());
+app.use(mongoSanitize());
+app.use((req, _res, next) => {
+  if (req.body) {
+    const sanitize = (obj) => {
+      if (typeof obj === "string") return xss(obj);
+      if (Array.isArray(obj)) return obj.map(sanitize);
+      if (obj && typeof obj === "object") {
+        return Object.fromEntries(
+          Object.entries(obj).map(([k, v]) => [k, sanitize(v)])
+        );
+      }
+      return obj;
+    };
+    req.body = sanitize(req.body);
+  }
+  next();
+});
 app.use("/public", express.static("public"));
+
+const globalLimiter = rateLimit({
+  windowMs: config.security.rateLimit.windowMinutes * 60 * 1000,
+  max: config.security.rateLimit.maxRequests,
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+const authLimiter = rateLimit({
+  windowMs: config.security.rateLimit.windowMinutes * 60 * 1000,
+  max: config.security.rateLimit.authMaxRequests,
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+app.use(globalLimiter);
+app.use("/api/auth", authLimiter);
 
 await connectDB();
 await seeding();
