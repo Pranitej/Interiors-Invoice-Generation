@@ -10,6 +10,7 @@ import PricingSection from "../components/PricingSection";
 import { formatINR, roundTo2 } from "../utils/calculations";
 import InvoicePreview from "../components/InvoicePreview";
 import { Check, FilePlusCorner, RefreshCw, X } from "lucide-react";
+import config from "../config.js";
 
 const DRAFT_KEY = "invoice_draft";
 
@@ -147,8 +148,12 @@ export default function NewQuote() {
   useEffect(() => {
     if (!id || !user) return;
 
-    if (!user.isAdmin) {
-      alert("Only admin can edit invoices.");
+    const canEdit =
+      user.role === config.roles.COMPANY_ADMIN ||
+      (user.role === config.roles.COMPANY_USER &&
+        config.permissions.companyUser.canEditOwnInvoices);
+    if (!canEdit) {
+      alert("You do not have permission to edit invoices.");
       navigate("/history");
       return;
     }
@@ -377,7 +382,7 @@ export default function NewQuote() {
       finalPayableAfterDiscount: finalPayable, // NEW
       invoiceType,
       createdBy: user.username,
-      role: user.isAdmin ? "admin" : "Engineer",
+      role: user.role === config.roles.COMPANY_ADMIN ? "admin" : "Engineer",
     };
   };
 
