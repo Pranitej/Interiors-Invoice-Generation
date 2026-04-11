@@ -6,6 +6,12 @@ import User from "../models/User.js";
 import Invoice from "../models/Invoice.js";
 import AppError from "../utils/AppError.js";
 import config from "../config.js";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const PUBLIC_DIR = path.resolve(__dirname, "..", "public");
 
 const { COMPANY_ADMIN } = config.roles;
 
@@ -101,5 +107,25 @@ export async function toggleCompanyActive(id) {
   if (!company) throw new AppError(404, "Company not found");
   company.isActive = !company.isActive;
   await company.save();
+  return company;
+}
+
+export async function updateCompanyLogo(companyId, newFilename) {
+  const company = await Company.findById(companyId);
+  if (!company) throw new AppError(404, "Company not found");
+
+  const oldFile = company.logoFile;
+  company.logoFile = newFilename;
+  await company.save();
+
+  // Clean up old logo file (fire-and-forget)
+  if (oldFile) {
+    const oldPath = path.join(PUBLIC_DIR, oldFile);
+    fs.unlink(oldPath, (err) => {
+      if (err && err.code !== "ENOENT")
+        console.warn(`[Logo] Failed to delete old logo ${oldFile}:`, err.message);
+    });
+  }
+
   return company;
 }
