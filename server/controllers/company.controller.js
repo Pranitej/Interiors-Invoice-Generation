@@ -60,3 +60,21 @@ export async function toggleActive(req, res, next) {
     next(err);
   }
 }
+
+export async function updateLogo(req, res, next) {
+  try {
+    if (!req.file) throw new AppError(400, "No file uploaded");
+    const company = await CompanyService.updateCompanyLogo(
+      req.user.companyId,
+      req.file.filename,
+    );
+    sendSuccess(res, company);
+  } catch (err) {
+    // Clean up the uploaded file if the DB update failed
+    if (req.file) {
+      const { unlink } = await import("fs/promises");
+      await unlink(req.file.path).catch(() => {});
+    }
+    next(err);
+  }
+}
