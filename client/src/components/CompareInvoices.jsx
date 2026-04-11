@@ -114,6 +114,7 @@ const CompareInvoices = forwardRef(
         ref={ref}
         invoiceA={invoiceA}
         invoiceB={invoiceB}
+        company={company}
       />
     );
   },
@@ -123,7 +124,7 @@ const CompareInvoices = forwardRef(
    Invoice Comparison Report Component
 --------------------------------*/
 
-function InvoiceComparisonReport({ invoiceA, invoiceB }, ref) {
+function InvoiceComparisonReport({ invoiceA, invoiceB, company }, ref) {
   const clientA = invoiceA.client || {};
   const clientB = invoiceB.client || {};
 

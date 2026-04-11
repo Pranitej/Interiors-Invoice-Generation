@@ -24,6 +24,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { formatISTDateTime } from "../utils/dateTime";
 import config from "../config.js";
+import CompanyLogoChanger from "../components/CompanyLogoChanger";
 
 export default function Profile() {
   const { user: currentUser, setUser: setCurrentUser } =
@@ -408,6 +409,10 @@ export default function Profile() {
 
             {/* Profile Tab */}
             {activeTab === "profile" && (
+              <>
+              {currentUser?.role === config.roles.COMPANY_ADMIN && (
+                <CompanyLogoChanger />
+              )}
               <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
                 <div className="p-5 border-b border-gray-200 dark:border-gray-700">
                   <div className="flex items-center gap-3">
@@ -547,6 +552,7 @@ export default function Profile() {
                   </div>
                 </form>
               </div>
+              </>
             )}
 
             {/* Manage Users Tab */}

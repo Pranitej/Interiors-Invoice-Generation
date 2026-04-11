@@ -39,6 +39,10 @@ app.use((req, _res, next) => {
   next();
 });
 app.use((req, _res, next) => {
+  // Skip XSS sanitization for the PDF render endpoint — its body is
+  // server-generated HTML that requires inline styles to render correctly.
+  if (req.path === "/api/pdf/render" && req.method === "POST") return next();
+
   if (req.body) {
     const sanitize = (obj) => {
       if (typeof obj === "string") return xss(obj);

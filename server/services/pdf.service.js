@@ -1,6 +1,12 @@
 // server/services/pdf.service.js
 import puppeteer from "puppeteer";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
 import config from "../config.js";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const PUBLIC_DIR = path.resolve(__dirname, "..", "public");
 
 const {
   maxConcurrent,
@@ -34,6 +40,27 @@ export const renderState = {
   },
 };
 
+// Replace /public/... image URLs with base64 data URIs so Puppeteer
+// doesn't need to make network requests back to the server.
+function embedLocalImages(html) {
+  const extToMime = { ".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".svg": "image/svg+xml", ".webp": "image/webp" };
+  return html.replace(
+    /https?:\/\/[^"']+?\/public\/([^"'\s]+)/g,
+    (match, filename) => {
+      try {
+        const filePath = path.join(PUBLIC_DIR, filename);
+        if (!fs.existsSync(filePath)) return match;
+        const ext = path.extname(filename).toLowerCase();
+        const mime = extToMime[ext] || "application/octet-stream";
+        const base64 = fs.readFileSync(filePath).toString("base64");
+        return `data:${mime};base64,${base64}`;
+      } catch (_) {
+        return match;
+      }
+    },
+  );
+}
+
 async function generatePDF(html, retries = retryCount) {
   let browser = null;
 
@@ -54,6 +81,8 @@ async function generatePDF(html, retries = retryCount) {
       page.setDefaultTimeout(PDF_TIMEOUT_MS);
       page.setDefaultNavigationTimeout(PDF_TIMEOUT_MS);
 
+      const readyHtml = embedLocalImages(html);
+
       await page.setContent(
         `<!DOCTYPE html>
          <html>
@@ -67,7 +96,7 @@ async function generatePDF(html, retries = retryCount) {
                img { max-width: 100%; }
              </style>
            </head>
-           <body>${html}</body>
+           <body>${readyHtml}</body>
          </html>`,
         { waitUntil: "networkidle0", timeout: PDF_TIMEOUT_MS }
       );

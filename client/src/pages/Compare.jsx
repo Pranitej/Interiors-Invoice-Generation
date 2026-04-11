@@ -54,27 +54,13 @@ export default function ComparePage() {
 
     setDownloading(true);
     try {
-      const html = `<!DOCTYPE html>
-      <html>
-        <head>
-          <meta charset="utf-8"/>
-          <script src="https://cdn.tailwindcss.com"></script>
-          <style>
-            @media print {
-              @page { margin: 0mm; }
-              body { -webkit-print-color-adjust: exact; }
-            }
-          </style>
-        </head>
-        <body class="p-0 m-0">
-          ${renderToStaticMarkup(
-            <InvoiceComparisonReport
-              invoiceA={invoiceAData}
-              invoiceB={invoiceBData}
-            />,
-          )}
-        </body>
-      </html>`;
+      const html = renderToStaticMarkup(
+        <InvoiceComparisonReport
+          invoiceA={invoiceAData}
+          invoiceB={invoiceBData}
+          company={company}
+        />,
+      );
 
       const res = await API.post(
         "/pdf/render",
