@@ -21,7 +21,7 @@ import xss from "xss";
 const app = express();
 
 app.use(cors());
-app.use(helmet());
+app.use(helmet({ crossOriginResourcePolicy: { policy: "cross-origin" } }));
 app.use(express.json({ limit: `${config.server.bodyLimitMb}mb` }));
 app.use(express.urlencoded({ extended: true }));
 app.use(hpp());
