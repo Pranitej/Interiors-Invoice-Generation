@@ -135,10 +135,11 @@ export async function updateMyCompany(companyId, data) {
   // Strip fields the company admin must not change
   const { isActive, _id, __v, logoFile, ...safeData } = data;
 
-  // Validate termsAndConditions length
+  // Validate termsAndConditions length (strip blank entries first)
   if (safeData.termsAndConditions !== undefined) {
     if (!Array.isArray(safeData.termsAndConditions))
       throw new AppError(400, "termsAndConditions must be an array");
+    safeData.termsAndConditions = safeData.termsAndConditions.filter(t => t.trim() !== "");
     if (safeData.termsAndConditions.length > maxTerms)
       throw new AppError(400, `Maximum ${maxTerms} terms and conditions allowed`);
   }
