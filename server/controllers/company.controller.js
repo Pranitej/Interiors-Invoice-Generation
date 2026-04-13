@@ -78,3 +78,21 @@ export async function updateLogo(req, res, next) {
     next(err);
   }
 }
+
+export async function getMyCompany(req, res, next) {
+  try {
+    const company = await CompanyService.getCompanyById(req.user.companyId);
+    sendSuccess(res, company);
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function updateMyCompany(req, res, next) {
+  try {
+    const company = await CompanyService.updateMyCompany(req.user.companyId, req.body);
+    sendSuccess(res, company);
+  } catch (err) {
+    next(err);
+  }
+}
