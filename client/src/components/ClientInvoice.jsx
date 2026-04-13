@@ -964,9 +964,9 @@ const ClientInvoice = forwardRef(({ invoice, company }, ref) => {
           <div>
             <p style={s.footerLabel}>Terms:</p>
             <ul style={s.footerList}>
-              <li>Quotation valid for 30 days</li>
-              <li>Final values based on site measurement</li>
-              <li>40% advance, 60% on completion</li>
+              {(company?.termsAndConditions ?? []).map((term, i) => (
+                <li key={i}>{term}</li>
+              ))}
             </ul>
           </div>
         </div>

@@ -1098,14 +1098,9 @@ const AdminInvoice = forwardRef(function AdminInvoice({ invoice, company }, ref)
           <div>
             <p style={s.footerLabel}>Terms &amp; Conditions:</p>
             <ul style={s.footerList}>
-              <li style={s.footerListItem}>
-                Payment: 50% advance, balance before delivery
-              </li>
-              <li style={s.footerListItem}>GST included in all prices</li>
-              <li style={s.footerListItem}>1 year warranty on workmanship</li>
-              <li style={s.footerListItem}>
-                Delivery: 30-45 days from advance
-              </li>
+              {(company?.termsAndConditions ?? []).map((term, i) => (
+                <li key={i} style={s.footerListItem}>{term}</li>
+              ))}
             </ul>
           </div>
           <div style={s.footerRight}>
