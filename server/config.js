@@ -61,6 +61,10 @@ const config = {
     trashRetentionDays: 30,       // * 24 * 60 * 60 * 1000 in invoice.service.js
   },
 
+  company: {
+    maxTerms: 5,   // maximum number of terms & conditions entries per company
+  },
+
   permissions: {
     companyUser: {
       canEditOwnInvoices: true,            // company_user can PUT their own invoices

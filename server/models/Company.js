@@ -11,6 +11,7 @@ const CompanySchema = new mongoose.Schema(
     phones: [String],
     email: { type: String, default: "" },
     website: { type: String, default: "" },
+    termsAndConditions: { type: [String], default: [] },
     isActive: { type: Boolean, default: true },
   },
   { timestamps: true }
