@@ -961,14 +961,16 @@ const ClientInvoice = forwardRef(({ invoice, company }, ref) => {
             <p style={{ margin: 0 }}>{company?.phones.join(" | ")}</p>
             <p style={{ margin: 0 }}>{company?.email}</p>
           </div>
-          <div>
-            <p style={s.footerLabel}>Terms:</p>
-            <ul style={s.footerList}>
-              {(company?.termsAndConditions ?? []).map((term, i) => (
-                <li key={i}>{term}</li>
-              ))}
-            </ul>
-          </div>
+          {(company?.termsAndConditions ?? []).length > 0 && (
+            <div>
+              <p style={s.footerLabel}>Terms:</p>
+              <ul style={s.footerList}>
+                {company.termsAndConditions.map((term, i) => (
+                  <li key={i}>{term}</li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
         <div style={s.footerNote}>
           <p style={{ margin: 0 }}>
