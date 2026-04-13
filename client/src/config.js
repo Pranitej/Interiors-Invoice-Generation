@@ -21,6 +21,10 @@ const config = {
       canPermanentDeleteOwnInvoices: false, // requires canSoftDeleteOwnInvoices: true to be reachable
     },
   },
+
+  company: {
+    maxTerms: 5,  // keep in sync with server/config.js company.maxTerms
+  },
 };
 
 export default config;
