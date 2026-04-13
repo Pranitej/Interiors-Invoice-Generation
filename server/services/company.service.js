@@ -14,6 +14,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PUBLIC_DIR = path.resolve(__dirname, "..", "public");
 
 const { COMPANY_ADMIN } = config.roles;
+const { maxTerms } = config.company;
 
 export async function createCompany({
   name,
@@ -127,5 +128,25 @@ export async function updateCompanyLogo(companyId, newFilename) {
     });
   }
 
+  return company;
+}
+
+export async function updateMyCompany(companyId, data) {
+  // Strip fields the company admin must not change
+  const { isActive, _id, __v, logoFile, ...safeData } = data;
+
+  // Validate termsAndConditions length
+  if (safeData.termsAndConditions !== undefined) {
+    if (!Array.isArray(safeData.termsAndConditions))
+      throw new AppError(400, "termsAndConditions must be an array");
+    if (safeData.termsAndConditions.length > maxTerms)
+      throw new AppError(400, `Maximum ${maxTerms} terms and conditions allowed`);
+  }
+
+  const company = await Company.findByIdAndUpdate(companyId, safeData, {
+    new: true,
+    runValidators: true,
+  });
+  if (!company) throw new AppError(404, "Company not found");
   return company;
 }
