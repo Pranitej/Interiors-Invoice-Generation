@@ -555,16 +555,24 @@ const ClientInvoice = forwardRef(({ invoice, company }, ref) => {
                 <span style={s.infoLabel}>Regd Office:</span>{" "}
                 {company?.registeredOffice}
               </p>
-              <p style={s.companyInfoLine}>
-                <span style={s.infoLabel}>Industry:</span>{" "}
-                {company?.industryAddress}
-              </p>
+              {company?.industryAddress && (
+                <p style={s.companyInfoLine}>
+                  <span style={s.infoLabel}>Industry:</span>{" "}
+                  {company.industryAddress}
+                </p>
+              )}
               <p style={s.companyInfoLine}>
                 <span style={s.infoLabel}>Contact: </span>
                 {company?.phones.join(", ")} |{" "}
                 <span style={s.infoLabel}>Email: </span>
                 {company?.email}
               </p>
+              {company?.website && (
+                <p style={s.companyInfoLine}>
+                  <span style={s.infoLabel}>Website: </span>
+                  {company.website}
+                </p>
+              )}
             </div>
           </div>
         </div>

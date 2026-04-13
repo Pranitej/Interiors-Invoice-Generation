@@ -542,16 +542,24 @@ const AdminInvoice = forwardRef(function AdminInvoice({ invoice, company }, ref)
                 <span style={s.infoLabel}>Regd Office:</span>{" "}
                 {company?.registeredOffice}
               </p>
-              <p style={s.companyInfoLine}>
-                <span style={s.infoLabel}>Industry:</span>{" "}
-                {company?.industryAddress}
-              </p>
+              {company?.industryAddress && (
+                <p style={s.companyInfoLine}>
+                  <span style={s.infoLabel}>Industry:</span>{" "}
+                  {company.industryAddress}
+                </p>
+              )}
               <p style={s.companyInfoLine}>
                 <span style={s.infoLabel}>Contact: </span>
                 {company?.phones.join(", ")} |{" "}
                 <span style={s.infoLabel}>Email: </span>
                 {company?.email}
               </p>
+              {company?.website && (
+                <p style={s.companyInfoLine}>
+                  <span style={s.infoLabel}>Website: </span>
+                  {company.website}
+                </p>
+              )}
             </div>
           </div>
         </div>
@@ -1095,16 +1103,18 @@ const AdminInvoice = forwardRef(function AdminInvoice({ invoice, company }, ref)
       {/* Footer Notes */}
       <div style={s.footer}>
         <div style={s.footerGrid}>
-          {(company?.termsAndConditions ?? []).length > 0 && (
-            <div>
-              <p style={s.footerLabel}>Terms &amp; Conditions:</p>
-              <ul style={s.footerList}>
-                {company.termsAndConditions.map((term, i) => (
-                  <li key={i} style={s.footerListItem}>{term}</li>
-                ))}
-              </ul>
-            </div>
-          )}
+          <div>
+            {(company?.termsAndConditions ?? []).length > 0 && (
+              <>
+                <p style={s.footerLabel}>Terms &amp; Conditions:</p>
+                <ul style={s.footerList}>
+                  {company.termsAndConditions.map((term, i) => (
+                    <li key={i} style={s.footerListItem}>{term}</li>
+                  ))}
+                </ul>
+              </>
+            )}
+          </div>
           <div style={s.footerRight}>
             <p style={s.footerLabel}>For {company?.name}</p>
             <p style={s.footerMt2}>Authorized Signatory</p>
