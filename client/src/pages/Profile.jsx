@@ -20,6 +20,8 @@ import {
   UserPlus,
   Calendar,
   IdCard,
+  Building2,
+  Plus,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { formatISTDateTime } from "../utils/dateTime";
@@ -27,7 +29,7 @@ import config from "../config.js";
 import CompanyLogoChanger from "../components/CompanyLogoChanger";
 
 export default function Profile() {
-  const { user: currentUser, setUser: setCurrentUser } =
+  const { user: currentUser, setUser: setCurrentUser, setCompany } =
     useContext(AuthContext);
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("profile");
@@ -50,6 +52,17 @@ export default function Profile() {
     role: config.roles.COMPANY_USER,
   });
   const [editingUser, setEditingUser] = useState(null);
+  const [companyForm, setCompanyForm] = useState({
+    name: "",
+    tagline: "",
+    registeredOffice: "",
+    industryAddress: "",
+    phones: [],
+    email: "",
+    website: "",
+    termsAndConditions: [],
+  });
+  const [companyLoading, setCompanyLoading] = useState(false);
   const [showPassword, setShowPassword] = useState({
     current: false,
     new: false,
@@ -89,6 +102,26 @@ export default function Profile() {
       setMessage({ type: "error", text: "Failed to load users" });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchCompany = async () => {
+    try {
+      const response = await api.get("/companies/my");
+      const c = response.data.data;
+      setCompanyForm({
+        name: c.name || "",
+        tagline: c.tagline || "",
+        registeredOffice: c.registeredOffice || "",
+        industryAddress: c.industryAddress || "",
+        phones: Array.isArray(c.phones) ? c.phones : [],
+        email: c.email || "",
+        website: c.website || "",
+        termsAndConditions: Array.isArray(c.termsAndConditions) ? c.termsAndConditions : [],
+      });
+    } catch (error) {
+      console.error("Failed to fetch company:", error);
+      setMessage({ type: "error", text: "Failed to load company details" });
     }
   };
 
@@ -256,6 +289,38 @@ export default function Profile() {
     }
   };
 
+  const handleCompanyUpdate = async (e) => {
+    e.preventDefault();
+    setMessage({ type: "", text: "" });
+
+    if (!companyForm.name.trim()) {
+      setMessage({ type: "error", text: "Company name is required" });
+      return;
+    }
+
+    if (companyForm.termsAndConditions.length > config.company.maxTerms) {
+      setMessage({ type: "error", text: `Maximum ${config.company.maxTerms} terms allowed` });
+      return;
+    }
+
+    try {
+      setCompanyLoading(true);
+      const response = await api.put("/companies/my", companyForm);
+      const updatedCompany = response.data.data;
+      setCompany(updatedCompany);
+      localStorage.setItem("company", JSON.stringify(updatedCompany));
+      setMessage({ type: "success", text: "Company details updated successfully!" });
+    } catch (error) {
+      console.error("Company update failed:", error);
+      setMessage({
+        type: "error",
+        text: error.response?.data?.message || "Failed to update company details",
+      });
+    } finally {
+      setCompanyLoading(false);
+    }
+  };
+
   const togglePasswordVisibility = (field) => {
     setShowPassword({
       ...showPassword,
@@ -277,13 +342,9 @@ export default function Profile() {
     { id: "profile", label: "My Profile", icon: User, color: "blue" },
     ...(currentUser?.role === config.roles.COMPANY_ADMIN
       ? [
+          { id: "company", label: "Company", icon: Building2, color: "indigo" },
           { id: "users", label: "Manage Users", icon: Users, color: "purple" },
-          {
-            id: "create-user",
-            label: "Create User",
-            icon: UserPlus,
-            color: "green",
-          },
+          { id: "create-user", label: "Create User", icon: UserPlus, color: "green" },
         ]
       : []),
   ];
@@ -330,6 +391,7 @@ export default function Profile() {
                     key={tab.id}
                     onClick={() => {
                       setActiveTab(tab.id);
+                      if (tab.id === "company") fetchCompany();
                     }}
                     className={`w-full flex cursor-pointer items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 text-sm ${
                       activeTab === tab.id
@@ -410,9 +472,6 @@ export default function Profile() {
             {/* Profile Tab */}
             {activeTab === "profile" && (
               <>
-              {currentUser?.role === config.roles.COMPANY_ADMIN && (
-                <CompanyLogoChanger />
-              )}
               <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
                 <div className="p-5 border-b border-gray-200 dark:border-gray-700">
                   <div className="flex items-center gap-3">
@@ -553,6 +612,229 @@ export default function Profile() {
                 </form>
               </div>
               </>
+            )}
+
+            {/* Company Tab */}
+            {activeTab === "company" && currentUser?.role === config.roles.COMPANY_ADMIN && (
+              <div className="space-y-5">
+                <CompanyLogoChanger />
+
+                <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
+                  <div className="p-5 border-b border-gray-200 dark:border-gray-700">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center">
+                        <Building2 className="w-5 h-5 text-white" />
+                      </div>
+                      <div>
+                        <h2 className="text-lg font-bold text-gray-900 dark:text-white">
+                          Company Details
+                        </h2>
+                        <p className="text-xs text-gray-600 dark:text-gray-400">
+                          Update your company information and terms
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <form onSubmit={handleCompanyUpdate} className="p-5">
+                    <div className="space-y-5">
+                      {/* Company Name */}
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-900 dark:text-white mb-1.5">
+                          Company Name <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          value={companyForm.name}
+                          onChange={(e) => setCompanyForm({ ...companyForm, name: e.target.value })}
+                          className="w-full px-3 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:bg-gray-700 dark:text-white transition-all"
+                          required
+                        />
+                      </div>
+
+                      {/* Tagline */}
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-900 dark:text-white mb-1.5">
+                          Tagline
+                        </label>
+                        <input
+                          type="text"
+                          value={companyForm.tagline}
+                          onChange={(e) => setCompanyForm({ ...companyForm, tagline: e.target.value })}
+                          className="w-full px-3 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:bg-gray-700 dark:text-white transition-all"
+                        />
+                      </div>
+
+                      {/* Registered Office */}
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-900 dark:text-white mb-1.5">
+                          Registered Office
+                        </label>
+                        <input
+                          type="text"
+                          value={companyForm.registeredOffice}
+                          onChange={(e) => setCompanyForm({ ...companyForm, registeredOffice: e.target.value })}
+                          className="w-full px-3 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:bg-gray-700 dark:text-white transition-all"
+                        />
+                      </div>
+
+                      {/* Industry Address (optional) */}
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-900 dark:text-white mb-1.5">
+                          Industry Address
+                          <span className="ml-1 text-xs font-normal text-gray-500 dark:text-gray-400">(optional)</span>
+                        </label>
+                        <input
+                          type="text"
+                          value={companyForm.industryAddress}
+                          onChange={(e) => setCompanyForm({ ...companyForm, industryAddress: e.target.value })}
+                          className="w-full px-3 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:bg-gray-700 dark:text-white transition-all"
+                        />
+                      </div>
+
+                      {/* Email & Website */}
+                      <div className="grid md:grid-cols-2 gap-3">
+                        <div>
+                          <label className="block text-sm font-semibold text-gray-900 dark:text-white mb-1.5">
+                            Email
+                          </label>
+                          <input
+                            type="email"
+                            value={companyForm.email}
+                            onChange={(e) => setCompanyForm({ ...companyForm, email: e.target.value })}
+                            className="w-full px-3 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:bg-gray-700 dark:text-white transition-all"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-semibold text-gray-900 dark:text-white mb-1.5">
+                            Website
+                          </label>
+                          <input
+                            type="text"
+                            value={companyForm.website}
+                            onChange={(e) => setCompanyForm({ ...companyForm, website: e.target.value })}
+                            className="w-full px-3 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:bg-gray-700 dark:text-white transition-all"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Phones */}
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-900 dark:text-white mb-1.5">
+                          Phone Numbers
+                        </label>
+                        <div className="space-y-2">
+                          {companyForm.phones.map((phone, idx) => (
+                            <div key={idx} className="flex gap-2">
+                              <input
+                                type="text"
+                                value={phone}
+                                onChange={(e) => {
+                                  const updated = [...companyForm.phones];
+                                  updated[idx] = e.target.value;
+                                  setCompanyForm({ ...companyForm, phones: updated });
+                                }}
+                                className="flex-1 px-3 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:bg-gray-700 dark:text-white transition-all"
+                                placeholder="Phone number"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const updated = companyForm.phones.filter((_, i) => i !== idx);
+                                  setCompanyForm({ ...companyForm, phones: updated });
+                                }}
+                                className="p-2.5 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                              >
+                                <X className="w-4 h-4" />
+                              </button>
+                            </div>
+                          ))}
+                          <button
+                            type="button"
+                            onClick={() => setCompanyForm({ ...companyForm, phones: [...companyForm.phones, ""] })}
+                            className="flex items-center gap-1.5 text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 font-medium"
+                          >
+                            <Plus className="w-4 h-4" />
+                            Add Phone
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Terms & Conditions */}
+                      <div>
+                        <div className="flex items-center justify-between mb-1.5">
+                          <label className="block text-sm font-semibold text-gray-900 dark:text-white">
+                            Terms &amp; Conditions
+                          </label>
+                          <span className="text-xs text-gray-500 dark:text-gray-400">
+                            {companyForm.termsAndConditions.length} / {config.company.maxTerms}
+                          </span>
+                        </div>
+                        <div className="space-y-2">
+                          {companyForm.termsAndConditions.map((term, idx) => (
+                            <div key={idx} className="flex gap-2">
+                              <input
+                                type="text"
+                                value={term}
+                                onChange={(e) => {
+                                  const updated = [...companyForm.termsAndConditions];
+                                  updated[idx] = e.target.value;
+                                  setCompanyForm({ ...companyForm, termsAndConditions: updated });
+                                }}
+                                className="flex-1 px-3 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:bg-gray-700 dark:text-white transition-all"
+                                placeholder={`Term ${idx + 1}`}
+                              />
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const updated = companyForm.termsAndConditions.filter((_, i) => i !== idx);
+                                  setCompanyForm({ ...companyForm, termsAndConditions: updated });
+                                }}
+                                className="p-2.5 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                              >
+                                <X className="w-4 h-4" />
+                              </button>
+                            </div>
+                          ))}
+                          <button
+                            type="button"
+                            disabled={companyForm.termsAndConditions.length >= config.company.maxTerms}
+                            onClick={() => setCompanyForm({
+                              ...companyForm,
+                              termsAndConditions: [...companyForm.termsAndConditions, ""],
+                            })}
+                            className="flex items-center gap-1.5 text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 font-medium disabled:opacity-40 disabled:cursor-not-allowed"
+                          >
+                            <Plus className="w-4 h-4" />
+                            Add Term
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Save Button */}
+                      <div className="pt-2">
+                        <button
+                          type="submit"
+                          disabled={companyLoading}
+                          className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-white text-sm font-semibold rounded-lg shadow-sm hover:shadow transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          {companyLoading ? (
+                            <>
+                              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                              Saving...
+                            </>
+                          ) : (
+                            <>
+                              <Save className="w-4 h-4" />
+                              Update Company
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                  </form>
+                </div>
+              </div>
             )}
 
             {/* Manage Users Tab */}
