@@ -55,6 +55,21 @@ router.use((err, _req, res, next) => {
   next(err);
 });
 
+// --- Company-admin: read and update own company details ---
+router.get(
+  "/my",
+  authenticate,
+  requireRole(COMPANY_ADMIN),
+  CompanyController.getMyCompany,
+);
+
+router.put(
+  "/my",
+  authenticate,
+  requireRole(COMPANY_ADMIN),
+  CompanyController.updateMyCompany,
+);
+
 // --- Super-admin-only company management routes ---
 router.use(authenticate, requireRole(SUPER_ADMIN));
 
