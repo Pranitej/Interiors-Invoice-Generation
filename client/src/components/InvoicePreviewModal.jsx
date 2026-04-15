@@ -22,12 +22,15 @@ export default function InvoicePreviewModal({ invoice, company, onClose }) {
       onClick={onClose}
     >
       <div
-        className="bg-white dark:bg-gray-800 w-full max-w-5xl max-h-[90vh] rounded-2xl border border-gray-200 dark:border-gray-700 shadow-2xl flex flex-col overflow-hidden"
-        onClick={(e) => e.stopPropagation()}
-      >
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="invoice-preview-title"
+          className="bg-white dark:bg-gray-800 w-full max-w-5xl max-h-[90vh] rounded-2xl border border-gray-200 dark:border-gray-700 shadow-2xl flex flex-col overflow-hidden"
+          onClick={(e) => e.stopPropagation()}
+        >
         {/* Header */}
         <div className="flex items-center justify-between gap-3 p-4 border-b border-gray-200 dark:border-gray-700 flex-wrap sm:flex-nowrap">
-          <h3 className="text-base font-bold text-gray-900 dark:text-white shrink-0">
+          <h3 id="invoice-preview-title" className="text-base font-bold text-gray-900 dark:text-white shrink-0">
             Invoice Preview
           </h3>
 
@@ -35,6 +38,8 @@ export default function InvoicePreviewModal({ invoice, company, onClose }) {
           <div className="relative bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-1 shadow-sm order-3 sm:order-2 w-full sm:w-auto">
             <div className="flex items-center">
               <button
+                type="button"
+                aria-pressed={viewMode === "admin"}
                 onClick={() => setViewMode("admin")}
                 className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
                   viewMode === "admin"
@@ -45,8 +50,10 @@ export default function InvoicePreviewModal({ invoice, company, onClose }) {
                 <Shield className="w-4 h-4" strokeWidth={viewMode === "admin" ? 2.5 : 2} />
                 Admin
               </button>
-              <div className="w-px h-5 bg-gray-300 dark:bg-gray-600 mx-0.5" />
+              <div aria-hidden="true" className="w-px h-5 bg-gray-300 dark:bg-gray-600 mx-0.5" />
               <button
+                type="button"
+                aria-pressed={viewMode === "client"}
                 onClick={() => setViewMode("client")}
                 className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
                   viewMode === "client"
@@ -61,6 +68,7 @@ export default function InvoicePreviewModal({ invoice, company, onClose }) {
           </div>
 
           <button
+            type="button"
             onClick={onClose}
             className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors order-2 sm:order-3 shrink-0"
             aria-label="Close preview"
