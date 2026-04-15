@@ -68,7 +68,7 @@ export default function CompanyDetail() {
         {["users", "invoices"].map((t) => (
           <button
             key={t}
-            onClick={() => setTab(t)}
+            onClick={() => { setTab(t); setPreviewInvoice(null); }}
             className={`px-5 py-2.5 text-sm font-medium capitalize transition-colors border-b-2 -mb-px ${
               tab === t
                 ? "border-blue-600 text-blue-600 dark:text-blue-400"
