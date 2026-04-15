@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import API from "../api/api";
+import InvoicePreviewModal from "../components/InvoicePreviewModal";
 
 export default function CompanyDetail() {
   const { id } = useParams();
@@ -10,6 +11,7 @@ export default function CompanyDetail() {
   const [invoices, setInvoices] = useState([]);
   const [tab, setTab] = useState("users");
   const [loading, setLoading] = useState(true);
+  const [previewInvoice, setPreviewInvoice] = useState(null);
 
   useEffect(() => {
     Promise.all([
@@ -40,7 +42,7 @@ export default function CompanyDetail() {
       {/* Header */}
       <div className="flex items-center gap-4">
         <Link
-          to="/companies"
+          to="/dashboard"
           className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
         >
           ← Back
@@ -134,7 +136,7 @@ export default function CompanyDetail() {
           <table className="w-full text-sm">
             <thead className="bg-gray-50 dark:bg-gray-900/50 border-b border-gray-200 dark:border-gray-700">
               <tr>
-                {["Client", "Amount", "Type", "Date"].map((h) => (
+                {["Client", "Amount", "Type", "Date", "Actions"].map((h) => (
                   <th
                     key={h}
                     className="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider"
@@ -147,7 +149,7 @@ export default function CompanyDetail() {
             <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
               {invoices.length === 0 && (
                 <tr>
-                  <td colSpan={4} className="px-4 py-8 text-center text-gray-400">
+                  <td colSpan={5} className="px-4 py-8 text-center text-gray-400">
                     No invoices yet.
                   </td>
                 </tr>
@@ -166,11 +168,27 @@ export default function CompanyDetail() {
                   <td className="px-4 py-3 text-gray-500 dark:text-gray-400">
                     {new Date(inv.createdAt).toLocaleDateString()}
                   </td>
+                  <td className="px-4 py-3">
+                    <button
+                      type="button"
+                      onClick={() => setPreviewInvoice(inv)}
+                      className="px-3 py-1 text-xs bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400 rounded-lg hover:bg-indigo-200 dark:hover:bg-indigo-900/60 transition-colors"
+                    >
+                      Preview
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
+      )}
+      {previewInvoice && (
+        <InvoicePreviewModal
+          invoice={previewInvoice}
+          company={company}
+          onClose={() => setPreviewInvoice(null)}
+        />
       )}
     </div>
   );
