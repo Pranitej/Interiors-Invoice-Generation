@@ -106,7 +106,7 @@ export default function CompanyDetail() {
             </h2>
             <button
               type="button"
-              onClick={() => setShowCreateUser(true)}
+              onClick={() => { setShowCreateUser(true); setEditingUser(null); }}
               className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors"
             >
               <UserPlus className="w-4 h-4" />
@@ -158,7 +158,7 @@ export default function CompanyDetail() {
                     <button
                       type="button"
                       aria-label={`Edit user ${u.username}`}
-                      onClick={() => setEditingUser(u)}
+                      onClick={() => { setEditingUser(u); setShowCreateUser(false); }}
                       className="px-3 py-1 text-xs bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/60 transition-colors"
                     >
                       Edit
