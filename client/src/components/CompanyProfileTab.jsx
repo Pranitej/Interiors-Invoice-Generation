@@ -308,6 +308,7 @@ export default function CompanyProfileTab({ companyId, initialCompany, onUpdate 
                 {form.phones.map((phone, idx) => (
                   <div key={idx} className="flex gap-2">
                     <input
+                      id={`cp-phone-${idx}`}
                       type="text"
                       value={phone}
                       onChange={(e) => setPhone(idx, e.target.value)}
@@ -349,6 +350,7 @@ export default function CompanyProfileTab({ companyId, initialCompany, onUpdate 
                 {form.termsAndConditions.map((term, idx) => (
                   <div key={idx} className="flex gap-2">
                     <input
+                      id={`cp-term-${idx}`}
                       type="text"
                       value={term}
                       onChange={(e) => setTerm(idx, e.target.value)}
@@ -388,7 +390,7 @@ export default function CompanyProfileTab({ companyId, initialCompany, onUpdate 
                 {saving ? (
                   <>
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    Saving...
+                    Saving…
                   </>
                 ) : (
                   <>
