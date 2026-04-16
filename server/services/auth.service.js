@@ -67,7 +67,9 @@ export async function createUser({ username, password, role, companyId }) {
 }
 
 export async function listUsers(companyId) {
-  const query = companyId ? { companyId } : {};
+  const query = companyId
+    ? { companyId, deletedAt: null }
+    : { deletedAt: null };
   return User.find(query).select("-password");
 }
 
