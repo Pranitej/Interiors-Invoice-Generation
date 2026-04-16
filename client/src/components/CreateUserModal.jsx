@@ -139,7 +139,8 @@ export default function CreateUserModal({ companyId, onSave, onClose }) {
                 Role
               </p>
               <div className="space-y-2">
-                {ROLES.map(({ value, label, description, Icon, color }) => {
+                {ROLES.map((role) => {
+                  const { value, label, description, Icon: RoleIcon, color } = role;
                   const selected = form.role === value;
                   return (
                     <label
@@ -169,7 +170,7 @@ export default function CreateUserModal({ companyId, onSave, onClose }) {
                             : "bg-gray-100 dark:bg-gray-700"
                         }`}
                       >
-                        <Icon
+                        <RoleIcon
                           className={`w-4 h-4 ${
                             selected
                               ? color === "purple"
