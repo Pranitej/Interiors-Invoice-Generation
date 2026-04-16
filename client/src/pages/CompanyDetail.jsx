@@ -1,10 +1,12 @@
 // client/src/pages/CompanyDetail.jsx
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
+import { UserPlus } from "lucide-react";
 import API from "../api/api";
 import InvoicePreviewModal from "../components/InvoicePreviewModal";
 import EditUserModal from "../components/EditUserModal";
 import CompanyProfileTab from "../components/CompanyProfileTab";
+import CreateUserModal from "../components/CreateUserModal";
 
 export default function CompanyDetail() {
   const { id } = useParams();
@@ -16,6 +18,7 @@ export default function CompanyDetail() {
   const [previewInvoice, setPreviewInvoice] = useState(null);
   const [editingUser, setEditingUser] = useState(null);
   const [editSuccess, setEditSuccess] = useState("");
+  const [showCreateUser, setShowCreateUser] = useState(false);
 
   useEffect(() => {
     Promise.all([
@@ -82,7 +85,7 @@ export default function CompanyDetail() {
         ].map(({ key, label, count }) => (
           <button
             key={key}
-            onClick={() => { setTab(key); setPreviewInvoice(null); setEditingUser(null); }}
+            onClick={() => { setTab(key); setPreviewInvoice(null); setEditingUser(null); setShowCreateUser(false); }}
             className={`px-5 py-2.5 text-sm font-medium transition-colors border-b-2 -mb-px ${
               tab === key
                 ? "border-blue-600 text-blue-600 dark:text-blue-400"
@@ -96,7 +99,21 @@ export default function CompanyDetail() {
 
       {/* Users Tab */}
       {tab === "users" && (
-        <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+              Users ({users.length})
+            </h2>
+            <button
+              type="button"
+              onClick={() => setShowCreateUser(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors"
+            >
+              <UserPlus className="w-4 h-4" />
+              Add User
+            </button>
+          </div>
+          <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
           <table className="w-full text-sm">
             <thead className="bg-gray-50 dark:bg-gray-900/50 border-b border-gray-200 dark:border-gray-700">
               <tr>
@@ -151,6 +168,7 @@ export default function CompanyDetail() {
               ))}
             </tbody>
           </table>
+          </div>
         </div>
       )}
 
@@ -222,6 +240,18 @@ export default function CompanyDetail() {
           invoice={previewInvoice}
           company={company}
           onClose={() => setPreviewInvoice(null)}
+        />
+      )}
+
+      {showCreateUser && (
+        <CreateUserModal
+          companyId={id}
+          onSave={(newUser) => {
+            setUsers((prev) => [...prev, newUser]);
+            setShowCreateUser(false);
+            setEditSuccess("User created successfully!");
+          }}
+          onClose={() => setShowCreateUser(false)}
         />
       )}
 
