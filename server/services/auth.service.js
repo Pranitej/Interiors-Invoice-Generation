@@ -11,7 +11,7 @@ import config from "../config.js";
 const { jwtSecret, jwtExpiresInDays, bcryptRounds } = config.auth;
 
 export async function login(username, password) {
-  const user = await User.findOne({ username });
+  const user = await User.findOne({ username, deletedAt: null });
   if (!user) throw new AppError(401, "Invalid username or password");
 
   const match = await bcrypt.compare(password, user.password);
@@ -110,10 +110,12 @@ export async function deleteUser(id, companyId) {
   const user = await User.findOne(filter);
   if (!user) throw new AppError(404, "User not found");
 
+  // Count all invoices including trashed — soft-deleted invoices still reference
+  // this user as createdBy, so we preserve the user until they are permanently purged.
   const invoiceCount = await Invoice.countDocuments({ createdBy: id });
 
   if (invoiceCount > 0) {
-    await User.findByIdAndUpdate(id, { deletedAt: new Date() });
+    await User.findOneAndUpdate(filter, { deletedAt: new Date() });
   } else {
     await User.findOneAndDelete(filter);
   }
