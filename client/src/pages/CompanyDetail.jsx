@@ -49,8 +49,8 @@ export default function CompanyDetail() {
       await API.delete(`/auth/users/${userId}`);
       setUsers((prev) => prev.filter((u) => u._id !== userId));
       setEditSuccess("User deleted successfully!");
-    } catch {
-      setEditSuccess("");
+    } catch (err) {
+      setEditSuccess(err?.response?.data?.message || "Failed to delete user.");
     } finally {
       setDeleting(false);
       setDeleteTarget(null);
@@ -184,7 +184,7 @@ export default function CompanyDetail() {
                       <button
                         type="button"
                         aria-label={`Delete user ${u.username}`}
-                        onClick={() => setDeleteTarget(u)}
+                        onClick={() => { setDeleteTarget(u); setEditingUser(null); setShowCreateUser(false); }}
                         className="px-3 py-1 text-xs bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/60 transition-colors"
                       >
                         Delete
