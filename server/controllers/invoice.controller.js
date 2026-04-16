@@ -34,8 +34,10 @@ export async function listInvoices(req, res, next) {
       maxLimit,
       parseInt(req.query.limit, 10) || defaultLimit,
     );
+    const isCompanyUser = req.user.role === config.roles.COMPANY_USER;
     const { invoices, total } = await InvoiceService.listInvoices({
       companyId: req.companyId,
+      createdBy: isCompanyUser ? req.user.userId : null,
       q,
       sortBy,
       order,
@@ -50,9 +52,11 @@ export async function listInvoices(req, res, next) {
 
 export async function getInvoice(req, res, next) {
   try {
+    const isCompanyUser = req.user.role === config.roles.COMPANY_USER;
     const invoice = await InvoiceService.getInvoiceById(
       req.params.id,
       req.companyId,
+      isCompanyUser ? req.user.userId : null,
     );
     sendSuccess(res, invoice);
   } catch (err) {
@@ -80,11 +84,7 @@ export async function updateInvoice(req, res, next) {
 
 export async function deleteInvoice(req, res, next) {
   try {
-    const isCompanyUser = req.user.role === config.roles.COMPANY_USER;
-    if (isCompanyUser && !config.permissions.companyUser.canSoftDeleteOwnInvoices)
-      throw new AppError(403, "Forbidden");
-    const ownerId = isCompanyUser ? req.user.userId : null;
-    await InvoiceService.deleteInvoice(req.params.id, req.companyId, ownerId);
+    await InvoiceService.deleteInvoice(req.params.id, req.companyId);
     sendSuccess(res, null, 200, "Invoice deleted successfully");
   } catch (err) {
     next(err);
@@ -114,11 +114,7 @@ export async function restoreInvoice(req, res, next) {
 
 export async function permanentDeleteInvoice(req, res, next) {
   try {
-    const isCompanyUser = req.user.role === config.roles.COMPANY_USER;
-    if (isCompanyUser && !config.permissions.companyUser.canPermanentDeleteOwnInvoices)
-      throw new AppError(403, "Forbidden");
-    const ownerId = isCompanyUser ? req.user.userId : null;
-    await InvoiceService.permanentDelete(req.params.id, req.companyId, ownerId);
+    await InvoiceService.permanentDelete(req.params.id, req.companyId);
     sendSuccess(res, null, 200, "Invoice permanently deleted");
   } catch (err) {
     next(err);

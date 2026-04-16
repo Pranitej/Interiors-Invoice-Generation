@@ -12,6 +12,7 @@ export async function createInvoice({ body, companyId, userId }) {
 
 export async function listInvoices({
   companyId,
+  createdBy = null,
   q,
   sortBy = "createdAt",
   order = "desc",
@@ -23,6 +24,7 @@ export async function listInvoices({
   const baseFilter = companyId
     ? { companyId, deletedAt: null }
     : { deletedAt: null };
+  if (createdBy) baseFilter.createdBy = createdBy;
   const searchFilter = q
     ? {
         $or: [
@@ -36,6 +38,7 @@ export async function listInvoices({
 
   const [invoices, total] = await Promise.all([
     Invoice.find(query)
+      .populate("createdBy", "username")
       .sort({ [safeSortBy]: order === "asc" ? 1 : -1 })
       .skip((Number(page) - 1) * Number(limit))
       .limit(Number(limit)),
@@ -45,12 +48,13 @@ export async function listInvoices({
   return { invoices, total };
 }
 
-export async function getInvoiceById(id, companyId) {
+export async function getInvoiceById(id, companyId, createdBy = null) {
   if (!mongoose.Types.ObjectId.isValid(id))
     throw new AppError(400, "Invalid invoice ID");
   const filter = { _id: id, deletedAt: null };
   if (companyId) filter.companyId = companyId;
-  const invoice = await Invoice.findOne(filter);
+  if (createdBy) filter.createdBy = createdBy;
+  const invoice = await Invoice.findOne(filter).populate("createdBy", "username");
   if (!invoice) throw new AppError(404, "Invoice not found");
   return invoice;
 }
@@ -70,12 +74,11 @@ export async function updateInvoice(id, companyId, data, ownerId = null) {
   return invoice;
 }
 
-export async function deleteInvoice(id, companyId, ownerId = null) {
+export async function deleteInvoice(id, companyId) {
   if (!mongoose.Types.ObjectId.isValid(id))
     throw new AppError(400, "Invalid invoice ID");
   const filter = { _id: id, deletedAt: null };
   if (companyId) filter.companyId = companyId;
-  if (ownerId) filter.createdBy = ownerId;
   const invoice = await Invoice.findOneAndUpdate(
     filter,
     { deletedAt: new Date() },
@@ -88,7 +91,9 @@ export async function listTrash(companyId) {
   const cutoff = new Date(Date.now() - config.invoice.trashRetentionDays * 24 * 60 * 60 * 1000);
   const filter = companyId ? { companyId } : {};
   await Invoice.deleteMany({ ...filter, deletedAt: { $lt: cutoff } });
-  return Invoice.find({ ...filter, deletedAt: { $ne: null } }).sort({ deletedAt: -1 });
+  return Invoice.find({ ...filter, deletedAt: { $ne: null } })
+    .populate("createdBy", "username")
+    .sort({ deletedAt: -1 });
 }
 
 export async function restoreInvoice(id, companyId) {
@@ -105,12 +110,11 @@ export async function restoreInvoice(id, companyId) {
   return invoice;
 }
 
-export async function permanentDelete(id, companyId, ownerId = null) {
+export async function permanentDelete(id, companyId) {
   if (!mongoose.Types.ObjectId.isValid(id))
     throw new AppError(400, "Invalid invoice ID");
   const filter = { _id: id, deletedAt: { $ne: null } };
   if (companyId) filter.companyId = companyId;
-  if (ownerId) filter.createdBy = ownerId;
   const invoice = await Invoice.findOneAndDelete(filter);
   if (!invoice) throw new AppError(404, "Invoice not found in trash");
 }

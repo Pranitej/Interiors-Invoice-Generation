@@ -1,7 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useContext, useState, useRef, useEffect } from "react";
 import { AuthContext } from "../context/AuthContext";
-import { History, Plus, Scale, User, UserStar } from "lucide-react";
+import { History, Plus, Scale, User, UserStar, LayoutDashboard } from "lucide-react";
 import config from "../config.js";
 
 export default function Header({ theme, toggleTheme }) {
@@ -13,6 +13,18 @@ export default function Header({ theme, toggleTheme }) {
 
   // Dynamic navigation configuration
   const navigationLinks = [
+    {
+      path: "/dashboard",
+      label: "Dashboard",
+      icon: <LayoutDashboard />,
+      colorClass:
+        "from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20",
+      iconColor: "text-blue-600 dark:text-blue-400",
+      description: "Super Admin Dashboard",
+      showForSuperAdmin: true,
+      showForAdmin: false,
+      showForUser: false,
+    },
     {
       path: "/new-quote",
       label: "New Quote",
@@ -51,8 +63,9 @@ export default function Header({ theme, toggleTheme }) {
   // Filter navigation links based on user role
   const getFilteredLinks = () => {
     if (!user) return [];
+    if (user.role === "super_admin") return navigationLinks.filter((link) => link.showForSuperAdmin);
     return navigationLinks.filter((link) =>
-      user.role !== "super_admin" ? (user.role === "company_admin" ? link.showForAdmin : link.showForUser) : false,
+      user.role === "company_admin" ? link.showForAdmin : link.showForUser,
     );
   };
 

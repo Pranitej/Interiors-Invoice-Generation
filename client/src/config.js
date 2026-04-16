@@ -16,9 +16,7 @@ const config = {
 
   permissions: {
     companyUser: {
-      canEditOwnInvoices: true,             // company_user can edit invoices they created
-      canSoftDeleteOwnInvoices: false,      // company_user can soft-delete their own invoices
-      canPermanentDeleteOwnInvoices: false, // requires canSoftDeleteOwnInvoices: true to be reachable
+      canEditOwnInvoices: true, // company_user can edit invoices they created
     },
   },
 

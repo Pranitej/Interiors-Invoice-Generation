@@ -69,7 +69,7 @@ function calcDiversified(item = {}, frameRate = 0, boxRateInput) {
   const br =
     typeof boxRateInput === "number" && !Number.isNaN(boxRateInput)
       ? boxRateInput
-      : fr * 1.4;
+      : 0;
 
   const fh = Number(item.frame?.height || 0);
   const fw = Number(item.frame?.width || 0);
@@ -121,9 +121,7 @@ export default function RoomEditor({
     description: room.description || "",
     frameRate: Number(room.frameRate || 0),
     boxRate:
-      typeof room.boxRate === "number"
-        ? Number(room.boxRate)
-        : Number(room.frameRate || 0) * 1.4,
+      typeof room.boxRate === "number" ? Number(room.boxRate) : 0,
     items: (room.items || []).map(normalizeToStructured),
     accessories: room.accessories || [],
   };
@@ -489,7 +487,6 @@ export default function RoomEditor({
                     onChange({
                       ...safeRoom,
                       frameRate: newFrame,
-                      boxRate: newFrame * 1.4,
                     });
                   }}
                   className="w-full pl-7 pr-3 py-2 text-sm bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-400 text-gray-900 dark:text-white"

@@ -219,13 +219,9 @@ export default function History() {
     user?.role === config.roles.COMPANY_ADMIN ||
     (user?.role === config.roles.COMPANY_USER &&
       config.permissions.companyUser.canEditOwnInvoices &&
-      inv?.createdBy === user?._id);
+      inv?.createdBy?._id === user?._id);
 
-  const canDeleteInvoice = (inv) =>
-    user?.role === config.roles.COMPANY_ADMIN ||
-    (user?.role === config.roles.COMPANY_USER &&
-      config.permissions.companyUser.canSoftDeleteOwnInvoices &&
-      inv?.createdBy === user?._id);
+  const canDeleteInvoice = () => user?.role === config.roles.COMPANY_ADMIN;
 
   const handleDelete = (id) => {
     const invoice = invoices.find((i) => i._id === id);
@@ -323,29 +319,31 @@ export default function History() {
           )}
         </div>
 
-        {/* Tab Toggle */}
-        <div className="flex gap-1 mb-4 bg-gray-100 dark:bg-gray-800 rounded-lg p-1 w-fit">
-          <button
-            onClick={() => setActiveTab("active")}
-            className={`px-4 py-1.5 text-sm font-medium rounded-md transition-colors ${
-              activeTab === "active"
-                ? "bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm"
-                : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
-            }`}
-          >
-            Active
-          </button>
-          <button
-            onClick={() => setActiveTab("trash")}
-            className={`px-4 py-1.5 text-sm font-medium rounded-md transition-colors ${
-              activeTab === "trash"
-                ? "bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm"
-                : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
-            }`}
-          >
-            Trash
-          </button>
-        </div>
+        {/* Tab Toggle — Trash only visible to admins */}
+        {user?.role !== config.roles.COMPANY_USER && (
+          <div className="flex gap-1 mb-4 bg-gray-100 dark:bg-gray-800 rounded-lg p-1 w-fit">
+            <button
+              onClick={() => setActiveTab("active")}
+              className={`px-4 py-1.5 text-sm font-medium rounded-md transition-colors ${
+                activeTab === "active"
+                  ? "bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm"
+                  : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+              }`}
+            >
+              Active
+            </button>
+            <button
+              onClick={() => setActiveTab("trash")}
+              className={`px-4 py-1.5 text-sm font-medium rounded-md transition-colors ${
+                activeTab === "trash"
+                  ? "bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm"
+                  : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+              }`}
+            >
+              Trash
+            </button>
+          </div>
+        )}
       </div>
 
       {activeTab === "active" && (
@@ -490,6 +488,14 @@ export default function History() {
                         </span>
                       </div>
                     </div>
+                    {user?.role === config.roles.COMPANY_ADMIN && (
+                      <div className="flex-shrink-0 px-4 min-w-[110px]">
+                        <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300">
+                          <User size={10} />
+                          {invoice.createdBy?.username || "—"}
+                        </div>
+                      </div>
+                    )}
                     <div className="flex-shrink-0 px-4 min-w-[120px] text-center">
                       <div className="text-xs text-gray-900 dark:text-white">
                         {formatISTDate(invoice.createdAt)}
@@ -605,8 +611,14 @@ export default function History() {
                           {formatISTDateTime(invoice.createdAt)}
                         </span>
                       </div>
-                      <div className="items-center gap-2 text-sm text-gray-600">
+                      <div className="flex items-center gap-2 text-sm text-gray-600">
                         <p>({invoice.invoiceType})</p>
+                        {user?.role === config.roles.COMPANY_ADMIN && (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300">
+                            <User size={10} />
+                            {invoice.createdBy?.username || "—"}
+                          </span>
+                        )}
                       </div>
                     </div>
                     <div className="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-gray-700">
@@ -712,6 +724,15 @@ export default function History() {
                         <span className="font-medium text-green-600 dark:text-green-400">
                           {formatINR(invoice.finalPayableAfterDiscount)}
                         </span>
+                        {user?.role === config.roles.COMPANY_ADMIN && (
+                          <>
+                            <span className="mx-1">•</span>
+                            <span className="inline-flex items-center gap-1 text-indigo-600 dark:text-indigo-400">
+                              <User size={10} />
+                              {invoice.createdBy?.username || "—"}
+                            </span>
+                          </>
+                        )}
                       </div>
                     </div>
                     <div className="flex items-center gap-2 flex-shrink-0">

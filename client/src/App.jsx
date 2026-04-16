@@ -10,7 +10,6 @@ import { AuthContext } from "./context/AuthContext";
 import PageNotFound from "./pages/PageNotFound";
 import ProtectedRoute from "./components/ProtectedRoute";
 import SuperAdminDashboard from "./pages/SuperAdminDashboard";
-import Companies from "./pages/Companies";
 import CompanyDetail from "./pages/CompanyDetail";
 
 function App() {
@@ -68,14 +67,6 @@ function App() {
                 element={
                   <ProtectedRoute roles={["super_admin"]}>
                     <SuperAdminDashboard />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/companies"
-                element={
-                  <ProtectedRoute roles={["super_admin"]}>
-                    <Companies />
                   </ProtectedRoute>
                 }
               />

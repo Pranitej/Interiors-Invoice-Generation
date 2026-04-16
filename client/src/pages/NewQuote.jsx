@@ -102,9 +102,7 @@ export default function NewQuote() {
           setClient(d.client || {});
           const savedFrameRate = d.globalFrameRate || 0;
           const savedBoxRate =
-            typeof d.globalBoxRate === "number"
-              ? d.globalBoxRate
-              : savedFrameRate * 1.4;
+            typeof d.globalBoxRate === "number" ? d.globalBoxRate : 0;
 
           setGlobalFrameRate(savedFrameRate);
           setGlobalBoxRate(savedBoxRate);
@@ -173,7 +171,7 @@ export default function NewQuote() {
 
         if (
           user.role === config.roles.COMPANY_USER &&
-          invoice.createdBy !== user._id
+          invoice.createdBy?._id !== user._id
         ) {
           alert("You can only edit invoices you created.");
           navigate("/history");
@@ -188,7 +186,7 @@ export default function NewQuote() {
         const invoiceBoxRate =
           typeof invoice.pricing.boxRate === "number"
             ? invoice.pricing.boxRate
-            : invoiceFrameRate * 1.4;
+            : 0;
 
         setGlobalFrameRate(invoiceFrameRate);
         setGlobalBoxRate(invoiceBoxRate);
@@ -202,7 +200,7 @@ export default function NewQuote() {
             boxRate:
               typeof r.boxRate === "number"
                 ? r.boxRate
-                : (invoiceBoxRate ?? invoiceFrameRate * 1.4),
+                : (invoiceBoxRate ?? 0),
             isCustomRate: r.frameRate !== invoice.pricing.frameRate,
             items: r.items.map((i) => ({
               name: i.name,
@@ -331,7 +329,7 @@ export default function NewQuote() {
         name: "",
         description: "",
         frameRate: globalFrameRate,
-        boxRate: globalBoxRate || globalFrameRate * 1.4,
+        boxRate: globalBoxRate || 0,
         isCustomRate: false,
         items: [],
         accessories: [],
@@ -734,7 +732,6 @@ export default function NewQuote() {
                 onChangeFrameRate={(value) => {
                   userEditedGlobalRateRef.current = true;
                   setGlobalFrameRate(value);
-                  setGlobalBoxRate(roundTo2(value * 1.4));
                 }}
                 onChangeBoxRate={(value) => {
                   userEditedGlobalRateRef.current = true;

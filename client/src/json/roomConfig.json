@@ -4,7 +4,7 @@
     "width": 1,
     "depth": 1
   },
-  "invoiceTypes": ["Standard", "Advanced", "Premium", "Luxury"],
+  "invoiceTypes": ["Basic", "Comfort", "Premium", "Elite"],
   "rooms": [
     {
       "name": "Bedroom",

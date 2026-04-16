@@ -15,11 +15,13 @@ API.interceptors.request.use((config) => {
   return config;
 });
 
-// On 401, clear storage and redirect to login
+// On 401, clear storage and redirect to login — except for the login call itself,
+// where a 401 just means wrong credentials and should surface as an inline error.
 API.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    const isLoginCall = error.config?.url?.includes("/auth/login");
+    if (error.response?.status === 401 && !isLoginCall) {
       localStorage.removeItem("user");
       localStorage.removeItem("token");
       localStorage.removeItem("company");

@@ -34,6 +34,10 @@ export async function createUser(req, res, next) {
     if (!username || !password || !role)
       throw new AppError(400, "username, password, and role are required");
 
+    // Company admins may only create company_user accounts
+    if (req.user.role === config.roles.COMPANY_ADMIN && role !== config.roles.COMPANY_USER)
+      throw new AppError(403, "Company admins can only create standard user accounts");
+
     const companyId =
       req.user.role === SUPER_ADMIN ? req.body.companyId : req.companyId;
 
