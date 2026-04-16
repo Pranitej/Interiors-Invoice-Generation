@@ -28,6 +28,7 @@ import { formatISTDateTime } from "../utils/dateTime";
 import config from "../config.js";
 import CompanyLogoChanger from "../components/CompanyLogoChanger";
 import EditUserModal from "../components/EditUserModal";
+import DeleteUserModal from "../components/DeleteUserModal";
 
 export default function Profile() {
   const { user: currentUser, setUser: setCurrentUser, setCompany } =
@@ -53,6 +54,8 @@ export default function Profile() {
     role: config.roles.COMPANY_USER,
   });
   const [editingUser, setEditingUser] = useState(null);
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [deleting, setDeleting] = useState(false);
   const [showCreateUserModal, setShowCreateUserModal] = useState(false);
   const [companyForm, setCompanyForm] = useState({
     name: "",
@@ -226,35 +229,28 @@ export default function Profile() {
     }
   };
 
-  const handleDeleteUser = async (userId) => {
-    if (userId === currentUser._id) {
+  const handleDeleteUser = (user) => {
+    if (user._id === currentUser._id) {
       setMessage({ type: "error", text: "Cannot delete your own account" });
       return;
     }
+    setDeleteTarget(user);
+  };
 
-    if (
-      !window.confirm(
-        "Are you sure you want to delete this user? This action cannot be undone.",
-      )
-    ) {
-      return;
-    }
-
+  const confirmDeleteUser = async (userId) => {
+    setDeleting(true);
     try {
       await api.delete(`/auth/users/${userId}`);
-
-      setMessage({
-        type: "success",
-        text: "User deleted successfully!",
-      });
-
+      setMessage({ type: "success", text: "User deleted successfully!" });
       fetchUsers();
     } catch (error) {
-      console.error("Delete user failed:", error);
       setMessage({
         type: "error",
         text: error.response?.data?.message || "Failed to delete user",
       });
+    } finally {
+      setDeleting(false);
+      setDeleteTarget(null);
     }
   };
 
@@ -908,7 +904,7 @@ export default function Profile() {
                                       <Edit2 className="w-3.5 h-3.5" />
                                     </button>
                                     <button
-                                      onClick={() => handleDeleteUser(user._id)}
+                                      onClick={() => handleDeleteUser(user)}
                                       className="p-1.5 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-md transition-colors"
                                       title="Delete User"
                                     >
@@ -1109,6 +1105,16 @@ export default function Profile() {
             setMessage({ type: "success", text: "User updated successfully!" });
           }}
           onClose={() => setEditingUser(null)}
+        />
+      )}
+
+      {/* Delete User Modal */}
+      {deleteTarget && (
+        <DeleteUserModal
+          user={deleteTarget}
+          onConfirm={confirmDeleteUser}
+          onClose={() => { if (!deleting) setDeleteTarget(null); }}
+          deleting={deleting}
         />
       )}
     </div>
