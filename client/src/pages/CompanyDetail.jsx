@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import API from "../api/api";
 import InvoicePreviewModal from "../components/InvoicePreviewModal";
+import EditUserModal from "../components/EditUserModal";
 
 export default function CompanyDetail() {
   const { id } = useParams();
@@ -12,6 +13,8 @@ export default function CompanyDetail() {
   const [tab, setTab] = useState("users");
   const [loading, setLoading] = useState(true);
   const [previewInvoice, setPreviewInvoice] = useState(null);
+  const [editingUser, setEditingUser] = useState(null);
+  const [editSuccess, setEditSuccess] = useState("");
 
   useEffect(() => {
     Promise.all([
@@ -68,7 +71,7 @@ export default function CompanyDetail() {
         {["users", "invoices"].map((t) => (
           <button
             key={t}
-            onClick={() => { setTab(t); setPreviewInvoice(null); }}
+            onClick={() => { setTab(t); setPreviewInvoice(null); setEditingUser(null); }}
             className={`px-5 py-2.5 text-sm font-medium capitalize transition-colors border-b-2 -mb-px ${
               tab === t
                 ? "border-blue-600 text-blue-600 dark:text-blue-400"
@@ -86,7 +89,7 @@ export default function CompanyDetail() {
           <table className="w-full text-sm">
             <thead className="bg-gray-50 dark:bg-gray-900/50 border-b border-gray-200 dark:border-gray-700">
               <tr>
-                {["Username", "Role", "Created"].map((h) => (
+                {["Username", "Role", "Created", "Actions"].map((h) => (
                   <th
                     key={h}
                     className="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider"
@@ -99,7 +102,7 @@ export default function CompanyDetail() {
             <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
               {users.length === 0 && (
                 <tr>
-                  <td colSpan={3} className="px-4 py-8 text-center text-gray-400">
+                  <td colSpan={4} className="px-4 py-8 text-center text-gray-400">
                     No users yet.
                   </td>
                 </tr>
@@ -122,6 +125,15 @@ export default function CompanyDetail() {
                   </td>
                   <td className="px-4 py-3 text-gray-500 dark:text-gray-400">
                     {new Date(u.createdAt).toLocaleDateString()}
+                  </td>
+                  <td className="px-4 py-3">
+                    <button
+                      type="button"
+                      onClick={() => setEditingUser(u)}
+                      className="px-3 py-1 text-xs bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/60 transition-colors"
+                    >
+                      Edit
+                    </button>
                   </td>
                 </tr>
               ))}
@@ -189,6 +201,25 @@ export default function CompanyDetail() {
           company={company}
           onClose={() => setPreviewInvoice(null)}
         />
+      )}
+
+      {editingUser && (
+        <EditUserModal
+          user={editingUser}
+          onSave={(updated) => {
+            setUsers((prev) => prev.map((u) => (u._id === updated._id ? updated : u)));
+            setEditingUser(null);
+            setEditSuccess("User updated successfully!");
+            setTimeout(() => setEditSuccess(""), 3000);
+          }}
+          onClose={() => setEditingUser(null)}
+        />
+      )}
+
+      {editSuccess && (
+        <div className="fixed bottom-4 right-4 z-40 bg-green-600 text-white text-sm font-medium px-4 py-2.5 rounded-lg shadow-lg">
+          {editSuccess}
+        </div>
       )}
     </div>
   );
