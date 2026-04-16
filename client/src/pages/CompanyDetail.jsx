@@ -30,6 +30,12 @@ export default function CompanyDetail() {
       .finally(() => setLoading(false));
   }, [id]);
 
+  useEffect(() => {
+    if (!editSuccess) return;
+    const timer = setTimeout(() => setEditSuccess(""), 3000);
+    return () => clearTimeout(timer);
+  }, [editSuccess]);
+
   if (loading)
     return (
       <div className="flex items-center justify-center h-64">
@@ -129,6 +135,7 @@ export default function CompanyDetail() {
                   <td className="px-4 py-3">
                     <button
                       type="button"
+                      aria-label={`Edit user ${u.username}`}
                       onClick={() => setEditingUser(u)}
                       className="px-3 py-1 text-xs bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/60 transition-colors"
                     >
@@ -210,17 +217,18 @@ export default function CompanyDetail() {
             setUsers((prev) => prev.map((u) => (u._id === updated._id ? updated : u)));
             setEditingUser(null);
             setEditSuccess("User updated successfully!");
-            setTimeout(() => setEditSuccess(""), 3000);
           }}
           onClose={() => setEditingUser(null)}
         />
       )}
 
-      {editSuccess && (
-        <div className="fixed bottom-4 right-4 z-40 bg-green-600 text-white text-sm font-medium px-4 py-2.5 rounded-lg shadow-lg">
-          {editSuccess}
-        </div>
-      )}
+      <div role="status" aria-live="polite" aria-atomic="true" className="fixed bottom-4 right-4 z-50">
+        {editSuccess && (
+          <div className="bg-green-600 text-white text-sm font-medium px-4 py-2.5 rounded-lg shadow-lg">
+            {editSuccess}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

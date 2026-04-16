@@ -1,4 +1,4 @@
-import { formatINR, roundTo2 } from "../utils/calculations";
+import { formatINR } from "../utils/calculations";
 import ROOM_CONFIG from "../json/roomConfig.json";
 
 export default function PricingSection({
@@ -11,8 +11,6 @@ export default function PricingSection({
   setInvoiceType,
   setDiscount,
 }) {
-  const calculatedBoxRate = roundTo2(globalFrameRate * 1.4);
-  const isUsingDefault = Math.abs(globalBoxRate - calculatedBoxRate) < 0.01;
   const multiplier =
     globalFrameRate > 0 ? (globalBoxRate / globalFrameRate).toFixed(2) : "0.00";
 
@@ -85,26 +83,9 @@ export default function PricingSection({
             <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
               Box Rate
             </label>
-            <div className="flex items-center gap-1.5">
-              <span
-                className={`text-xs font-medium ${
-                  isUsingDefault
-                    ? "text-green-600 dark:text-green-400"
-                    : "text-amber-600 dark:text-amber-400"
-                }`}
-              >
-                {formatINR(globalBoxRate)}/sqft
-              </span>
-              <span
-                className={`px-1.5 py-0.5 rounded text-xs ${
-                  isUsingDefault
-                    ? "bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-300"
-                    : "bg-amber-100 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300"
-                }`}
-              >
-                {isUsingDefault ? "Auto" : "Custom"}
-              </span>
-            </div>
+            <span className="text-xs text-green-600 dark:text-green-400 font-medium">
+              {formatINR(globalBoxRate)}/sqft
+            </span>
           </div>
 
           <div className="relative">
@@ -115,11 +96,7 @@ export default function PricingSection({
               type="number"
               min="0"
               step="0.01"
-              className={`w-full pl-9 pr-4 py-2.5 bg-white dark:bg-gray-700 border rounded-lg focus:ring-1 focus:border-transparent text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${
-                isUsingDefault
-                  ? "border-gray-300 dark:border-gray-600 focus:ring-green-500"
-                  : "border-amber-300 dark:border-amber-600 focus:ring-amber-500"
-              }`}
+              className="w-full pl-9 pr-4 py-2.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-1 focus:ring-green-500 focus:border-transparent text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
               placeholder="Enter box rate"
               value={globalBoxRate}
               onChange={(e) => {
@@ -133,11 +110,7 @@ export default function PricingSection({
           </div>
 
           <div className="text-xs text-gray-500 dark:text-gray-400">
-            {isUsingDefault ? (
-              <>Automatically set to 1.4× frame rate</>
-            ) : (
-              <>Custom box rate applied</>
-            )}
+            Box rate per square foot
           </div>
         </div>
       </div>
@@ -195,51 +168,8 @@ export default function PricingSection({
           <div className="text-xs text-gray-500 dark:text-gray-400">
             Frame: {formatINR(globalFrameRate)}
           </div>
-          <div
-            className={`text-xs ${
-              isUsingDefault
-                ? "text-green-600 dark:text-green-400"
-                : "text-amber-600 dark:text-amber-400"
-            }`}
-          >
+          <div className="text-xs text-green-600 dark:text-green-400">
             Box: {formatINR(globalBoxRate)}
-          </div>
-        </div>
-      </div>
-
-      {/* Quick Info */}
-      <div className="bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-800/20 rounded-lg p-3">
-        <div className="flex items-start gap-2">
-          <svg
-            className="w-4 h-4 text-blue-500 dark:text-blue-400 mt-0.5 flex-shrink-0"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-            />
-          </svg>
-          <div className="space-y-1">
-            <p className="text-xs text-gray-700 dark:text-gray-300">
-              Changing the frame rate automatically updates the box rate to 1.4×
-            </p>
-            <div className="flex items-center gap-2 text-xs">
-              <span className="px-1.5 py-0.5 bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 rounded">
-                Frame: ₹{globalFrameRate}
-              </span>
-              <span className="text-gray-500">×</span>
-              <span className="px-1.5 py-0.5 bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-300 rounded">
-                1.4
-              </span>
-              <span className="text-gray-500">=</span>
-              <span className="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded">
-                Box: ₹{calculatedBoxRate.toFixed(2)}
-              </span>
-            </div>
           </div>
         </div>
       </div>
@@ -503,67 +433,20 @@ export default function PricingSection({
           </div>
 
           {/* Box Rate Card */}
-          <div
-            className={`relative p-3 rounded-lg border ${
-              isUsingDefault
-                ? "bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-900/10 border-green-100 dark:border-green-800/30"
-                : "bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-900/20 dark:to-amber-900/10 border-amber-100 dark:border-amber-800/30"
-            }`}
-          >
+          <div className="relative p-3 rounded-lg border bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-900/10 border-green-100 dark:border-green-800/30">
             <div className="absolute -top-1.5 left-1/2 transform -translate-x-1/2">
-              <span
-                className={`px-1.5 py-0.5 text-xs font-medium rounded-full ${
-                  isUsingDefault
-                    ? "bg-green-100 dark:bg-green-800 text-green-700 dark:text-green-300"
-                    : "bg-amber-100 dark:bg-amber-800 text-amber-700 dark:text-amber-300"
-                }`}
-              >
+              <span className="px-1.5 py-0.5 text-xs font-medium rounded-full bg-green-100 dark:bg-green-800 text-green-700 dark:text-green-300">
                 Box
               </span>
             </div>
             <div className="text-center pt-1.5">
-              <div className="text-xs mb-1 font-medium flex items-center justify-center gap-1">
-                <span
-                  className={
-                    isUsingDefault
-                      ? "text-green-600 dark:text-green-400"
-                      : "text-amber-600 dark:text-amber-400"
-                  }
-                >
-                  Box Rate
-                </span>
-                {!isUsingDefault && (
-                  <span className="text-amber-600 dark:text-amber-400">
-                    <svg
-                      className="w-3 h-3"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                  </span>
-                )}
+              <div className="text-xs mb-1 font-medium text-green-600 dark:text-green-400">
+                Box Rate
               </div>
-              <div
-                className={`text-lg font-bold ${
-                  isUsingDefault
-                    ? "text-green-700 dark:text-green-300"
-                    : "text-amber-700 dark:text-amber-300"
-                }`}
-              >
+              <div className="text-lg font-bold text-green-700 dark:text-green-300">
                 ₹{globalBoxRate}
               </div>
-              <div
-                className={`text-xs mt-0.5 ${
-                  isUsingDefault
-                    ? "text-green-500/70 dark:text-green-400/60"
-                    : "text-amber-500/70 dark:text-amber-400/60"
-                }`}
-              >
+              <div className="text-xs mt-0.5 text-green-500/70 dark:text-green-400/60">
                 per box
               </div>
             </div>
