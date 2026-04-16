@@ -85,6 +85,7 @@ export default function CreateUserModal({ companyId, onSave, onClose }) {
           </button>
         </div>
 
+        {/* Persistent live region so screen readers register it before errors arrive */}
         <div aria-live="polite">
           {error && (
             <p className="mb-3 text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/30 rounded-lg px-3 py-2">
@@ -138,7 +139,7 @@ export default function CreateUserModal({ companyId, onSave, onClose }) {
                 Role
               </p>
               <div className="space-y-2">
-                {ROLES.map(({ value, label, description, Icon, color }) => { // eslint-disable-line no-unused-vars
+                {ROLES.map(({ value, label, description, Icon, color }) => {
                   const selected = form.role === value;
                   return (
                     <label
@@ -237,7 +238,8 @@ export default function CreateUserModal({ companyId, onSave, onClose }) {
             <button
               type="button"
               onClick={onClose}
-              className="px-5 py-2.5 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg text-sm font-medium transition-colors"
+              disabled={submitting}
+              className="px-5 py-2.5 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Cancel
             </button>
