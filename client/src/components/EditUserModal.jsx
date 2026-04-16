@@ -3,7 +3,7 @@ import { X } from "lucide-react";
 import api from "../api/api";
 
 export default function EditUserModal({ user, onSave, onClose }) {
-  const [form, setForm] = useState({ username: user.username, password: "" });
+  const [form, setForm] = useState({ username: user?.username ?? "", password: "" });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
 
@@ -14,6 +14,8 @@ export default function EditUserModal({ user, onSave, onClose }) {
     window.addEventListener("keydown", handleKey);
     return () => window.removeEventListener("keydown", handleKey);
   }, [onClose]);
+
+  if (!user) return null;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -61,7 +63,7 @@ export default function EditUserModal({ user, onSave, onClose }) {
         </div>
 
         {error && (
-          <p className="mb-3 text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/30 rounded-lg px-3 py-2">
+          <p aria-live="polite" className="mb-3 text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/30 rounded-lg px-3 py-2">
             {error}
           </p>
         )}
@@ -69,11 +71,14 @@ export default function EditUserModal({ user, onSave, onClose }) {
         <form onSubmit={handleSubmit}>
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+              <label htmlFor="edit-user-username" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                 Username
               </label>
               <input
+                id="edit-user-username"
                 type="text"
+                autoFocus
+                autoComplete="username"
                 value={form.username}
                 onChange={(e) => setForm((f) => ({ ...f, username: e.target.value }))}
                 className="w-full px-3 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -82,14 +87,17 @@ export default function EditUserModal({ user, onSave, onClose }) {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+              <label htmlFor="edit-user-password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                 New Password
                 <span className="text-gray-500 dark:text-gray-400 text-xs font-normal ml-1">
                   (Optional)
                 </span>
               </label>
               <input
+                id="edit-user-password"
                 type="password"
+                autoComplete="new-password"
+                minLength={6}
                 value={form.password}
                 onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
                 className="w-full px-3 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -102,7 +110,7 @@ export default function EditUserModal({ user, onSave, onClose }) {
             <button
               type="submit"
               disabled={submitting}
-              className="flex-1 px-5 py-2.5 bg-blue-500 hover:bg-blue-600 text-white text-sm font-semibold rounded-lg transition-colors disabled:opacity-50"
+              className="flex-1 px-5 py-2.5 bg-blue-500 hover:bg-blue-600 text-white text-sm font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {submitting ? "Saving..." : "Save Changes"}
             </button>
