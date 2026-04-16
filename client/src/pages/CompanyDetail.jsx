@@ -7,6 +7,7 @@ import InvoicePreviewModal from "../components/InvoicePreviewModal";
 import EditUserModal from "../components/EditUserModal";
 import CompanyProfileTab from "../components/CompanyProfileTab";
 import CreateUserModal from "../components/CreateUserModal";
+import DeleteUserModal from "../components/DeleteUserModal";
 
 export default function CompanyDetail() {
   const { id } = useParams();
@@ -19,6 +20,8 @@ export default function CompanyDetail() {
   const [editingUser, setEditingUser] = useState(null);
   const [editSuccess, setEditSuccess] = useState("");
   const [showCreateUser, setShowCreateUser] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     Promise.all([
@@ -39,6 +42,20 @@ export default function CompanyDetail() {
     const timer = setTimeout(() => setEditSuccess(""), 3000);
     return () => clearTimeout(timer);
   }, [editSuccess]);
+
+  const handleConfirmDeleteUser = async (userId) => {
+    setDeleting(true);
+    try {
+      await API.delete(`/auth/users/${userId}`);
+      setUsers((prev) => prev.filter((u) => u._id !== userId));
+      setEditSuccess("User deleted successfully!");
+    } catch {
+      setEditSuccess("");
+    } finally {
+      setDeleting(false);
+      setDeleteTarget(null);
+    }
+  };
 
   if (loading)
     return (
@@ -155,14 +172,24 @@ export default function CompanyDetail() {
                     {new Date(u.createdAt).toLocaleDateString()}
                   </td>
                   <td className="px-4 py-3">
-                    <button
-                      type="button"
-                      aria-label={`Edit user ${u.username}`}
-                      onClick={() => { setEditingUser(u); setShowCreateUser(false); }}
-                      className="px-3 py-1 text-xs bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/60 transition-colors"
-                    >
-                      Edit
-                    </button>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        aria-label={`Edit user ${u.username}`}
+                        onClick={() => { setEditingUser(u); setShowCreateUser(false); }}
+                        className="px-3 py-1 text-xs bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/60 transition-colors"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        type="button"
+                        aria-label={`Delete user ${u.username}`}
+                        onClick={() => setDeleteTarget(u)}
+                        className="px-3 py-1 text-xs bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/60 transition-colors"
+                      >
+                        Delete
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -264,6 +291,15 @@ export default function CompanyDetail() {
             setEditSuccess("User updated successfully!");
           }}
           onClose={() => setEditingUser(null)}
+        />
+      )}
+
+      {deleteTarget && (
+        <DeleteUserModal
+          user={deleteTarget}
+          onConfirm={handleConfirmDeleteUser}
+          onClose={() => { if (!deleting) setDeleteTarget(null); }}
+          deleting={deleting}
         />
       )}
 
