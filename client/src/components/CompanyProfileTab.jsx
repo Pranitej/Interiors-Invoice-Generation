@@ -86,20 +86,22 @@ export default function CompanyProfileTab({ companyId, initialCompany, onUpdate 
     }
   };
 
-  const setPhone = (idx, val) => {
-    const updated = [...form.phones];
-    updated[idx] = val;
-    setForm((f) => ({ ...f, phones: updated }));
-  };
+  const setPhone = (idx, val) =>
+    setForm((f) => {
+      const updated = [...f.phones];
+      updated[idx] = val;
+      return { ...f, phones: updated };
+    });
   const removePhone = (idx) =>
     setForm((f) => ({ ...f, phones: f.phones.filter((_, i) => i !== idx) }));
   const addPhone = () => setForm((f) => ({ ...f, phones: [...f.phones, ""] }));
 
-  const setTerm = (idx, val) => {
-    const updated = [...form.termsAndConditions];
-    updated[idx] = val;
-    setForm((f) => ({ ...f, termsAndConditions: updated }));
-  };
+  const setTerm = (idx, val) =>
+    setForm((f) => {
+      const updated = [...f.termsAndConditions];
+      updated[idx] = val;
+      return { ...f, termsAndConditions: updated };
+    });
   const removeTerm = (idx) =>
     setForm((f) => ({ ...f, termsAndConditions: f.termsAndConditions.filter((_, i) => i !== idx) }));
   const addTerm = () =>
@@ -319,7 +321,7 @@ export default function CompanyProfileTab({ companyId, initialCompany, onUpdate 
                       type="button"
                       onClick={() => removePhone(idx)}
                       className="p-2.5 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
-                      aria-label="Remove phone"
+                      aria-label={`Remove phone ${idx + 1}`}
                     >
                       <X className="w-4 h-4" />
                     </button>
@@ -361,7 +363,7 @@ export default function CompanyProfileTab({ companyId, initialCompany, onUpdate 
                       type="button"
                       onClick={() => removeTerm(idx)}
                       className="p-2.5 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
-                      aria-label="Remove term"
+                      aria-label={`Remove term ${idx + 1}`}
                     >
                       <X className="w-4 h-4" />
                     </button>
