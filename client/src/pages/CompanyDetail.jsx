@@ -4,6 +4,7 @@ import { useParams, Link } from "react-router-dom";
 import API from "../api/api";
 import InvoicePreviewModal from "../components/InvoicePreviewModal";
 import EditUserModal from "../components/EditUserModal";
+import CompanyProfileTab from "../components/CompanyProfileTab";
 
 export default function CompanyDetail() {
   const { id } = useParams();
@@ -74,17 +75,21 @@ export default function CompanyDetail() {
 
       {/* Tabs */}
       <div className="flex gap-1 border-b border-gray-200 dark:border-gray-700">
-        {["users", "invoices"].map((t) => (
+        {[
+          { key: "users", label: "Users", count: users.length },
+          { key: "invoices", label: "Invoices", count: invoices.length },
+          { key: "company-profile", label: "Company Profile", count: null },
+        ].map(({ key, label, count }) => (
           <button
-            key={t}
-            onClick={() => { setTab(t); setPreviewInvoice(null); setEditingUser(null); }}
-            className={`px-5 py-2.5 text-sm font-medium capitalize transition-colors border-b-2 -mb-px ${
-              tab === t
+            key={key}
+            onClick={() => { setTab(key); setPreviewInvoice(null); setEditingUser(null); }}
+            className={`px-5 py-2.5 text-sm font-medium transition-colors border-b-2 -mb-px ${
+              tab === key
                 ? "border-blue-600 text-blue-600 dark:text-blue-400"
                 : "border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
             }`}
           >
-            {t} ({t === "users" ? users.length : invoices.length})
+            {label}{count !== null ? ` (${count})` : ""}
           </button>
         ))}
       </div>
@@ -202,6 +207,16 @@ export default function CompanyDetail() {
           </table>
         </div>
       )}
+
+      {/* Company Profile Tab */}
+      {tab === "company-profile" && (
+        <CompanyProfileTab
+          companyId={id}
+          initialCompany={company}
+          onUpdate={(updated) => setCompany(updated)}
+        />
+      )}
+
       {previewInvoice && (
         <InvoicePreviewModal
           invoice={previewInvoice}
