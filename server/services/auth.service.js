@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import User from "../models/User.js";
 import Company from "../models/Company.js";
+import Invoice from "../models/Invoice.js";
 import AppError from "../utils/AppError.js";
 import config from "../config.js";
 
@@ -102,8 +103,18 @@ export async function updateUser(id, companyId, body) {
 export async function deleteUser(id, companyId) {
   if (!mongoose.Types.ObjectId.isValid(id))
     throw new AppError(400, "Invalid user ID");
+
   const filter = { _id: id };
   if (companyId) filter.companyId = companyId;
-  const user = await User.findOneAndDelete(filter);
+
+  const user = await User.findOne(filter);
   if (!user) throw new AppError(404, "User not found");
+
+  const invoiceCount = await Invoice.countDocuments({ createdBy: id });
+
+  if (invoiceCount > 0) {
+    await User.findByIdAndUpdate(id, { deletedAt: new Date() });
+  } else {
+    await User.findOneAndDelete(filter);
+  }
 }
