@@ -161,25 +161,31 @@ export default function CreateUserModal({ companyId, onSave, onClose }) {
                       />
                       <div
                         className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${
-                          color === "purple"
-                            ? "bg-purple-100 dark:bg-purple-900/40"
-                            : "bg-blue-100 dark:bg-blue-900/40"
+                          selected
+                            ? color === "purple"
+                              ? "bg-purple-100 dark:bg-purple-900/40"
+                              : "bg-blue-100 dark:bg-blue-900/40"
+                            : "bg-gray-100 dark:bg-gray-700"
                         }`}
                       >
                         <Icon
                           className={`w-4 h-4 ${
-                            color === "purple"
-                              ? "text-purple-600 dark:text-purple-400"
-                              : "text-blue-600 dark:text-blue-400"
+                            selected
+                              ? color === "purple"
+                                ? "text-purple-600 dark:text-purple-400"
+                                : "text-blue-600 dark:text-blue-400"
+                              : "text-gray-400 dark:text-gray-500"
                           }`}
                         />
                       </div>
                       <div className="flex-1 min-w-0">
                         <p
                           className={`text-sm font-semibold ${
-                            color === "purple"
-                              ? "text-purple-700 dark:text-purple-300"
-                              : "text-blue-700 dark:text-blue-300"
+                            selected
+                              ? color === "purple"
+                                ? "text-purple-700 dark:text-purple-300"
+                                : "text-blue-700 dark:text-blue-300"
+                              : "text-gray-700 dark:text-gray-300"
                           }`}
                         >
                           {label}
