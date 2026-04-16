@@ -15,8 +15,8 @@ export default function DeleteUserModal({ user, onConfirm, onClose, deleting }) 
 
   return (
     <div
-      className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50"
-      onClick={onClose}
+      className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50"
+      onClick={() => { if (!deleting) onClose(); }}
     >
       <div
         role="dialog"
