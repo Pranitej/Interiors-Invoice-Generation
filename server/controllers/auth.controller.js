@@ -6,6 +6,12 @@ import config from "../config.js";
 
 const { SUPER_ADMIN } = config.roles;
 
+const cookieOptions = {
+  httpOnly: true,
+  secure: config.server.isProduction,
+  sameSite: config.server.isProduction ? "strict" : "lax",
+};
+
 export async function login(req, res, next) {
   try {
     const { username, password } = req.body;
@@ -14,12 +20,7 @@ export async function login(req, res, next) {
 
     const { token, user, company } = await AuthService.login(username, password);
 
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
-      maxAge: config.auth.cookieMaxAgeMs,
-    });
+    res.cookie("token", token, { ...cookieOptions, maxAge: config.auth.cookieMaxAgeMs });
 
     sendSuccess(res, { user, company });
   } catch (err) {
@@ -29,11 +30,7 @@ export async function login(req, res, next) {
 
 export async function logout(_req, res, next) {
   try {
-    res.clearCookie("token", {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
-    });
+    res.clearCookie("token", cookieOptions);
     sendSuccess(res, null, 200, "Logged out");
   } catch (err) {
     next(err);
