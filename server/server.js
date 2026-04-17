@@ -1,6 +1,7 @@
 // server/server.js
 import express from "express";
 import cors from "cors";
+import cookieParser from "cookie-parser";
 import connectDB from "./database/db.js";
 import seeding from "./database/seeding.js";
 import invoiceRouter from "./routes/invoice.routes.js";
@@ -28,6 +29,7 @@ app.use(cors({
   origin: config.server.corsOrigin,
   credentials: true,
 }));
+app.use(cookieParser());
 app.use(helmet({ crossOriginResourcePolicy: { policy: "cross-origin" } }));
 app.use(express.json({ limit: `${config.server.bodyLimitMb}mb` }));
 app.use(express.urlencoded({ extended: true }));

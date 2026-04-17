@@ -11,7 +11,7 @@ export default function Login() {
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
-  const { user, setUser, setToken, setCompany } = useContext(AuthContext);
+  const { user, setUser, setCompany } = useContext(AuthContext);
 
   useEffect(() => {
     if (user) {
@@ -38,7 +38,7 @@ export default function Login() {
       const res = await api.post("/auth/login", { username, password });
 
       if (res.data.success) {
-        const { token, user, company } = res.data.data;
+        const { user, company } = res.data.data;
 
         const userData = {
           _id: user._id,
@@ -48,13 +48,11 @@ export default function Login() {
         };
 
         localStorage.setItem("user", JSON.stringify(userData));
-        localStorage.setItem("token", token);
         if (company) {
           localStorage.setItem("company", JSON.stringify(company));
         }
 
         setUser(userData);
-        setToken(token);
         setCompany(company ?? null);
 
         setTimeout(() => {

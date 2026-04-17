@@ -32,6 +32,7 @@ const config = {
   auth: {
     jwtSecret: process.env.JWT_SECRET,
     jwtExpiresInDays: 7,          // appended as `${n}d` in auth.service.js
+    cookieMaxAgeMs: 7 * 24 * 60 * 60 * 1000,
     bcryptRounds: 10,
   },
 

@@ -5,13 +5,8 @@ import config from "../config.js";
 
 export default async function authenticate(req, res, next) {
   try {
-    const authHeader = req.headers.authorization;
-
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return next(new AppError(401, "No token provided"));
-    }
-
-    const token = authHeader.split(" ")[1];
+    const token = req.cookies?.token;
+    if (!token) return next(new AppError(401, "No token provided"));
     let decoded;
     try {
       decoded = jwt.verify(token, config.auth.jwtSecret);

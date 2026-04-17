@@ -25,10 +25,6 @@ function App() {
     return stored ? JSON.parse(stored) : null;
   });
 
-  const [token, setToken] = useState(() => {
-    return localStorage.getItem("token") || null;
-  });
-
   const [company, setCompany] = useState(() => {
     const stored = localStorage.getItem("company");
     return stored ? JSON.parse(stored) : null;
@@ -45,25 +41,24 @@ function App() {
     });
   };
 
-  const logout = () => {
+  const logout = async () => {
+    try { await API.post("/auth/logout"); } catch (_) {}
     setUser(null);
-    setToken(null);
     setCompany(null);
     setSubscriptionStatus(null);
     localStorage.removeItem("user");
-    localStorage.removeItem("token");
     localStorage.removeItem("company");
   };
 
   const fetchSubscriptionStatus = useCallback(async () => {
-    if (!user || user.role === "super_admin" || !token) return;
+    if (!user || user.role === "super_admin") return;
     try {
       const res = await API.get("/subscription/status");
       setSubscriptionStatus(res.data.data);
     } catch {
       // non-critical — don't break the app
     }
-  }, [user, token]);
+  }, [user]);
 
   useEffect(() => {
     fetchSubscriptionStatus();
@@ -74,7 +69,7 @@ function App() {
   }, [fetchSubscriptionStatus, user]);
 
   return (
-    <AuthContext.Provider value={{ user, setUser, token, setToken, company, setCompany, subscriptionStatus, setSubscriptionStatus, logout }}>
+    <AuthContext.Provider value={{ user, setUser, company, setCompany, subscriptionStatus, setSubscriptionStatus, logout }}>
       <div
         className={`${theme} min-h-screen bg-gray-50 dark:bg-slate-900 text-gray-900 dark:text-gray-100`}
       >

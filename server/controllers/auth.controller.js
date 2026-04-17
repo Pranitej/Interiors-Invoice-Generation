@@ -12,8 +12,29 @@ export async function login(req, res, next) {
     if (!username || !password)
       throw new AppError(400, "username and password are required");
 
-    const result = await AuthService.login(username, password);
-    sendSuccess(res, result);
+    const { token, user, company } = await AuthService.login(username, password);
+
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
+      maxAge: config.auth.cookieMaxAgeMs,
+    });
+
+    sendSuccess(res, { user, company });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function logout(_req, res, next) {
+  try {
+    res.clearCookie("token", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
+    });
+    sendSuccess(res, null, 200, "Logged out");
   } catch (err) {
     next(err);
   }

@@ -10,6 +10,7 @@ const { COMPANY_ADMIN, SUPER_ADMIN } = config.roles;
 const router = express.Router();
 
 router.post("/login", AuthController.login);
+router.post("/logout", AuthController.logout);
 router.get("/me", authenticate, AuthController.getMe);
 
 router.post(
