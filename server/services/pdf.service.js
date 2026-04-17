@@ -40,6 +40,24 @@ export const renderState = {
   },
 };
 
+let _browser = null;
+
+async function getBrowser() {
+  if (_browser && _browser.isConnected()) return _browser;
+  _browser = await puppeteer.launch({
+    headless: true,
+    args: [
+      "--no-sandbox",
+      "--disable-setuid-sandbox",
+      "--disable-dev-shm-usage",
+      "--disable-gpu",
+    ],
+    timeout: BROWSER_TIMEOUT_MS,
+  });
+  _browser.on("disconnected", () => { _browser = null; });
+  return _browser;
+}
+
 // Replace /public/... image URLs with base64 data URIs so Puppeteer
 // doesn't need to make network requests back to the server.
 function embedLocalImages(html) {
@@ -63,22 +81,11 @@ function embedLocalImages(html) {
 }
 
 async function generatePDF(html, retries = retryCount) {
-  let browser = null;
-
   for (let attempt = 1; attempt <= retries; attempt++) {
+    let page = null;
     try {
-      browser = await puppeteer.launch({
-        headless: true,
-        args: [
-          "--no-sandbox",
-          "--disable-setuid-sandbox",
-          "--disable-dev-shm-usage",
-          "--disable-gpu",
-        ],
-        timeout: BROWSER_TIMEOUT_MS,
-      });
-
-      const page = await browser.newPage();
+      const browser = await getBrowser();
+      page = await browser.newPage();
       page.setDefaultTimeout(PDF_TIMEOUT_MS);
       page.setDefaultNavigationTimeout(PDF_TIMEOUT_MS);
 
@@ -108,15 +115,14 @@ async function generatePDF(html, retries = retryCount) {
         preferCSSPageSize: true,
       });
 
-      await browser.close();
-      browser = null;
+      await page.close();
       return pdfBuffer;
     } catch (err) {
       console.error(`[PDF] Attempt ${attempt}/${retries} failed: ${err.message}`);
-      if (browser) {
-        try { await browser.close(); } catch (_) {}
-        browser = null;
+      if (page) {
+        try { await page.close(); } catch (_) {}
       }
+      if (_browser && !_browser.isConnected()) _browser = null;
       if (attempt === retries) throw err;
       await new Promise((r) => setTimeout(r, attempt * retryDelayBaseMs));
     }
