@@ -9,7 +9,7 @@ import ROOM_CONFIG from "../json/roomConfig";
 import PricingSection from "../components/PricingSection";
 import { formatINR, roundTo2 } from "../utils/calculations";
 import InvoicePreview from "../components/InvoicePreview";
-import { Check, FilePlusCorner, RefreshCw, X } from "lucide-react";
+import { AlertCircle, Check, FilePlusCorner, RefreshCw, X } from "lucide-react";
 import config from "../config.js";
 
 const DRAFT_KEY = "invoice_draft";
@@ -45,7 +45,7 @@ function getItemDefaults(roomName, itemName) {
 export default function NewQuote() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { user, company } = useContext(AuthContext);
+  const { user, company, subscriptionStatus } = useContext(AuthContext);
 
   const prevIdRef = useRef(id);
   const isEditingRef = useRef(!!id);
@@ -394,6 +394,14 @@ export default function NewQuote() {
   };
 
   const handleSaveInvoice = async () => {
+    if (subscriptionStatus && !subscriptionStatus.canCreateInvoices) {
+      alert(
+        subscriptionStatus.inactiveRemarks
+          ? `Your account has been suspended: ${subscriptionStatus.inactiveRemarks}`
+          : "Your account is inactive. Please contact support to renew your subscription."
+      );
+      return;
+    }
     if (!client.siteAddress.trim()) {
       alert("Site address is required to save the invoice.");
       return;
@@ -436,6 +444,14 @@ export default function NewQuote() {
   };
 
   const handleSaveAsNewInvoice = async () => {
+    if (subscriptionStatus && !subscriptionStatus.canCreateInvoices) {
+      alert(
+        subscriptionStatus.inactiveRemarks
+          ? `Your account has been suspended: ${subscriptionStatus.inactiveRemarks}`
+          : "Your account is inactive. Please contact support to renew your subscription."
+      );
+      return;
+    }
     if (!client.siteAddress.trim()) {
       alert("Site address is required to save the invoice.");
       return;
@@ -506,6 +522,20 @@ export default function NewQuote() {
           </h2>
           <p className="text-sm text-gray-600 dark:text-gray-400">
             {id ? "Fetching invoice details..." : "Preparing workspace..."}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (company?.invoicesBlocked) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="bg-white dark:bg-gray-800 rounded-xl border border-amber-200 dark:border-amber-800 p-8 max-w-md text-center">
+          <AlertCircle className="w-12 h-12 text-amber-500 mx-auto mb-4" />
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Invoice Access Disabled</h2>
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            {id ? "Editing invoices" : "Creating invoices"} has been temporarily disabled for your account. Please contact support to renew your subscription.
           </p>
         </div>
       </div>

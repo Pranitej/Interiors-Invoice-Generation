@@ -22,14 +22,11 @@ const CompareInvoices = forwardRef(
         try {
           setLoading(true);
           setError(null);
-          const [resA, resB] = await Promise.all([
-            api.get(`/invoices/${invoiceAId}`),
-            api.get(`/invoices/${invoiceBId}`),
-          ]);
-          setInvoiceA(resA.data.data);
-          setInvoiceB(resB.data.data);
-          onLoadedA?.(resA.data.data);
-          onLoadedB?.(resB.data.data);
+          const res = await api.post("/invoices/compare", { invoiceAId, invoiceBId });
+          setInvoiceA(res.data.data.invoiceA);
+          setInvoiceB(res.data.data.invoiceB);
+          onLoadedA?.(res.data.data.invoiceA);
+          onLoadedB?.(res.data.data.invoiceB);
         } catch (err) {
           console.error("Failed to load invoices", err);
           setError("Failed to load invoices. Please try again.");
