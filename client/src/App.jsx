@@ -1,16 +1,18 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Login from "./pages/Login";
 import NewQuote from "./pages/NewQuote";
 import History from "./pages/History";
 import Compare from "./pages/Compare";
 import Header from "./components/Header";
+import SubscriptionBanner from "./components/SubscriptionBanner";
 import Profile from "./pages/Profile";
 import { AuthContext } from "./context/AuthContext";
 import PageNotFound from "./pages/PageNotFound";
 import ProtectedRoute from "./components/ProtectedRoute";
 import SuperAdminDashboard from "./pages/SuperAdminDashboard";
 import CompanyDetail from "./pages/CompanyDetail";
+import API from "./api/api";
 
 function App() {
   const [theme, setTheme] = useState(() => {
@@ -32,6 +34,8 @@ function App() {
     return stored ? JSON.parse(stored) : null;
   });
 
+  const [subscriptionStatus, setSubscriptionStatus] = useState(null);
+
   const toggleTheme = () => {
     setTheme((prev) => {
       const next = prev === "light" ? "dark" : "light";
@@ -45,18 +49,38 @@ function App() {
     setUser(null);
     setToken(null);
     setCompany(null);
+    setSubscriptionStatus(null);
     localStorage.removeItem("user");
     localStorage.removeItem("token");
     localStorage.removeItem("company");
   };
 
+  const fetchSubscriptionStatus = useCallback(async () => {
+    if (!user || user.role === "super_admin" || !token) return;
+    try {
+      const res = await API.get("/subscription/status");
+      setSubscriptionStatus(res.data.data);
+    } catch {
+      // non-critical — don't break the app
+    }
+  }, [user, token]);
+
+  useEffect(() => {
+    fetchSubscriptionStatus();
+    // Refresh subscription status every 5 minutes while logged in
+    if (!user || user.role === "super_admin") return;
+    const interval = setInterval(fetchSubscriptionStatus, 5 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, [fetchSubscriptionStatus, user]);
+
   return (
-    <AuthContext.Provider value={{ user, setUser, token, setToken, company, setCompany, logout }}>
+    <AuthContext.Provider value={{ user, setUser, token, setToken, company, setCompany, subscriptionStatus, setSubscriptionStatus, logout }}>
       <div
         className={`${theme} min-h-screen bg-gray-50 dark:bg-slate-900 text-gray-900 dark:text-gray-100`}
       >
         <BrowserRouter>
           <Header theme={theme} toggleTheme={toggleTheme} />
+          <SubscriptionBanner />
           <main className="max-w-6xl mx-auto p-4">
             <Routes>
               <Route path="/" element={<Login />} />

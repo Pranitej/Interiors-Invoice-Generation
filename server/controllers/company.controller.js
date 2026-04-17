@@ -43,23 +43,7 @@ export async function updateCompany(req, res, next) {
   }
 }
 
-export async function deleteCompany(req, res, next) {
-  try {
-    await CompanyService.deleteCompany(req.params.id);
-    sendSuccess(res, null, 200, "Company deleted successfully");
-  } catch (err) {
-    next(err);
-  }
-}
-
-export async function toggleActive(req, res, next) {
-  try {
-    const company = await CompanyService.toggleCompanyActive(req.params.id);
-    sendSuccess(res, company);
-  } catch (err) {
-    next(err);
-  }
-}
+// toggleActive removed — use /api/subscription/companies/:id/activate|deactivate
 
 export async function updateLogo(req, res, next) {
   try {

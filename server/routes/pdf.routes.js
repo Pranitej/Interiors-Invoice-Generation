@@ -1,9 +1,9 @@
 // server/routes/pdf.routes.js
-// server/routes/pdf.routes.js
 import express from "express";
 import { renderState, MAX_HTML_BYTES } from "../services/pdf.service.js";
 import * as PdfController from "../controllers/pdf.controller.js";
 import authenticate from "../middleware/authenticate.js";
+import { requireDownloadAccess } from "../middleware/checkSubscription.js";
 import { sendError, sendSuccess } from "../utils/response.js";
 
 const router = express.Router();
@@ -36,6 +36,13 @@ const concurrencyGuard = (req, res, next) => {
 };
 
 router.get("/status", PdfController.getStatus);
-router.post("/render", authenticate, validatePayload, concurrencyGuard, PdfController.renderPdf);
+router.post(
+  "/render",
+  authenticate,
+  requireDownloadAccess,
+  validatePayload,
+  concurrencyGuard,
+  PdfController.renderPdf
+);
 
 export default router;

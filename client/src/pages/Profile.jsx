@@ -22,6 +22,15 @@ import {
   IdCard,
   Building2,
   Plus,
+  CreditCard,
+  Clock,
+  IndianRupee,
+  Download,
+  Ban,
+  ReceiptText,
+  LogIn,
+  FileText,
+  ZoomIn,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { formatISTDateTime } from "../utils/dateTime";
@@ -31,7 +40,7 @@ import EditUserModal from "../components/EditUserModal";
 import DeleteUserModal from "../components/DeleteUserModal";
 
 export default function Profile() {
-  const { user: currentUser, setUser: setCurrentUser, setCompany } =
+  const { user: currentUser, setUser: setCurrentUser, setCompany, subscriptionStatus } =
     useContext(AuthContext);
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("profile");
@@ -57,6 +66,10 @@ export default function Profile() {
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleting, setDeleting] = useState(false);
   const [showCreateUserModal, setShowCreateUserModal] = useState(false);
+  const [subscriptionData, setSubscriptionData] = useState(null);
+  const [subscriptionTransactions, setSubscriptionTransactions] = useState([]);
+  const [subscriptionLoading, setSubscriptionLoading] = useState(false);
+  const [showQrModal, setShowQrModal] = useState(false);
   const [companyForm, setCompanyForm] = useState({
     name: "",
     tagline: "",
@@ -107,6 +120,22 @@ export default function Profile() {
       setMessage({ type: "error", text: "Failed to load users" });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchSubscription = async () => {
+    try {
+      setSubscriptionLoading(true);
+      const [statusRes, txRes] = await Promise.all([
+        api.get("/subscription/status"),
+        api.get("/subscription/my/transactions"),
+      ]);
+      setSubscriptionData(statusRes.data.data);
+      setSubscriptionTransactions(txRes.data.data);
+    } catch {
+      // non-critical
+    } finally {
+      setSubscriptionLoading(false);
     }
   };
 
@@ -309,6 +338,7 @@ export default function Profile() {
       ? [
           { id: "company", label: "Company", icon: Building2, color: "indigo" },
           { id: "users", label: "Manage Users", icon: Users, color: "purple" },
+          { id: "subscription", label: "Subscription", icon: CreditCard, color: "green" },
         ]
       : []),
   ];
@@ -345,9 +375,33 @@ export default function Profile() {
           </p>
         </div>
 
+        {/* Mobile horizontal tab bar */}
+        <div className="lg:hidden mb-4 overflow-x-auto">
+          <div className="flex gap-2 pb-1 min-w-max">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => {
+                  setActiveTab(tab.id);
+                  if (tab.id === "company") fetchCompany();
+                  if (tab.id === "subscription") fetchSubscription();
+                }}
+                className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all border ${
+                  activeTab === tab.id
+                    ? `bg-${tab.color}-50 dark:bg-${tab.color}-900/20 text-${tab.color}-600 dark:text-${tab.color}-400 border-${tab.color}-200 dark:border-${tab.color}-800`
+                    : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50"
+                }`}
+              >
+                <tab.icon className="w-4 h-4" />
+                {tab.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          {/* Sidebar */}
-          <div className="lg:col-span-1">
+          {/* Sidebar — desktop only */}
+          <div className="hidden lg:block lg:col-span-1">
             <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 shadow-sm">
               <div className="space-y-0.5">
                 {tabs.map((tab) => (
@@ -356,6 +410,7 @@ export default function Profile() {
                     onClick={() => {
                       setActiveTab(tab.id);
                       if (tab.id === "company") fetchCompany();
+                      if (tab.id === "subscription") fetchSubscription();
                     }}
                     className={`w-full flex cursor-pointer items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 text-sm ${
                       activeTab === tab.id
@@ -419,7 +474,7 @@ export default function Profile() {
           </div>
 
           {/* Main Content Area */}
-          <div className="lg:col-span-3">
+          <div className="col-span-1 lg:col-span-3">
             {/* Message Display */}
             {message.text && (
               <div
@@ -808,6 +863,238 @@ export default function Profile() {
               </div>
             )}
 
+            {/* Subscription Tab */}
+            {activeTab === "subscription" && currentUser?.role === config.roles.COMPANY_ADMIN && (
+              <div className="space-y-5">
+                {subscriptionLoading ? (
+                  <div className="flex justify-center py-12">
+                    <div className="w-8 h-8 border-4 border-green-500 border-t-transparent rounded-full animate-spin" />
+                  </div>
+                ) : subscriptionData ? (
+                  <>
+                    {/* Status + Access Controls Card */}
+                    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5 shadow-sm">
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center">
+                          <CreditCard className="w-5 h-5 text-white" />
+                        </div>
+                        <div>
+                          <h2 className="text-lg font-bold text-gray-900 dark:text-white">Subscription</h2>
+                          <p className="text-xs text-gray-600 dark:text-gray-400">Your current plan and access status</p>
+                        </div>
+                      </div>
+
+                      {/* Top info row */}
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
+                        <div className="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-3">
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Account Status</p>
+                          <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
+                            subscriptionData.isActive
+                              ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
+                              : "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400"
+                          }`}>
+                            {subscriptionData.isActive ? <CheckCircle className="w-3 h-3" /> : <Ban className="w-3 h-3" />}
+                            {subscriptionData.isActive ? "Active" : "Inactive"}
+                          </span>
+                        </div>
+
+                        <div className="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-3">
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Expiry Date</p>
+                          <p className="text-sm font-semibold text-gray-800 dark:text-white flex items-center gap-1">
+                            <Clock className="w-3 h-3 text-gray-400" />
+                            {subscriptionData.subscriptionExpiryDate
+                              ? new Date(subscriptionData.subscriptionExpiryDate).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })
+                              : "—"}
+                          </p>
+                          {subscriptionData.daysUntilExpiry !== null && (
+                            <p className={`text-xs mt-0.5 ${
+                              subscriptionData.daysUntilExpiry > 7 ? "text-green-600 dark:text-green-400"
+                              : subscriptionData.daysUntilExpiry > 0 ? "text-amber-600 dark:text-amber-400"
+                              : "text-red-600 dark:text-red-400"
+                            }`}>
+                              {subscriptionData.daysUntilExpiry > 0
+                                ? `${subscriptionData.daysUntilExpiry}d remaining`
+                                : "Expired"}
+                            </p>
+                          )}
+                        </div>
+
+                        <div className="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-3">
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Renewal Amount</p>
+                          <p className="text-sm font-semibold text-gray-800 dark:text-white flex items-center gap-1">
+                            <IndianRupee className="w-3 h-3 text-gray-400" />
+                            {subscriptionData.subscriptionAmount != null
+                              ? Number(subscriptionData.subscriptionAmount).toLocaleString("en-IN")
+                              : subscriptionData.platformAmount
+                                ? Number(subscriptionData.platformAmount).toLocaleString("en-IN")
+                                : "—"}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Access Controls row */}
+                      <div className="border-t border-gray-100 dark:border-gray-700 pt-4">
+                        <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">Access Controls</p>
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                          {/* Create / Edit Invoice */}
+                          <div className="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-3">
+                            <div className="flex items-center gap-1.5 mb-1.5">
+                              <FileText className="w-3.5 h-3.5 text-gray-400" />
+                              <p className="text-xs text-gray-500 dark:text-gray-400">Create &amp; Edit Invoice</p>
+                            </div>
+                            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
+                              !subscriptionData.invoicesBlocked
+                                ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
+                                : "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400"
+                            }`}>
+                              {subscriptionData.invoicesBlocked
+                                ? <Ban className="w-3 h-3" />
+                                : <CheckCircle className="w-3 h-3" />}
+                              {subscriptionData.invoicesBlocked ? "Blocked" : "Allowed"}
+                            </span>
+                          </div>
+
+                          {/* Download */}
+                          <div className="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-3">
+                            <div className="flex items-center gap-1.5 mb-1.5">
+                              <Download className="w-3.5 h-3.5 text-gray-400" />
+                              <p className="text-xs text-gray-500 dark:text-gray-400">Download</p>
+                            </div>
+                            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
+                              !subscriptionData.downloadsBlocked
+                                ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
+                                : "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400"
+                            }`}>
+                              {subscriptionData.downloadsBlocked
+                                ? <Ban className="w-3 h-3" />
+                                : <CheckCircle className="w-3 h-3" />}
+                              {subscriptionData.downloadsBlocked ? "Blocked" : "Allowed"}
+                            </span>
+                          </div>
+
+                          {/* Login */}
+                          <div className="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-3">
+                            <div className="flex items-center gap-1.5 mb-1.5">
+                              <LogIn className="w-3.5 h-3.5 text-gray-400" />
+                              <p className="text-xs text-gray-500 dark:text-gray-400">Login</p>
+                            </div>
+                            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
+                              !subscriptionData.loginBlocked
+                                ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
+                                : "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400"
+                            }`}>
+                              {subscriptionData.loginBlocked
+                                ? <Ban className="w-3 h-3" />
+                                : <CheckCircle className="w-3 h-3" />}
+                              {subscriptionData.loginBlocked ? "Blocked" : "Allowed"}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Inactive remarks */}
+                      {!subscriptionData.isActive && subscriptionData.inactiveRemarks && (
+                        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg px-4 py-3 mt-4">
+                          <p className="text-xs font-semibold text-red-700 dark:text-red-400 mb-0.5">Reason for suspension:</p>
+                          <p className="text-sm text-red-800 dark:text-red-300">{subscriptionData.inactiveRemarks}</p>
+                        </div>
+                      )}
+
+                      {/* UPI QR */}
+                      {subscriptionData.upiQrFile && (
+                        <div className="border-t border-gray-100 dark:border-gray-700 pt-4 mt-4">
+                          <p className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Pay via UPI to renew</p>
+                          <div className="flex flex-col sm:flex-row items-start gap-4">
+                            <button
+                              type="button"
+                              onClick={() => setShowQrModal(true)}
+                              className="group relative w-36 h-36 flex-shrink-0 border border-gray-200 dark:border-gray-600 rounded-xl bg-white p-2 hover:border-green-400 dark:hover:border-green-500 transition-colors focus:outline-none focus:ring-2 focus:ring-green-500"
+                              title="Click to enlarge"
+                            >
+                              <img
+                                src={`${import.meta.env.VITE_API_BASE || "http://localhost:5000"}/public/${subscriptionData.upiQrFile}`}
+                                alt="UPI QR Code"
+                                className="w-full h-full object-contain"
+                              />
+                              <span className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/10 dark:group-hover:bg-black/30 rounded-xl transition-colors">
+                                <ZoomIn className="w-6 h-6 text-white opacity-0 group-hover:opacity-100 drop-shadow transition-opacity" />
+                              </span>
+                            </button>
+                            <div className="text-sm text-gray-600 dark:text-gray-400 space-y-1.5">
+                              <p>Scan the QR code to pay the renewal amount.</p>
+                              <p>After payment, contact your administrator to activate your subscription.</p>
+                              {(subscriptionData.subscriptionAmount != null || subscriptionData.platformAmount) && (
+                                <p className="font-semibold text-gray-800 dark:text-white">
+                                  Amount: ₹{Number(subscriptionData.subscriptionAmount ?? subscriptionData.platformAmount).toLocaleString("en-IN")}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Transaction History */}
+                    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
+                      <div className="px-5 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center gap-2">
+                        <ReceiptText className="w-4 h-4 text-gray-500" />
+                        <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Transaction History</h3>
+                      </div>
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-sm">
+                          <thead className="bg-gray-50 dark:bg-gray-900/50 border-b border-gray-200 dark:border-gray-700">
+                            <tr>
+                              {["Date", "Event", "Amount", "Valid Until", "Remarks"].map((h) => (
+                                <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{h}</th>
+                              ))}
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
+                            {subscriptionTransactions.length === 0 && (
+                              <tr><td colSpan={5} className="px-4 py-8 text-center text-gray-400 text-sm">No transactions yet.</td></tr>
+                            )}
+                            {subscriptionTransactions.map((tx) => {
+                              const typeMap = {
+                                activated: { label: "Activated", cls: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400" },
+                                deactivated: { label: "Deactivated", cls: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400" },
+                                auto_expired: { label: "Auto-Expired", cls: "bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300" },
+                                amount_changed: { label: "Amount Changed", cls: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400" },
+                                downloads_toggled: { label: "Downloads Toggled", cls: "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400" },
+                              };
+                              const { label, cls } = typeMap[tx.type] || { label: tx.type, cls: "bg-gray-100 text-gray-700" };
+                              return (
+                                <tr key={tx._id} className="hover:bg-gray-50 dark:hover:bg-gray-700/30">
+                                  <td className="px-4 py-3 text-gray-500 dark:text-gray-400 whitespace-nowrap text-xs">
+                                    {new Date(tx.createdAt).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}
+                                  </td>
+                                  <td className="px-4 py-3">
+                                    <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${cls}`}>{label}</span>
+                                  </td>
+                                  <td className="px-4 py-3 text-gray-700 dark:text-gray-300 text-xs">
+                                    {tx.amount != null ? `₹${Number(tx.amount).toLocaleString("en-IN")}` : "—"}
+                                  </td>
+                                  <td className="px-4 py-3 text-gray-500 dark:text-gray-400 whitespace-nowrap text-xs">
+                                    {tx.expiryDate ? new Date(tx.expiryDate).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) : "—"}
+                                  </td>
+                                  <td className="px-4 py-3 text-gray-600 dark:text-gray-300 text-xs max-w-xs">
+                                    {tx.remarks || "—"}
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-8 text-center text-gray-400">
+                    No subscription data available.
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Manage Users Tab */}
             {activeTab === "users" && currentUser?.role === config.roles.COMPANY_ADMIN && (
               <div className="space-y-5">
@@ -1091,6 +1378,46 @@ export default function Profile() {
               </button>
             </div>
           </div>
+          </div>
+        </div>
+      )}
+
+      {/* UPI QR Popup Modal */}
+      {showQrModal && subscriptionData?.upiQrFile && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
+          onClick={() => setShowQrModal(false)}
+        >
+          <div
+            className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-6 max-w-sm w-full flex flex-col items-center gap-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between w-full">
+              <h3 className="text-base font-bold text-gray-900 dark:text-white">UPI Payment QR</h3>
+              <button
+                onClick={() => setShowQrModal(false)}
+                className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+              >
+                <X className="w-4 h-4 text-gray-500" />
+              </button>
+            </div>
+            <img
+              src={`${import.meta.env.VITE_API_BASE || "http://localhost:5000"}/public/${subscriptionData.upiQrFile}`}
+              alt="UPI QR Code"
+              className="w-64 h-64 object-contain border border-gray-200 dark:border-gray-600 rounded-xl bg-white p-3"
+            />
+            {(subscriptionData.subscriptionAmount != null || subscriptionData.platformAmount) && (
+              <div className="flex items-center gap-2 px-4 py-2.5 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl">
+                <IndianRupee className="w-4 h-4 text-green-600 dark:text-green-400" />
+                <span className="text-base font-bold text-green-700 dark:text-green-300">
+                  {Number(subscriptionData.subscriptionAmount ?? subscriptionData.platformAmount).toLocaleString("en-IN")}
+                </span>
+                <span className="text-sm text-green-600 dark:text-green-400">renewal amount</span>
+              </div>
+            )}
+            <p className="text-xs text-center text-gray-500 dark:text-gray-400">
+              After payment, contact your administrator to activate your subscription.
+            </p>
           </div>
         </div>
       )}

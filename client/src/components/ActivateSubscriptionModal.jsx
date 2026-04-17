@@ -5,10 +5,25 @@ import API from "../api/api";
 
 const PAYMENT_MODES = ["Cash", "UPI", "Bank Transfer", "Cheque"];
 
+const DURATION_PRESETS = [
+  { label: "+7d",   days: 7 },
+  { label: "+30d",  days: 30 },
+  { label: "+3mo",  months: 3 },
+  { label: "+6mo",  months: 6 },
+  { label: "+1yr",  months: 12 },
+];
+
+function addDuration(base, { days, months }) {
+  const d = base ? new Date(base) : new Date();
+  if (days)   d.setDate(d.getDate() + days);
+  if (months) d.setMonth(d.getMonth() + months);
+  return d.toISOString().split("T")[0];
+}
+
 export default function ActivateSubscriptionModal({ companyId, companyName, currentAmount, platformAmount, onSave, onClose }) {
-  const defaultAmount = currentAmount ?? platformAmount ?? "";
+  const companyRate = currentAmount ?? platformAmount ?? null;
   const [expiryDate, setExpiryDate] = useState("");
-  const [amount, setAmount] = useState(defaultAmount === 0 ? "" : String(defaultAmount));
+  const [amount, setAmount] = useState(companyRate ? String(companyRate) : "");
   const [modeOfPayment, setModeOfPayment] = useState("");
   const [remarks, setRemarks] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -74,6 +89,27 @@ export default function ActivateSubscriptionModal({ companyId, companyName, curr
               required
               className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-green-500 focus:border-green-500"
             />
+            <div className="flex flex-wrap gap-1.5 mt-2">
+              {DURATION_PRESETS.map((preset) => (
+                <button
+                  key={preset.label}
+                  type="button"
+                  onClick={() => setExpiryDate(addDuration(expiryDate, preset))}
+                  className="px-2.5 py-1 text-xs font-medium rounded-md border border-green-200 dark:border-green-800 text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-900/20 hover:bg-green-100 dark:hover:bg-green-900/40 transition-colors"
+                >
+                  {preset.label}
+                </button>
+              ))}
+              {expiryDate && (
+                <button
+                  type="button"
+                  onClick={() => setExpiryDate("")}
+                  className="px-2.5 py-1 text-xs font-medium rounded-md border border-gray-200 dark:border-gray-600 text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
+                >
+                  Clear
+                </button>
+              )}
+            </div>
           </div>
 
           <div>
@@ -94,19 +130,28 @@ export default function ActivateSubscriptionModal({ companyId, companyName, curr
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
-              Subscription Amount (₹){" "}
-              {platformAmount ? <span className="text-gray-400 font-normal">— platform default: ₹{Number(platformAmount).toLocaleString("en-IN")}</span> : ""}
-            </label>
+            <div className="flex items-baseline justify-between mb-1">
+              <label className="text-xs font-medium text-gray-600 dark:text-gray-400">
+                Amount Paid (₹) <span className="text-red-500">*</span>
+              </label>
+              {companyRate != null && (
+                <span className="text-xs text-gray-400 dark:text-gray-500">
+                  company rate: ₹{Number(companyRate).toLocaleString("en-IN")}
+                </span>
+              )}
+            </div>
             <input
               type="number"
               min="0"
               step="1"
-              placeholder={platformAmount ? String(platformAmount) : "0"}
+              placeholder={companyRate ? String(companyRate) : "0"}
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
               className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-green-500 focus:border-green-500"
             />
+            <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">
+              Recorded in the transaction only — does not change the company rate.
+            </p>
           </div>
 
           <div>

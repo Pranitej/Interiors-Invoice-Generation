@@ -9,7 +9,8 @@ export async function requireInvoiceAccess(req, res, next) {
   if (req.user?.role === SUPER_ADMIN) return next();
 
   const companyId = req.user?.companyId;
-  if (!companyId) return sendError(res, 403, "No company associated with your account");
+  if (!companyId)
+    return sendError(res, 403, "No company associated with your account");
 
   const company = await Company.findById(companyId).lean();
   if (!company) return sendError(res, 404, "Company not found");
@@ -18,7 +19,7 @@ export async function requireInvoiceAccess(req, res, next) {
     return sendError(
       res,
       403,
-      "Invoice creation and editing has been temporarily disabled for your account. Please contact support."
+      "Invoice creation and editing has been disabled for your account. Please contact Administrator.",
     );
   }
 
@@ -29,7 +30,8 @@ export async function requireDownloadAccess(req, res, next) {
   if (req.user?.role === SUPER_ADMIN) return next();
 
   const companyId = req.user?.companyId;
-  if (!companyId) return sendError(res, 403, "No company associated with your account");
+  if (!companyId)
+    return sendError(res, 403, "No company associated with your account");
 
   const company = await Company.findById(companyId).lean();
   if (!company) return sendError(res, 404, "Company not found");
@@ -38,7 +40,7 @@ export async function requireDownloadAccess(req, res, next) {
     return sendError(
       res,
       403,
-      "Invoice downloads have been temporarily disabled for your account. Please contact your administrator."
+      "Invoice downloads have been disabled for your account. Please contact your administrator.",
     );
   }
 

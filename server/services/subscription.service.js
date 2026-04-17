@@ -105,7 +105,6 @@ export async function activateSubscription({ companyId, expiryDate, amount, mode
   company.invoicesBlocked = false;
   company.subscriptionExpiryDate = parsedExpiry;
   company.inactiveRemarks = "";
-  if (amount !== undefined && amount !== null) company.subscriptionAmount = amount;
 
   await company.save();
 
@@ -240,6 +239,17 @@ export async function getTransactionHistory(companyId) {
   return SubscriptionTransaction.find({ companyId, type: "activated" })
     .populate("performedBy", "username role")
     .sort({ createdAt: -1 });
+}
+
+// ─── Delete Transaction ───────────────────────────────────────────────────────
+
+export async function deleteTransaction(txId) {
+  if (!mongoose.Types.ObjectId.isValid(txId))
+    throw new AppError(400, "Invalid transaction ID");
+
+  const tx = await SubscriptionTransaction.findByIdAndDelete(txId);
+  if (!tx) throw new AppError(404, "Transaction not found");
+  return tx;
 }
 
 // ─── Cron: Auto-expire subscriptions ─────────────────────────────────────────

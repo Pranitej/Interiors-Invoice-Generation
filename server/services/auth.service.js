@@ -17,17 +17,25 @@ export async function login(username, password) {
   const match = await bcrypt.compare(password, user.password);
   if (!match) throw new AppError(401, "Invalid username or password");
 
-  if (user.companyId && (user.role === "company_admin" || user.role === "company_user")) {
-    const userCompany = await Company.findById(user.companyId).select("loginBlocked").lean();
+  if (
+    user.companyId &&
+    (user.role === "company_admin" || user.role === "company_user")
+  ) {
+    const userCompany = await Company.findById(user.companyId)
+      .select("loginBlocked")
+      .lean();
     if (userCompany?.loginBlocked) {
-      throw new AppError(403, "Login has been temporarily disabled for your account. Please contact support.");
+      throw new AppError(
+        403,
+        "Login has been disabled for your account. Please contact Administrator.",
+      );
     }
   }
 
   const token = jwt.sign(
     { userId: user._id, role: user.role, companyId: user.companyId ?? null },
     jwtSecret,
-    { expiresIn: `${jwtExpiresInDays}d` }
+    { expiresIn: `${jwtExpiresInDays}d` },
   );
 
   let company = null;
@@ -102,7 +110,9 @@ export async function updateUser(id, companyId, body) {
   const filter = { _id: id };
   if (companyId) filter.companyId = companyId;
 
-  const user = await User.findOneAndUpdate(filter, updateData, { new: true }).select("-password");
+  const user = await User.findOneAndUpdate(filter, updateData, {
+    new: true,
+  }).select("-password");
   if (!user) throw new AppError(404, "User not found");
   return user;
 }

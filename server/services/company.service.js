@@ -90,26 +90,7 @@ export async function updateCompany(id, data) {
   return company;
 }
 
-export async function deleteCompany(id) {
-  if (!mongoose.Types.ObjectId.isValid(id))
-    throw new AppError(400, "Invalid company ID");
-  const company = await Company.findByIdAndDelete(id);
-  if (!company) throw new AppError(404, "Company not found");
-  await Promise.all([
-    User.deleteMany({ companyId: id }),
-    Invoice.deleteMany({ companyId: id }),
-  ]);
-}
-
-export async function toggleCompanyActive(id) {
-  if (!mongoose.Types.ObjectId.isValid(id))
-    throw new AppError(400, "Invalid company ID");
-  const company = await Company.findById(id);
-  if (!company) throw new AppError(404, "Company not found");
-  company.isActive = !company.isActive;
-  await company.save();
-  return company;
-}
+// toggleCompanyActive removed — use subscription service activate/deactivate instead
 
 export async function updateCompanyLogo(companyId, newFilename) {
   const company = await Company.findById(companyId);

@@ -57,7 +57,7 @@ function buildSearchIndex(inv) {
 // Component
 // -------------------------
 export default function History() {
-  const { user, company } = useContext(AuthContext);
+  const { user, company, subscriptionStatus } = useContext(AuthContext);
   const [invoices, setInvoices] = useState([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
@@ -177,6 +177,12 @@ export default function History() {
   // Actions
   // -------------------------
   const handleDownload = async (id, type) => {
+    if (subscriptionStatus?.downloadsBlocked) {
+      alert(
+        "Invoice downloads have been disabled for your account. Please contact your administrator.",
+      );
+      return;
+    }
     try {
       setIsDownloading(true);
       setActiveInvoice(id);

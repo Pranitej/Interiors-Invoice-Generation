@@ -77,7 +77,5 @@ router.post("/", CompanyController.createCompany);
 router.get("/", CompanyController.listCompanies);
 router.get("/:id", CompanyController.getCompany);
 router.put("/:id", CompanyController.updateCompany);
-router.delete("/:id", CompanyController.deleteCompany);
-router.patch("/:id/toggle-active", CompanyController.toggleActive);
 
 export default router;

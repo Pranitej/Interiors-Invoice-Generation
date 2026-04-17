@@ -198,9 +198,7 @@ export default function NewQuote() {
             description: r.description,
             frameRate: r.frameRate,
             boxRate:
-              typeof r.boxRate === "number"
-                ? r.boxRate
-                : (invoiceBoxRate ?? 0),
+              typeof r.boxRate === "number" ? r.boxRate : (invoiceBoxRate ?? 0),
             isCustomRate: r.frameRate !== invoice.pricing.frameRate,
             items: r.items.map((i) => ({
               name: i.name,
@@ -398,7 +396,7 @@ export default function NewQuote() {
       alert(
         subscriptionStatus.inactiveRemarks
           ? `Your account has been suspended: ${subscriptionStatus.inactiveRemarks}`
-          : "Your account is inactive. Please contact support to renew your subscription."
+          : "Your account is inactive. Please contact support to renew your subscription.",
       );
       return;
     }
@@ -448,7 +446,7 @@ export default function NewQuote() {
       alert(
         subscriptionStatus.inactiveRemarks
           ? `Your account has been suspended: ${subscriptionStatus.inactiveRemarks}`
-          : "Your account is inactive. Please contact support to renew your subscription."
+          : "Your account is inactive. Please contact support to renew your subscription.",
       );
       return;
     }
@@ -533,9 +531,12 @@ export default function NewQuote() {
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="bg-white dark:bg-gray-800 rounded-xl border border-amber-200 dark:border-amber-800 p-8 max-w-md text-center">
           <AlertCircle className="w-12 h-12 text-amber-500 mx-auto mb-4" />
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Invoice Access Disabled</h2>
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+            Invoice Access Disabled
+          </h2>
           <p className="text-sm text-gray-600 dark:text-gray-400">
-            {id ? "Editing invoices" : "Creating invoices"} has been temporarily disabled for your account. Please contact support to renew your subscription.
+            {id ? "Editing invoices" : "Creating invoices"} has been disabled
+            for your account. Please contact Administrator.
           </p>
         </div>
       </div>

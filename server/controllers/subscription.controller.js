@@ -188,6 +188,16 @@ export async function toggleInvoices(req, res, next) {
   }
 }
 
+// DELETE /api/subscription/transactions/:txId  (super admin)
+export async function deleteTransaction(req, res, next) {
+  try {
+    await SubscriptionService.deleteTransaction(req.params.txId);
+    sendSuccess(res, null, 200, "Transaction deleted");
+  } catch (err) {
+    next(err);
+  }
+}
+
 // PATCH /api/subscription/companies/:id/toggle-login  (super admin)
 export async function toggleLogin(req, res, next) {
   try {

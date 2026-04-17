@@ -1,7 +1,7 @@
 // client/src/pages/CompanyDetail.jsx
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { UserPlus, CheckCircle, XCircle, Clock, IndianRupee, ReceiptText } from "lucide-react";
+import { UserPlus, CheckCircle, XCircle, Clock, IndianRupee, ReceiptText, Trash2, Edit2, Save, X, ZoomIn } from "lucide-react";
 import API from "../api/api";
 import InvoicePreviewModal from "../components/InvoicePreviewModal";
 import EditUserModal from "../components/EditUserModal";
@@ -20,7 +20,7 @@ export default function CompanyDetail() {
   const [invoices, setInvoices] = useState([]);
   const [subscriptionStatus, setSubscriptionStatus] = useState(null);
   const [transactions, setTransactions] = useState([]);
-  const [tab, setTab] = useState("users");
+  const [tab, setTab] = useState("subscription");
   const [loading, setLoading] = useState(true);
   const [previewInvoice, setPreviewInvoice] = useState(null);
   const [editingUser, setEditingUser] = useState(null);
@@ -31,6 +31,12 @@ export default function CompanyDetail() {
   const [showActivate, setShowActivate] = useState(false);
   const [showDeactivate, setShowDeactivate] = useState(false);
   const [showActivateCompany, setShowActivateCompany] = useState(false);
+  const [deleteTx, setDeleteTx] = useState(null);
+  const [deletingTx, setDeletingTx] = useState(false);
+  const [showQrModal, setShowQrModal] = useState(false);
+  const [editingRate, setEditingRate] = useState(false);
+  const [rateInput, setRateInput] = useState("");
+  const [savingRate, setSavingRate] = useState(false);
 
   const fetchSubscription = async () => {
     try {
@@ -122,6 +128,40 @@ export default function CompanyDetail() {
     }
   };
 
+  const handleSaveRate = async () => {
+    const parsed = Number(rateInput);
+    if (isNaN(parsed) || parsed < 0) {
+      setEditSuccess("Invalid amount.");
+      return;
+    }
+    setSavingRate(true);
+    try {
+      const res = await API.patch(`/subscription/companies/${id}/amount`, { amount: parsed });
+      setCompany((prev) => ({ ...prev, subscriptionAmount: res.data.data.subscriptionAmount }));
+      setEditingRate(false);
+      setEditSuccess("Company rate updated.");
+    } catch (err) {
+      setEditSuccess(err?.response?.data?.message || "Failed to update rate.");
+    } finally {
+      setSavingRate(false);
+    }
+  };
+
+  const handleDeleteTransaction = async () => {
+    if (!deleteTx) return;
+    setDeletingTx(true);
+    try {
+      await API.delete(`/subscription/transactions/${deleteTx._id}`);
+      setTransactions((prev) => prev.filter((t) => t._id !== deleteTx._id));
+      setEditSuccess("Transaction deleted.");
+    } catch (err) {
+      setEditSuccess(err?.response?.data?.message || "Failed to delete transaction.");
+    } finally {
+      setDeletingTx(false);
+      setDeleteTx(null);
+    }
+  };
+
   const handleToggleLogin = async () => {
     try {
       const res = await API.patch(`/subscription/companies/${id}/toggle-login`);
@@ -173,12 +213,12 @@ export default function CompanyDetail() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 border-b border-gray-200 dark:border-gray-700 overflow-x-auto">
+      <div className="flex gap-1 border-b border-gray-200 dark:border-gray-700 overflow-x-auto overflow-y-hidden">
         {[
-          { key: "users", label: "Users", count: users.length },
-          { key: "invoices", label: "Invoices", count: invoices.length },
           { key: "subscription", label: "Subscription", count: null },
           { key: "company-profile", label: "Company Profile", count: null },
+          { key: "users", label: "Users", count: users.length },
+          { key: "invoices", label: "Invoices", count: invoices.length },
         ].map(({ key, label, count }) => (
           <button
             key={key}
@@ -310,15 +350,66 @@ export default function CompanyDetail() {
                 )}
               </div>
               <div>
-                <p className="text-xs text-gray-500 dark:text-gray-400">Amount</p>
-                <p className="text-sm font-medium text-gray-800 dark:text-white mt-1 flex items-center gap-1">
-                  <IndianRupee className="w-3 h-3 text-gray-400" />
-                  {company.subscriptionAmount != null
-                    ? Number(company.subscriptionAmount).toLocaleString("en-IN")
-                    : sub?.platformAmount
-                      ? `${Number(sub.platformAmount).toLocaleString("en-IN")} (platform default)`
-                      : "—"}
-                </p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Company Rate</p>
+                {editingRate ? (
+                  <div className="flex items-center gap-1.5">
+                    <div className="relative">
+                      <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-gray-400">₹</span>
+                      <input
+                        type="number"
+                        min="0"
+                        step="1"
+                        value={rateInput}
+                        onChange={(e) => setRateInput(e.target.value)}
+                        className="w-32 pl-6 pr-2 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        autoFocus
+                      />
+                    </div>
+                    <button
+                      onClick={handleSaveRate}
+                      disabled={savingRate}
+                      className="p-1.5 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-md transition-colors disabled:opacity-50"
+                      title="Save"
+                    >
+                      {savingRate
+                        ? <div className="w-3.5 h-3.5 border-2 border-green-600 border-t-transparent rounded-full animate-spin" />
+                        : <Save className="w-3.5 h-3.5" />}
+                    </button>
+                    <button
+                      onClick={() => setEditingRate(false)}
+                      className="p-1.5 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors"
+                      title="Cancel"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <p className="text-sm font-medium text-gray-800 dark:text-white flex items-center gap-1">
+                      <IndianRupee className="w-3 h-3 text-gray-400" />
+                      {company.subscriptionAmount != null
+                        ? Number(company.subscriptionAmount).toLocaleString("en-IN")
+                        : sub?.platformAmount
+                          ? `${Number(sub.platformAmount).toLocaleString("en-IN")} (platform default)`
+                          : "—"}
+                    </p>
+                    <button
+                      onClick={() => {
+                        setRateInput(String(company.subscriptionAmount ?? sub?.platformAmount ?? ""));
+                        setEditingRate(true);
+                      }}
+                      className="p-1 text-gray-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded transition-colors"
+                      title="Edit company rate"
+                    >
+                      <Edit2 className="w-3 h-3" />
+                    </button>
+                  </div>
+                )}
+                {!editingRate && (
+                  <p className="text-xs text-gray-400 mt-0.5">
+                    {company.subscriptionAmount != null ? "custom rate" : "using platform default"}
+                  </p>
+                )}
               </div>
               {sub && sub.subscriptionState !== "no_subscription" && (
                 <div>
@@ -339,11 +430,21 @@ export default function CompanyDetail() {
             {sub?.upiQrFile && (
               <div className="mb-4">
                 <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">UPI QR Code for Payment</p>
-                <img
-                  src={`${API_BASE}/public/${sub.upiQrFile}`}
-                  alt="UPI QR"
-                  className="w-32 h-32 object-contain border border-gray-200 dark:border-gray-600 rounded-lg bg-white p-1"
-                />
+                <button
+                  type="button"
+                  onClick={() => setShowQrModal(true)}
+                  className="group relative w-32 h-32 border border-gray-200 dark:border-gray-600 rounded-lg bg-white p-1 hover:border-blue-400 dark:hover:border-blue-500 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  title="Click to enlarge"
+                >
+                  <img
+                    src={`${API_BASE}/public/${sub.upiQrFile}`}
+                    alt="UPI QR"
+                    className="w-full h-full object-contain"
+                  />
+                  <span className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/10 dark:group-hover:bg-black/30 rounded-lg transition-colors">
+                    <ZoomIn className="w-5 h-5 text-white opacity-0 group-hover:opacity-100 drop-shadow transition-opacity" />
+                  </span>
+                </button>
               </div>
             )}
 
@@ -470,36 +571,51 @@ export default function CompanyDetail() {
               <ReceiptText className="w-4 h-4 text-gray-500" />
               <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Subscription Payments</h3>
             </div>
-            <table className="w-full text-sm">
-              <thead className="bg-gray-50 dark:bg-gray-900/50 border-b border-gray-200 dark:border-gray-700">
-                <tr>
-                  {["Date", "Amount", "Mode of Payment", "Valid Till"].map((h) => (
-                    <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-                {transactions.length === 0 && (
-                  <tr><td colSpan={4} className="px-4 py-8 text-center text-gray-400">No subscription payments yet.</td></tr>
-                )}
-                {transactions.map((tx) => (
-                  <tr key={tx._id} className="hover:bg-gray-50 dark:hover:bg-gray-700/30">
-                    <td className="px-4 py-3 text-gray-500 dark:text-gray-400 whitespace-nowrap">
-                      {new Date(tx.createdAt).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}
-                    </td>
-                    <td className="px-4 py-3 text-gray-700 dark:text-gray-300 font-medium">
-                      {tx.amount != null ? `₹${Number(tx.amount).toLocaleString("en-IN")}` : "—"}
-                    </td>
-                    <td className="px-4 py-3 text-gray-600 dark:text-gray-300">
-                      {tx.modeOfPayment || "—"}
-                    </td>
-                    <td className="px-4 py-3 text-gray-500 dark:text-gray-400 whitespace-nowrap">
-                      {tx.expiryDate ? new Date(tx.expiryDate).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) : "—"}
-                    </td>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="bg-gray-50 dark:bg-gray-900/50 border-b border-gray-200 dark:border-gray-700">
+                  <tr>
+                    {["Date", "Amount", "Mode of Payment", "Valid Till", "Remarks", ""].map((h) => (
+                      <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{h}</th>
+                    ))}
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
+                  {transactions.length === 0 && (
+                    <tr><td colSpan={6} className="px-4 py-8 text-center text-gray-400">No subscription payments yet.</td></tr>
+                  )}
+                  {transactions.map((tx) => (
+                    <tr key={tx._id} className="hover:bg-gray-50 dark:hover:bg-gray-700/30">
+                      <td className="px-4 py-3 text-gray-500 dark:text-gray-400 whitespace-nowrap">
+                        {new Date(tx.createdAt).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}
+                      </td>
+                      <td className="px-4 py-3 text-gray-700 dark:text-gray-300 font-medium">
+                        {tx.amount != null ? `₹${Number(tx.amount).toLocaleString("en-IN")}` : "—"}
+                      </td>
+                      <td className="px-4 py-3 text-gray-600 dark:text-gray-300">
+                        {tx.modeOfPayment || "—"}
+                      </td>
+                      <td className="px-4 py-3 text-gray-500 dark:text-gray-400 whitespace-nowrap">
+                        {tx.expiryDate ? new Date(tx.expiryDate).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) : "—"}
+                      </td>
+                      <td className="px-4 py-3 text-gray-600 dark:text-gray-300 max-w-xs">
+                        {tx.remarks || "—"}
+                      </td>
+                      <td className="px-4 py-3">
+                        <button
+                          type="button"
+                          onClick={() => setDeleteTx(tx)}
+                          className="p-1.5 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition-colors"
+                          title="Delete transaction"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       )}
@@ -569,6 +685,89 @@ export default function CompanyDetail() {
           onSave={handleActivatedCompany}
           onClose={() => setShowActivateCompany(false)}
         />
+      )}
+
+      {/* UPI QR Popup Modal */}
+      {showQrModal && sub?.upiQrFile && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
+          onClick={() => setShowQrModal(false)}
+        >
+          <div
+            className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-6 max-w-sm w-full flex flex-col items-center gap-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between w-full">
+              <h3 className="text-base font-bold text-gray-900 dark:text-white">UPI Payment QR</h3>
+              <button
+                onClick={() => setShowQrModal(false)}
+                className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+              >
+                <X className="w-4 h-4 text-gray-500" />
+              </button>
+            </div>
+            <img
+              src={`${API_BASE}/public/${sub.upiQrFile}`}
+              alt="UPI QR Code"
+              className="w-64 h-64 object-contain border border-gray-200 dark:border-gray-600 rounded-xl bg-white p-3"
+            />
+            {(company.subscriptionAmount != null || sub.platformAmount) && (
+              <div className="flex items-center gap-2 px-4 py-2.5 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl">
+                <IndianRupee className="w-4 h-4 text-green-600 dark:text-green-400" />
+                <span className="text-base font-bold text-green-700 dark:text-green-300">
+                  {Number(company.subscriptionAmount ?? sub.platformAmount).toLocaleString("en-IN")}
+                </span>
+                <span className="text-sm text-green-600 dark:text-green-400">
+                  {company.subscriptionAmount != null ? "company rate" : "platform rate"}
+                </span>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Delete Transaction Confirmation Modal */}
+      {deleteTx && (
+        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-xl p-5 max-w-sm w-full shadow-xl border border-gray-200 dark:border-gray-700">
+            <div className="text-center">
+              <div className="mx-auto w-11 h-11 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mb-3">
+                <Trash2 className="w-5 h-5 text-red-600 dark:text-red-400" />
+              </div>
+              <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-1">Delete transaction?</h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">
+                {new Date(deleteTx.createdAt).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}
+                {deleteTx.amount != null && ` · ₹${Number(deleteTx.amount).toLocaleString("en-IN")}`}
+                {deleteTx.modeOfPayment && ` · ${deleteTx.modeOfPayment}`}
+              </p>
+              {deleteTx.remarks && (
+                <p className="text-xs text-gray-400 dark:text-gray-500 mb-3 italic">&quot;{deleteTx.remarks}&quot;</p>
+              )}
+              <p className="text-xs text-red-600 dark:text-red-400 mb-4">This cannot be undone.</p>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setDeleteTx(null)}
+                  disabled={deletingTx}
+                  className="flex-1 px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleDeleteTransaction}
+                  disabled={deletingTx}
+                  className="flex-1 px-3 py-2 text-sm bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors flex items-center justify-center gap-1.5 disabled:opacity-50"
+                >
+                  {deletingTx ? (
+                    <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <Trash2 className="w-3.5 h-3.5" />
+                  )}
+                  Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
 
       <div role="status" aria-live="polite" aria-atomic="true" className="fixed bottom-4 right-4 z-50">

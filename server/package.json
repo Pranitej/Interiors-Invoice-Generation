@@ -24,6 +24,7 @@
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^8.18.2",
     "multer": "^2.1.1",
+    "node-cron": "^4.2.1",
     "nodemon": "^3.1.10",
     "puppeteer": "^24.37.3",
     "xss": "^1.0.15"

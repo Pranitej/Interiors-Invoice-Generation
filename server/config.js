@@ -65,6 +65,16 @@ const config = {
     maxTerms: 5,   // maximum number of terms & conditions entries per company
   },
 
+  subscription: {
+    warningDaysBeforeExpiry: 7,    // show banner this many days before expiry
+    defaultAmount: 0,              // default subscription amount (overridden by PlatformSettings)
+  },
+
+  cron: {
+    dailySchedule: "0 0 * * *",   // midnight every day
+    timezone: "Asia/Kolkata",
+  },
+
   permissions: {
     companyUser: {
       canEditOwnInvoices: true, // company_user can PUT their own invoices

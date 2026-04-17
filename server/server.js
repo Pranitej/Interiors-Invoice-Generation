@@ -9,7 +9,9 @@ import pdfRouter from "./routes/pdf.routes.js";
 import companyRouter from "./routes/company.routes.js";
 import superAdminRouter from "./routes/superAdmin.routes.js";
 import uploadRouter from "./routes/upload.routes.js";
+import subscriptionRouter from "./routes/subscription.routes.js";
 import errorHandler from "./middleware/errorHandler.js";
+import { startScheduler } from "./crons/scheduler.js";
 import { sendSuccess } from "./utils/response.js";
 import config from "./config.js";
 import mongoSanitize from "express-mongo-sanitize";
@@ -79,6 +81,7 @@ app.use("/api/auth", authLimiter);
 
 await connectDB();
 await seeding();
+startScheduler();
 
 app.use("/api/invoices", invoiceRouter);
 app.use("/api/auth", authRouter);
@@ -86,6 +89,7 @@ app.use("/api/pdf", pdfRouter);
 app.use("/api/companies", companyRouter);
 app.use("/api/super-admin", superAdminRouter);
 app.use("/api/upload", uploadRouter);
+app.use("/api/subscription", subscriptionRouter);
 
 app.get("/", (_, res) => sendSuccess(res, null, 200, `${config.platform.name} API`));
 

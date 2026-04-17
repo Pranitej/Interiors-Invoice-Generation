@@ -145,4 +145,11 @@ router.get(
   SubscriptionController.getTransactionHistory
 );
 
+router.delete(
+  "/transactions/:txId",
+  authenticate,
+  requireRole(SUPER_ADMIN),
+  SubscriptionController.deleteTransaction
+);
+
 export default router;

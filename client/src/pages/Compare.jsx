@@ -105,8 +105,13 @@ export default function ComparePage() {
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-8 flex items-center justify-center">
         <div className="bg-white dark:bg-gray-800 rounded-xl border border-amber-200 dark:border-amber-800 p-8 max-w-md text-center">
           <AlertCircle className="w-12 h-12 text-amber-500 mx-auto mb-4" />
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Invoice Access Disabled</h2>
-          <p className="text-sm text-gray-600 dark:text-gray-400">Invoice comparison has been temporarily disabled for your account. Please contact support.</p>
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+            Invoice Access Disabled
+          </h2>
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            Invoice comparison has been disabled for your account. Please
+            contact support.
+          </p>
         </div>
       </div>
     );
