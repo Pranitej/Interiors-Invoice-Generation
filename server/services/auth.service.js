@@ -17,6 +17,13 @@ export async function login(username, password) {
   const match = await bcrypt.compare(password, user.password);
   if (!match) throw new AppError(401, "Invalid username or password");
 
+  if (user.companyId && (user.role === "company_admin" || user.role === "company_user")) {
+    const userCompany = await Company.findById(user.companyId).select("loginBlocked").lean();
+    if (userCompany?.loginBlocked) {
+      throw new AppError(403, "Login has been temporarily disabled for your account. Please contact support.");
+    }
+  }
+
   const token = jwt.sign(
     { userId: user._id, role: user.role, companyId: user.companyId ?? null },
     jwtSecret,
