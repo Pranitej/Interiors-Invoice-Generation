@@ -26,6 +26,7 @@ export default async function authenticate(req, res, next) {
         .lean();
       if (!company) return next(new AppError(401, "Your company account no longer exists"));
       if (company.loginBlocked) return next(new AppError(403, "Login has been disabled for your account. Please contact Administrator."));
+      if (!company.isActive) return next(new AppError(403, "Your company account has been deactivated. Please contact Administrator."));
     }
 
     next();

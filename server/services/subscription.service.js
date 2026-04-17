@@ -110,6 +110,7 @@ export async function activateSubscription({ companyId, expiryDate, amount, mode
     if (wasAutoExpired) company.invoicesBlocked = false;
     company.subscriptionExpiryDate = parsedExpiry;
     company.inactiveRemarks = "";
+    if (amount !== undefined && amount >= 0) company.subscriptionAmount = amount;
     await company.save({ session });
 
     await SubscriptionTransaction.create([{
