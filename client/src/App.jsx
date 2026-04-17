@@ -43,7 +43,7 @@ function App() {
   };
 
   const logout = async () => {
-    try { await API.post("/auth/logout"); } catch (_) {}
+    try { await API.post("/auth/logout"); } catch { /* best-effort */ }
     setUser(null);
     setCompany(null);
     setSubscriptionStatus(null);
