@@ -72,6 +72,7 @@ export default function History() {
   const [loadingTrash, setLoadingTrash] = useState(false);
   const [showPermDeleteConfirm, setShowPermDeleteConfirm] = useState(false);
   const [permDeleteTarget, setPermDeleteTarget] = useState(null);
+  const [fetchError, setFetchError] = useState(null);
 
   const navigate = useNavigate();
 
@@ -80,10 +81,11 @@ export default function History() {
   // -------------------------
   const fetchInvoices = useCallback(async () => {
     try {
+      setFetchError(null);
       const res = await api.get("/invoices");
       setInvoices(res.data?.data?.invoices || []);
     } catch (error) {
-      console.error("Failed to fetch invoices:", error);
+      setFetchError("Failed to load invoices. Please refresh the page.");
     } finally {
       setLoading(false);
     }
@@ -99,7 +101,7 @@ export default function History() {
       const res = await api.get("/invoices/trash");
       setTrashedInvoices(res.data?.data || []);
     } catch (err) {
-      console.error("Failed to fetch trash:", err);
+      setFetchError("Failed to load trash. Please refresh the page.");
     } finally {
       setLoadingTrash(false);
     }
@@ -351,6 +353,12 @@ export default function History() {
           </div>
         )}
       </div>
+
+      {fetchError && (
+        <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-950 dark:text-red-300">
+          {fetchError}
+        </div>
+      )}
 
       {activeTab === "active" && (
         <>

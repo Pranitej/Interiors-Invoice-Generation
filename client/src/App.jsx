@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import Login from "./pages/Login";
 import NewQuote from "./pages/NewQuote";
 import History from "./pages/History";
@@ -31,6 +31,7 @@ function App() {
   });
 
   const [subscriptionStatus, setSubscriptionStatus] = useState(null);
+  const lastSubscriptionHash = useRef(null);
 
   const toggleTheme = () => {
     setTheme((prev) => {
@@ -54,9 +55,13 @@ function App() {
     if (!user || user.role === "super_admin") return;
     try {
       const res = await API.get("/subscription/status");
-      setSubscriptionStatus(res.data.data);
+      const newHash = JSON.stringify(res.data.data);
+      if (newHash !== lastSubscriptionHash.current) {
+        lastSubscriptionHash.current = newHash;
+        setSubscriptionStatus(res.data.data);
+      }
     } catch {
-      // non-critical — don't break the app
+      // non-critical
     }
   }, [user]);
 
