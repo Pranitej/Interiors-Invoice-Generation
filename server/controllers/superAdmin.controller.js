@@ -13,8 +13,9 @@ export async function getPlatformStats(req, res, next) {
 
 export async function getCompanyInvoices(req, res, next) {
   try {
-    const invoices = await SuperAdminService.getCompanyInvoices(req.params.id);
-    sendSuccess(res, invoices);
+    const { page, limit } = req.query;
+    const result = await SuperAdminService.getCompanyInvoices(req.params.id, { page, limit });
+    sendSuccess(res, result);
   } catch (err) {
     next(err);
   }
