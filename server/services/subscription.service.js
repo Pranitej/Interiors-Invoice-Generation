@@ -11,7 +11,7 @@ const { warningDaysBeforeExpiry } = config.subscription;
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
 // subscriptionState describes the subscription expiry, independent of isActive.
-// canCreateInvoices = isActive (cron auto-deactivates expired companies).
+// canCreateInvoices = isActive && !invoicesBlocked (both must be true; cron sets both on expiry).
 // canDownloadInvoices = !downloadsBlocked (manual super-admin toggle only).
 function computeSubscriptionStatus(company) {
   const now = new Date();
@@ -147,9 +147,6 @@ export async function deactivateCompany({ companyId, remarks, performedBy }) {
 export async function activateCompanyManually({ companyId, remarks, performedBy }) {
   if (!mongoose.Types.ObjectId.isValid(companyId))
     throw new AppError(400, "Invalid company ID");
-  if (!remarks || !remarks.trim())
-    throw new AppError(400, "remarks are required when manually activating a company");
-
   const company = await Company.findById(companyId);
   if (!company) throw new AppError(404, "Company not found");
 
