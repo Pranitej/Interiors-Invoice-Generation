@@ -430,12 +430,11 @@ export default function NewQuote() {
         }, 1500);
       }
     } catch (e) {
-      console.error(e);
       setSaveStatus({
         type: "error",
-        message: "Failed to save invoice. Please try again.",
+        message: e.response?.data?.message || "Failed to save invoice. Please try again.",
       });
-      setTimeout(() => setSaveStatus(null), 3000);
+      setTimeout(() => setSaveStatus(null), 5000);
     } finally {
       setIsLoading(false);
     }
@@ -469,12 +468,11 @@ export default function NewQuote() {
         navigate("/history");
       }, 1500);
     } catch (e) {
-      console.error(e);
       setSaveStatus({
         type: "error",
-        message: "Failed to save invoice. Please try again.",
+        message: e.response?.data?.message || "Failed to save invoice. Please try again.",
       });
-      setTimeout(() => setSaveStatus(null), 3000);
+      setTimeout(() => setSaveStatus(null), 5000);
     } finally {
       setIsLoading(false);
     }
