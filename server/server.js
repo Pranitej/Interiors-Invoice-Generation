@@ -23,7 +23,11 @@ import AppError from "./utils/AppError.js";
 
 const app = express();
 
-app.use(cors());
+app.set("trust proxy", config.server.trustProxy);
+app.use(cors({
+  origin: config.server.corsOrigin,
+  credentials: true,
+}));
 app.use(helmet({ crossOriginResourcePolicy: { policy: "cross-origin" } }));
 app.use(express.json({ limit: `${config.server.bodyLimitMb}mb` }));
 app.use(express.urlencoded({ extended: true }));

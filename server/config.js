@@ -18,6 +18,8 @@ const config = {
   server: {
     port: process.env.PORT || 5000,
     bodyLimitMb: 5,               // used as `${bodyLimitMb}mb` in server.js
+    corsOrigin: process.env.CORS_ORIGIN || "http://localhost:5173",
+    trustProxy: process.env.TRUST_PROXY === "true" ? 1 : false,
   },
 
   db: {
