@@ -23,6 +23,13 @@ router.post(
   InvoiceController.createInvoice
 );
 
+router.post(
+  "/compare",
+  requireRole(COMPANY_USER, COMPANY_ADMIN),
+  requireInvoiceAccess,
+  InvoiceController.compareInvoices
+);
+
 router.get("/trash", requireRole(COMPANY_ADMIN, SUPER_ADMIN), InvoiceController.listTrash);
 router.get("/", InvoiceController.listInvoices);
 router.get("/:id", InvoiceController.getInvoice);

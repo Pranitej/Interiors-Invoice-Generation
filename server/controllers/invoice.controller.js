@@ -120,3 +120,20 @@ export async function permanentDeleteInvoice(req, res, next) {
     next(err);
   }
 }
+
+export async function compareInvoices(req, res, next) {
+  try {
+    const { invoiceAId, invoiceBId } = req.body;
+    if (!invoiceAId || !invoiceBId)
+      throw new AppError(400, "invoiceAId and invoiceBId are required");
+
+    const [invoiceA, invoiceB] = await Promise.all([
+      InvoiceService.getInvoiceById(invoiceAId, req.companyId),
+      InvoiceService.getInvoiceById(invoiceBId, req.companyId),
+    ]);
+
+    sendSuccess(res, { invoiceA, invoiceB });
+  } catch (err) {
+    next(err);
+  }
+}
