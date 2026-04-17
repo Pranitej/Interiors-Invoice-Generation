@@ -24,4 +24,19 @@ const CompanySchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+CompanySchema.post("findOneAndDelete", async function (doc) {
+  if (!doc) return;
+  const companyId = doc._id;
+  const [User, Invoice, SubscriptionTransaction] = await Promise.all([
+    import("./User.js").then(m => m.default),
+    import("./Invoice.js").then(m => m.default),
+    import("./SubscriptionTransaction.js").then(m => m.default),
+  ]);
+  await Promise.all([
+    User.deleteMany({ companyId }),
+    Invoice.deleteMany({ companyId }),
+    SubscriptionTransaction.deleteMany({ companyId }),
+  ]);
+});
+
 export default mongoose.model("Company", CompanySchema);
