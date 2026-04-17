@@ -10,7 +10,6 @@ const SubscriptionTransactionSchema = new mongoose.Schema(
       required: true,
     },
     amount: { type: Number, default: null },
-    expiryDate: { type: Date, default: null },
     modeOfPayment: {
       type: String,
       enum: ["Cash", "UPI", "Bank Transfer", "Cheque"],

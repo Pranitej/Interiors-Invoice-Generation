@@ -14,7 +14,6 @@ const CompanySchema = new mongoose.Schema(
     termsAndConditions: { type: [String], default: [] },
     isActive: { type: Boolean, default: false },
     downloadsBlocked: { type: Boolean, default: false },
-    invoicesBlocked: { type: Boolean, default: false },
     loginBlocked: { type: Boolean, default: false },
     // Subscription fields
     subscriptionExpiryDate: { type: Date, default: null },

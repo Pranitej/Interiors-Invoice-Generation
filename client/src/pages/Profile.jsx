@@ -894,7 +894,7 @@ export default function Profile() {
                               : "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400"
                           }`}>
                             {subscriptionData.isActive ? <CheckCircle className="w-3 h-3" /> : <Ban className="w-3 h-3" />}
-                            {subscriptionData.isActive ? "Active" : "Inactive"}
+                            {subscriptionData.isActive ? "Active" : "Suspended"}
                           </span>
                         </div>
 
@@ -943,14 +943,14 @@ export default function Profile() {
                               <p className="text-xs text-gray-500 dark:text-gray-400">Create &amp; Edit Invoice</p>
                             </div>
                             <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
-                              !subscriptionData.invoicesBlocked
+                              subscriptionData.canCreateInvoices
                                 ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
                                 : "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400"
                             }`}>
-                              {subscriptionData.invoicesBlocked
-                                ? <Ban className="w-3 h-3" />
-                                : <CheckCircle className="w-3 h-3" />}
-                              {subscriptionData.invoicesBlocked ? "Blocked" : "Allowed"}
+                              {subscriptionData.canCreateInvoices
+                                ? <CheckCircle className="w-3 h-3" />
+                                : <Ban className="w-3 h-3" />}
+                              {subscriptionData.canCreateInvoices ? "Allowed" : "Blocked"}
                             </span>
                           </div>
 
@@ -1044,19 +1044,19 @@ export default function Profile() {
                         <table className="w-full text-sm">
                           <thead className="bg-gray-50 dark:bg-gray-900/50 border-b border-gray-200 dark:border-gray-700">
                             <tr>
-                              {["Date", "Event", "Amount", "Valid Until", "Remarks"].map((h) => (
+                              {["Date", "Event", "Amount", "Remarks"].map((h) => (
                                 <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{h}</th>
                               ))}
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
                             {subscriptionTransactions.length === 0 && (
-                              <tr><td colSpan={5} className="px-4 py-8 text-center text-gray-400 text-sm">No transactions yet.</td></tr>
+                              <tr><td colSpan={4} className="px-4 py-8 text-center text-gray-400 text-sm">No transactions yet.</td></tr>
                             )}
                             {subscriptionTransactions.map((tx) => {
                               const typeMap = {
                                 activated: { label: "Activated", cls: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400" },
-                                deactivated: { label: "Deactivated", cls: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400" },
+                                deactivated: { label: "Suspended", cls: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400" },
                                 auto_expired: { label: "Auto-Expired", cls: "bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300" },
                                 amount_changed: { label: "Amount Changed", cls: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400" },
                                 downloads_toggled: { label: "Downloads Toggled", cls: "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400" },
@@ -1072,9 +1072,6 @@ export default function Profile() {
                                   </td>
                                   <td className="px-4 py-3 text-gray-700 dark:text-gray-300 text-xs">
                                     {tx.amount != null ? `₹${Number(tx.amount).toLocaleString("en-IN")}` : "—"}
-                                  </td>
-                                  <td className="px-4 py-3 text-gray-500 dark:text-gray-400 whitespace-nowrap text-xs">
-                                    {tx.expiryDate ? new Date(tx.expiryDate).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) : "—"}
                                   </td>
                                   <td className="px-4 py-3 text-gray-600 dark:text-gray-300 text-xs max-w-xs">
                                     {tx.remarks || "—"}

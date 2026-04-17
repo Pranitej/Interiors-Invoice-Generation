@@ -15,11 +15,11 @@ export async function requireInvoiceAccess(req, res, next) {
   const company = await Company.findById(companyId).lean();
   if (!company) return sendError(res, 404, "Company not found");
 
-  if (company.invoicesBlocked) {
+  if (!company.isActive) {
     return sendError(
       res,
       403,
-      "Invoice creation and editing has been disabled for your account. Please contact Administrator.",
+      "Your company account has been suspended. Please contact Administrator.",
     );
   }
 

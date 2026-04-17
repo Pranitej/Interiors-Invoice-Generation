@@ -111,13 +111,6 @@ router.patch(
 );
 
 router.patch(
-  "/companies/:id/toggle-invoices",
-  authenticate,
-  requireRole(SUPER_ADMIN),
-  SubscriptionController.toggleInvoices
-);
-
-router.patch(
   "/companies/:id/toggle-login",
   authenticate,
   requireRole(SUPER_ADMIN),
@@ -132,6 +125,13 @@ router.patch(
 );
 
 router.patch(
+  "/companies/:id/expiry",
+  authenticate,
+  requireRole(SUPER_ADMIN),
+  SubscriptionController.updateExpiryDate
+);
+
+router.patch(
   "/companies/:id/amount",
   authenticate,
   requireRole(SUPER_ADMIN),
@@ -143,6 +143,13 @@ router.get(
   authenticate,
   requireRole(SUPER_ADMIN),
   SubscriptionController.getTransactionHistory
+);
+
+router.patch(
+  "/transactions/:txId",
+  authenticate,
+  requireRole(SUPER_ADMIN),
+  SubscriptionController.updateTransaction
 );
 
 router.delete(

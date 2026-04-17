@@ -11,7 +11,7 @@ const { warningDaysBeforeExpiry } = config.subscription;
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
 // subscriptionState describes the subscription expiry, independent of isActive.
-// canCreateInvoices = isActive && !invoicesBlocked (both must be true; cron sets both on expiry).
+// canCreateInvoices = isActive (cron sets to false on expiry; super admin deactivates manually).
 // canDownloadInvoices = !downloadsBlocked (manual super-admin toggle only).
 function computeSubscriptionStatus(company) {
   const now = new Date();
@@ -50,9 +50,14 @@ export async function getPlatformSettings() {
   return settings;
 }
 
-export async function updatePlatformSettings({ subscriptionAmount, upiQrFile, performedBy }) {
+export async function updatePlatformSettings({
+  subscriptionAmount,
+  upiQrFile,
+  performedBy,
+}) {
   const settings = await getPlatformSettings();
-  if (subscriptionAmount !== undefined) settings.subscriptionAmount = subscriptionAmount;
+  if (subscriptionAmount !== undefined)
+    settings.subscriptionAmount = subscriptionAmount;
   if (upiQrFile !== undefined) settings.upiQrFile = upiQrFile;
   settings.updatedBy = performedBy;
   await settings.save();
@@ -89,48 +94,43 @@ export async function getCompanySubscriptionStatus(companyId) {
 // ─── Activate Subscription ───────────────────────────────────────────────────
 // Sets subscription dates + amount, and re-activates the company.
 
-export async function activateSubscription({ companyId, expiryDate, amount, modeOfPayment, remarks, performedBy }) {
+export async function activateSubscription({
+  companyId,
+  expiryDate,
+  amount,
+  modeOfPayment,
+  remarks,
+  performedBy,
+}) {
   if (!mongoose.Types.ObjectId.isValid(companyId))
     throw new AppError(400, "Invalid company ID");
   if (!expiryDate) throw new AppError(400, "expiryDate is required");
 
   const parsedExpiry = new Date(expiryDate);
-  if (isNaN(parsedExpiry.getTime())) throw new AppError(400, "Invalid expiryDate");
-  if (parsedExpiry <= new Date()) throw new AppError(400, "expiryDate must be in the future");
+  if (isNaN(parsedExpiry.getTime()))
+    throw new AppError(400, "Invalid expiryDate");
+  if (parsedExpiry <= new Date())
+    throw new AppError(400, "expiryDate must be in the future");
 
-  const session = await mongoose.startSession();
-  session.startTransaction();
-  try {
-    const company = await Company.findById(companyId).session(session);
-    if (!company) throw new AppError(404, "Company not found");
+  const company = await Company.findById(companyId);
+  if (!company) throw new AppError(404, "Company not found");
 
-    company.isActive = true;
-    // Only unblock invoices if the cron auto-expired them — don't override a manual admin block
-    const wasAutoExpired = company.inactiveRemarks === "Subscription expired — access suspended by system";
-    if (wasAutoExpired) company.invoicesBlocked = false;
-    company.subscriptionExpiryDate = parsedExpiry;
-    company.inactiveRemarks = "";
-    if (amount !== undefined && amount >= 0) company.subscriptionAmount = amount;
-    await company.save({ session });
+  company.isActive = true;
+  company.subscriptionExpiryDate = parsedExpiry;
+  company.inactiveRemarks = "";
+  if (amount !== undefined && amount >= 0) company.subscriptionAmount = amount;
+  await company.save();
 
-    await SubscriptionTransaction.create([{
-      companyId,
-      type: "activated",
-      amount: company.subscriptionAmount,
-      expiryDate: parsedExpiry,
-      modeOfPayment,
-      remarks: remarks || "",
-      performedBy,
-    }], { session });
+  await SubscriptionTransaction.create({
+    companyId,
+    type: "activated",
+    amount: company.subscriptionAmount,
+    modeOfPayment,
+    remarks: remarks || "",
+    performedBy,
+  });
 
-    await session.commitTransaction();
-    return company;
-  } catch (err) {
-    await session.abortTransaction();
-    throw err;
-  } finally {
-    session.endSession();
-  }
+  return company;
 }
 
 // ─── Deactivate Company ───────────────────────────────────────────────────────
@@ -140,10 +140,14 @@ export async function deactivateCompany({ companyId, remarks, performedBy }) {
   if (!mongoose.Types.ObjectId.isValid(companyId))
     throw new AppError(400, "Invalid company ID");
   if (!remarks || !remarks.trim())
-    throw new AppError(400, "remarks are required when deactivating a company");
+    throw new AppError(400, "remarks are required when suspending a company");
 
   const company = await Company.findById(companyId);
   if (!company) throw new AppError(404, "Company not found");
+
+  const now = new Date();
+  if (!company.subscriptionExpiryDate || company.subscriptionExpiryDate <= now)
+    throw new AppError(400, "Cannot suspend a company with an expired or missing subscription. Renew the subscription first.");
 
   company.isActive = false;
   company.inactiveRemarks = remarks.trim();
@@ -160,6 +164,10 @@ export async function activateCompanyManually({ companyId, remarks, performedBy 
     throw new AppError(400, "Invalid company ID");
   const company = await Company.findById(companyId);
   if (!company) throw new AppError(404, "Company not found");
+
+  const now = new Date();
+  if (!company.subscriptionExpiryDate || company.subscriptionExpiryDate <= now)
+    throw new AppError(400, "Cannot activate a company with an expired or missing subscription. Renew the subscription first.");
 
   company.isActive = true;
   company.inactiveRemarks = "";
@@ -184,22 +192,6 @@ export async function toggleDownloads({ companyId, performedBy }) {
   return company;
 }
 
-// ─── Toggle Invoices ──────────────────────────────────────────────────────────
-// Super admin can block / unblock invoice create, edit, and compare independently.
-
-export async function toggleInvoices({ companyId }) {
-  if (!mongoose.Types.ObjectId.isValid(companyId))
-    throw new AppError(400, "Invalid company ID");
-
-  const company = await Company.findById(companyId);
-  if (!company) throw new AppError(404, "Company not found");
-
-  company.invoicesBlocked = !company.invoicesBlocked;
-  await company.save();
-
-  return company;
-}
-
 // ─── Toggle Login ─────────────────────────────────────────────────────────────
 // Super admin can block / unblock login for company admin and company users.
 
@@ -216,9 +208,35 @@ export async function toggleLogin({ companyId }) {
   return company;
 }
 
+// ─── Update Subscription Expiry Date ─────────────────────────────────────────
+
+export async function updateExpiryDate({ companyId, expiryDate, performedBy }) {
+  if (!mongoose.Types.ObjectId.isValid(companyId))
+    throw new AppError(400, "Invalid company ID");
+  if (!expiryDate) throw new AppError(400, "expiryDate is required");
+
+  const parsed = new Date(expiryDate);
+  if (isNaN(parsed.getTime())) throw new AppError(400, "Invalid expiryDate");
+
+  const company = await Company.findById(companyId);
+  if (!company) throw new AppError(404, "Company not found");
+
+  company.subscriptionExpiryDate = parsed;
+  if (parsed <= new Date()) {
+    company.isActive = false;
+    company.inactiveRemarks = "Subscription expired — access suspended by system";
+  }
+  await company.save();
+  return company;
+}
+
 // ─── Update Subscription Amount ───────────────────────────────────────────────
 
-export async function updateCompanySubscriptionAmount({ companyId, amount, performedBy }) {
+export async function updateCompanySubscriptionAmount({
+  companyId,
+  amount,
+  performedBy,
+}) {
   if (!mongoose.Types.ObjectId.isValid(companyId))
     throw new AppError(400, "Invalid company ID");
   if (amount === undefined || amount === null || amount < 0)
@@ -234,7 +252,6 @@ export async function updateCompanySubscriptionAmount({ companyId, amount, perfo
     companyId,
     type: "amount_changed",
     amount,
-    expiryDate: company.subscriptionExpiryDate,
     remarks: `Subscription amount updated to ₹${amount}`,
     performedBy,
   });
@@ -254,6 +271,20 @@ export async function getTransactionHistory(companyId) {
 }
 
 // ─── Delete Transaction ───────────────────────────────────────────────────────
+
+export async function updateTransaction(txId, { amount, modeOfPayment, remarks }) {
+  if (!mongoose.Types.ObjectId.isValid(txId))
+    throw new AppError(400, "Invalid transaction ID");
+
+  const tx = await SubscriptionTransaction.findById(txId);
+  if (!tx) throw new AppError(404, "Transaction not found");
+
+  if (amount !== undefined) tx.amount = amount >= 0 ? amount : tx.amount;
+  if (modeOfPayment !== undefined) tx.modeOfPayment = modeOfPayment || null;
+  if (remarks !== undefined) tx.remarks = remarks ?? "";
+  await tx.save();
+  return tx;
+}
 
 export async function deleteTransaction(txId) {
   if (!mongoose.Types.ObjectId.isValid(txId))
@@ -281,7 +312,7 @@ export async function runExpiryCheck() {
 
   await Company.updateMany(
     { _id: { $in: ids } },
-    { $set: { isActive: false, invoicesBlocked: true, inactiveRemarks: remark } }
+    { $set: { isActive: false, inactiveRemarks: remark } },
   );
 
   console.log(`[Cron] Auto-expired ${expired.length} subscription(s)`);
@@ -293,10 +324,14 @@ export async function runExpiryCheck() {
 export async function runTrashCleanup() {
   const { default: Invoice } = await import("../models/Invoice.js");
   const cutoff = new Date(
-    Date.now() - config.invoice.trashRetentionDays * 24 * 60 * 60 * 1000
+    Date.now() - config.invoice.trashRetentionDays * 24 * 60 * 60 * 1000,
   );
-  const result = await Invoice.deleteMany({ deletedAt: { $ne: null, $lte: cutoff } });
-  console.log(`[Cron] Permanently deleted ${result.deletedCount} trashed invoice(s)`);
+  const result = await Invoice.deleteMany({
+    deletedAt: { $ne: null, $lte: cutoff },
+  });
+  console.log(
+    `[Cron] Permanently deleted ${result.deletedCount} trashed invoice(s)`,
+  );
   return { deleted: result.deletedCount };
 }
 

@@ -11,7 +11,7 @@ export default function Login() {
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
-  const { user, setUser, setCompany } = useContext(AuthContext);
+  const { user, setUser, setCompany, setSubscriptionStatus, setSubscriptionLoaded } = useContext(AuthContext);
 
   useEffect(() => {
     if (user) {
@@ -38,7 +38,7 @@ export default function Login() {
       const res = await api.post("/auth/login", { username, password });
 
       if (res.data.success) {
-        const { user, company } = res.data.data;
+        const { user, company, subscriptionStatus } = res.data.data;
 
         const userData = {
           _id: user._id,
@@ -54,6 +54,11 @@ export default function Login() {
 
         setUser(userData);
         setCompany(company ?? null);
+
+        if (subscriptionStatus) {
+          setSubscriptionStatus(subscriptionStatus);
+          setSubscriptionLoaded(true);
+        }
 
         setTimeout(() => {
           if (userData.role === "super_admin") {

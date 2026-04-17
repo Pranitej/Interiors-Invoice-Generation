@@ -31,6 +31,7 @@ function App() {
   });
 
   const [subscriptionStatus, setSubscriptionStatus] = useState(null);
+  const [subscriptionLoaded, setSubscriptionLoaded] = useState(false);
   const lastSubscriptionHash = useRef(null);
 
   const toggleTheme = () => {
@@ -47,6 +48,7 @@ function App() {
     setUser(null);
     setCompany(null);
     setSubscriptionStatus(null);
+    setSubscriptionLoaded(false);
     localStorage.removeItem("user");
     localStorage.removeItem("company");
   };
@@ -62,6 +64,8 @@ function App() {
       }
     } catch {
       // non-critical
+    } finally {
+      setSubscriptionLoaded(true);
     }
   }, [user]);
 
@@ -74,7 +78,7 @@ function App() {
   }, [fetchSubscriptionStatus, user]);
 
   return (
-    <AuthContext.Provider value={{ user, setUser, company, setCompany, subscriptionStatus, setSubscriptionStatus, logout }}>
+    <AuthContext.Provider value={{ user, setUser, company, setCompany, subscriptionStatus, setSubscriptionStatus, subscriptionLoaded, setSubscriptionLoaded, logout }}>
       <div
         className={`${theme} min-h-screen bg-gray-50 dark:bg-slate-900 text-gray-900 dark:text-gray-100`}
       >

@@ -109,7 +109,7 @@ export async function deactivateCompany(req, res, next) {
       remarks,
       performedBy: req.user.userId,
     });
-    sendSuccess(res, company, 200, "Company deactivated");
+    sendSuccess(res, company, 200, "Company suspended");
   } catch (err) {
     next(err);
   }
@@ -132,6 +132,20 @@ export async function toggleDownloads(req, res, next) {
 }
 
 // PATCH /api/subscription/companies/:id/amount  (super admin)
+export async function updateExpiryDate(req, res, next) {
+  try {
+    const { expiryDate } = req.body;
+    const company = await SubscriptionService.updateExpiryDate({
+      companyId: req.params.id,
+      expiryDate,
+      performedBy: req.user.userId,
+    });
+    sendSuccess(res, company, 200, "Expiry date updated");
+  } catch (err) {
+    next(err);
+  }
+}
+
 export async function updateCompanySubscriptionAmount(req, res, next) {
   try {
     const { amount } = req.body;
@@ -173,16 +187,11 @@ export async function activateCompanyManually(req, res, next) {
   }
 }
 
-// PATCH /api/subscription/companies/:id/toggle-invoices  (super admin)
-export async function toggleInvoices(req, res, next) {
+// PATCH /api/subscription/transactions/:txId  (super admin)
+export async function updateTransaction(req, res, next) {
   try {
-    const company = await SubscriptionService.toggleInvoices({
-      companyId: req.params.id,
-    });
-    const msg = company.invoicesBlocked
-      ? "Invoice creation and editing blocked for this company"
-      : "Invoice creation and editing unblocked for this company";
-    sendSuccess(res, company, 200, msg);
+    const tx = await SubscriptionService.updateTransaction(req.params.txId, req.body);
+    sendSuccess(res, tx, 200, "Transaction updated");
   } catch (err) {
     next(err);
   }

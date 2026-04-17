@@ -1,5 +1,6 @@
 // server/controllers/auth.controller.js
 import * as AuthService from "../services/auth.service.js";
+import * as SubscriptionService from "../services/subscription.service.js";
 import AppError from "../utils/AppError.js";
 import { sendSuccess } from "../utils/response.js";
 import config from "../config.js";
@@ -22,7 +23,14 @@ export async function login(req, res, next) {
 
     res.cookie("token", token, { ...cookieOptions, maxAge: config.auth.cookieMaxAgeMs });
 
-    sendSuccess(res, { user, company });
+    let subscriptionStatus = null;
+    if (company?._id && user.role !== config.roles.SUPER_ADMIN) {
+      try {
+        subscriptionStatus = await SubscriptionService.getCompanySubscriptionStatus(company._id);
+      } catch { /* non-critical — client will fetch on mount */ }
+    }
+
+    sendSuccess(res, { user, company, subscriptionStatus });
   } catch (err) {
     next(err);
   }

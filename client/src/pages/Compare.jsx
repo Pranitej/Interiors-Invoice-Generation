@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 
 export default function ComparePage() {
-  const { company } = useContext(AuthContext);
+  const { company, user, subscriptionStatus, subscriptionLoaded } = useContext(AuthContext);
   const [invoiceAId, setInvoiceAId] = useState("");
   const [invoiceBId, setInvoiceBId] = useState("");
   const [invoiceAData, setInvoiceAData] = useState(null);
@@ -100,18 +100,36 @@ export default function ComparePage() {
     setInvoiceBData(invoiceAData);
   };
 
-  if (company?.invoicesBlocked) {
+  if (!subscriptionLoaded) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <RefreshCw className="w-6 h-6 text-blue-500 animate-spin" />
+      </div>
+    );
+  }
+
+  if (subscriptionStatus && !subscriptionStatus.canCreateInvoices) {
+    const isAdmin = user?.role === "company_admin";
+    const isSubscriptionExpired = subscriptionStatus.subscriptionState === "expired";
+    const amount = subscriptionStatus.subscriptionAmount ?? subscriptionStatus.platformAmount;
+
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-8 flex items-center justify-center">
-        <div className="bg-white dark:bg-gray-800 rounded-xl border border-amber-200 dark:border-amber-800 p-8 max-w-md text-center">
-          <AlertCircle className="w-12 h-12 text-amber-500 mx-auto mb-4" />
+        <div className="bg-white dark:bg-gray-800 rounded-xl border border-red-200 dark:border-red-800 p-8 max-w-md text-center">
+          <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-            Invoice Access Disabled
+            Company Suspended
           </h2>
           <p className="text-sm text-gray-600 dark:text-gray-400">
-            Invoice comparison has been disabled for your account. Please
-            contact support.
+            {isAdmin && isSubscriptionExpired
+              ? "Company suspended: subscription expired. Contact admin."
+              : "Company suspended. Contact admin."}
           </p>
+          {isAdmin && isSubscriptionExpired && amount != null && (
+            <p className="text-sm font-semibold text-gray-800 dark:text-gray-200 mt-3">
+              Subscription amount: ₹{Number(amount).toLocaleString("en-IN")}
+            </p>
+          )}
         </div>
       </div>
     );

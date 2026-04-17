@@ -1,6 +1,6 @@
 // client/src/components/ActivateSubscriptionModal.jsx
 import { useState } from "react";
-import { X, CheckCircle } from "lucide-react";
+import { X, CheckCircle, Clock } from "lucide-react";
 import API from "../api/api";
 
 const PAYMENT_MODES = ["Cash", "UPI", "Bank Transfer", "Cheque"];
@@ -20,8 +20,12 @@ function addDuration(base, { days, months }) {
   return d.toISOString().split("T")[0];
 }
 
-export default function ActivateSubscriptionModal({ companyId, companyName, currentAmount, platformAmount, onSave, onClose }) {
+export default function ActivateSubscriptionModal({ companyId, companyName, currentAmount, platformAmount, currentExpiryDate, isCurrentlyActive, onSave, onClose }) {
   const companyRate = currentAmount ?? platformAmount ?? null;
+  const hasValidSubscription = currentExpiryDate && new Date(currentExpiryDate) > new Date();
+  const activeExpiryStr = hasValidSubscription
+    ? new Date(currentExpiryDate).toISOString().split("T")[0]
+    : null;
   const [expiryDate, setExpiryDate] = useState("");
   const [amount, setAmount] = useState(companyRate ? String(companyRate) : "");
   const [modeOfPayment, setModeOfPayment] = useState("");
@@ -77,6 +81,19 @@ export default function ActivateSubscriptionModal({ companyId, companyName, curr
             </p>
           )}
 
+          {activeExpiryStr && (
+            <div className="flex items-center gap-2 px-3 py-2.5 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+              <Clock className="w-4 h-4 text-blue-500 flex-shrink-0" />
+              <div className="text-xs text-blue-800 dark:text-blue-300">
+                <span className="font-semibold">{isCurrentlyActive ? "Active subscription" : "Current subscription"}</span> expires on{" "}
+                <span className="font-semibold">
+                  {new Date(currentExpiryDate).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}
+                </span>
+                . Duration presets extend from this date.
+              </div>
+            </div>
+          )}
+
           <div>
             <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
               Subscription Expiry Date <span className="text-red-500">*</span>
@@ -94,7 +111,7 @@ export default function ActivateSubscriptionModal({ companyId, companyName, curr
                 <button
                   key={preset.label}
                   type="button"
-                  onClick={() => setExpiryDate(addDuration(expiryDate, preset))}
+                  onClick={() => setExpiryDate(addDuration(expiryDate || activeExpiryStr, preset))}
                   className="px-2.5 py-1 text-xs font-medium rounded-md border border-green-200 dark:border-green-800 text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-900/20 hover:bg-green-100 dark:hover:bg-green-900/40 transition-colors"
                 >
                   {preset.label}

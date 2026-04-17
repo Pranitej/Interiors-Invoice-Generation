@@ -50,13 +50,16 @@ export default function CompanyProfileTab({ companyId, initialCompany, onUpdate 
     try {
       const formData = new FormData();
       formData.append("logo", file);
-      const res = await api.post("/upload/logo", formData, {
+      const uploadRes = await api.post("/upload/logo", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-      setForm((f) => ({ ...f, logoFile: res.data.data.filename }));
-      setMessage({ type: "success", text: "Logo uploaded — click Save Changes to apply." });
+      const newLogoFile = uploadRes.data.data.filename;
+      const saveRes = await api.put(`/companies/${companyId}`, { ...form, logoFile: newLogoFile });
+      setForm((f) => ({ ...f, logoFile: newLogoFile }));
+      onUpdate(saveRes.data.data);
+      setMessage({ type: "success", text: "Logo updated successfully!" });
     } catch (err) {
-      setMessage({ type: "error", text: err.response?.data?.message || "Failed to upload logo" });
+      setMessage({ type: "error", text: err.response?.data?.message || "Failed to update logo" });
     } finally {
       setLogoUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
@@ -134,7 +137,7 @@ export default function CompanyProfileTab({ companyId, initialCompany, onUpdate 
             <div>
               <h2 className="text-lg font-bold text-gray-900 dark:text-white">Company Logo</h2>
               <p className="text-xs text-gray-600 dark:text-gray-400">
-                Upload a new logo (max {MAX_LOGO_MB} MB) — then click Save Changes below
+                Select an image to instantly update the logo (max {MAX_LOGO_MB} MB)
               </p>
             </div>
           </div>

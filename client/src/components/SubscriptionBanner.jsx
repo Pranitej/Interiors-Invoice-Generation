@@ -27,7 +27,8 @@ export default function SubscriptionBanner() {
   } = subscriptionStatus;
 
   const isAdmin = user.role === "company_admin";
-  const displayAmount = isAdmin ? (subscriptionAmount ?? platformAmount) : null;
+  const isSubscriptionExpired = subscriptionState === "expired";
+  const displayAmount = (isAdmin && isSubscriptionExpired) ? (subscriptionAmount ?? platformAmount) : null;
   const banners = [];
 
   // 1. Inactive company
@@ -40,7 +41,7 @@ export default function SubscriptionBanner() {
             <span className="font-semibold">Account suspended — </span>
             {inactiveRemarks
               ? inactiveRemarks
-              : "Your account is inactive. Please contact support to renew your subscription."}
+              : "Your account is suspended. Please contact support to renew your subscription."}
             {displayAmount ? (
               <span className="ml-1 font-medium">
                 Renewal amount: ₹{Number(displayAmount).toLocaleString("en-IN")}.

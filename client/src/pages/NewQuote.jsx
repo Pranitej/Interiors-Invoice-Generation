@@ -45,7 +45,7 @@ function getItemDefaults(roomName, itemName) {
 export default function NewQuote() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { user, company, subscriptionStatus } = useContext(AuthContext);
+  const { user, company, subscriptionStatus, subscriptionLoaded } = useContext(AuthContext);
 
   const prevIdRef = useRef(id);
   const isEditingRef = useRef(!!id);
@@ -393,11 +393,8 @@ export default function NewQuote() {
 
   const handleSaveInvoice = async () => {
     if (subscriptionStatus && !subscriptionStatus.canCreateInvoices) {
-      alert(
-        subscriptionStatus.inactiveRemarks
-          ? `Your account has been suspended: ${subscriptionStatus.inactiveRemarks}`
-          : "Your account is inactive. Please contact support to renew your subscription.",
-      );
+      setSaveStatus({ type: "error", message: "Company suspended. Contact admin." });
+      setTimeout(() => setSaveStatus(null), 5000);
       return;
     }
     if (!client.siteAddress.trim()) {
@@ -442,11 +439,8 @@ export default function NewQuote() {
 
   const handleSaveAsNewInvoice = async () => {
     if (subscriptionStatus && !subscriptionStatus.canCreateInvoices) {
-      alert(
-        subscriptionStatus.inactiveRemarks
-          ? `Your account has been suspended: ${subscriptionStatus.inactiveRemarks}`
-          : "Your account is inactive. Please contact support to renew your subscription.",
-      );
+      setSaveStatus({ type: "error", message: "Company suspended. Contact admin." });
+      setTimeout(() => setSaveStatus(null), 5000);
       return;
     }
     if (!client.siteAddress.trim()) {
@@ -524,18 +518,39 @@ export default function NewQuote() {
     );
   }
 
-  if (company?.invoicesBlocked) {
+  if (!subscriptionLoaded) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-4">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-gray-200 dark:border-gray-700 border-t-blue-500 rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-sm text-gray-600 dark:text-gray-400">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (subscriptionStatus && !subscriptionStatus.canCreateInvoices) {
+    const isAdmin = user?.role === config.roles.COMPANY_ADMIN;
+    const isSubscriptionExpired = subscriptionStatus.subscriptionState === "expired";
+    const amount = subscriptionStatus.subscriptionAmount ?? subscriptionStatus.platformAmount;
+
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="bg-white dark:bg-gray-800 rounded-xl border border-amber-200 dark:border-amber-800 p-8 max-w-md text-center">
-          <AlertCircle className="w-12 h-12 text-amber-500 mx-auto mb-4" />
+        <div className="bg-white dark:bg-gray-800 rounded-xl border border-red-200 dark:border-red-800 p-8 max-w-md text-center">
+          <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-            Invoice Access Disabled
+            Company Suspended
           </h2>
           <p className="text-sm text-gray-600 dark:text-gray-400">
-            {id ? "Editing invoices" : "Creating invoices"} has been disabled
-            for your account. Please contact Administrator.
+            {isAdmin && isSubscriptionExpired
+              ? "Company suspended: subscription expired. Contact admin."
+              : "Company suspended. Contact admin."}
           </p>
+          {isAdmin && isSubscriptionExpired && amount != null && (
+            <p className="text-sm font-semibold text-gray-800 dark:text-gray-200 mt-3">
+              Subscription amount: ₹{Number(amount).toLocaleString("en-IN")}
+            </p>
+          )}
         </div>
       </div>
     );
