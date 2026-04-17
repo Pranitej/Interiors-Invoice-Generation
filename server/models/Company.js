@@ -12,7 +12,14 @@ const CompanySchema = new mongoose.Schema(
     email: { type: String, default: "" },
     website: { type: String, default: "" },
     termsAndConditions: { type: [String], default: [] },
-    isActive: { type: Boolean, default: true },
+    isActive: { type: Boolean, default: false },
+    downloadsBlocked: { type: Boolean, default: false },
+    invoicesBlocked: { type: Boolean, default: false },
+    loginBlocked: { type: Boolean, default: false },
+    // Subscription fields
+    subscriptionExpiryDate: { type: Date, default: null },
+    subscriptionAmount: { type: Number, default: null },
+    inactiveRemarks: { type: String, default: "" },
   },
   { timestamps: true }
 );
