@@ -2,6 +2,8 @@
 import express from "express";
 import multer from "multer";
 import path from "path";
+import fs from "fs/promises";
+import { fileTypeFromBuffer } from "file-type";
 import authenticate from "../middleware/authenticate.js";
 import requireRole from "../middleware/requireRole.js";
 import * as UploadController from "../controllers/upload.controller.js";
@@ -37,6 +39,20 @@ router.post(
   authenticate,
   requireRole(SUPER_ADMIN),
   upload.single("logo"),
+  async (req, res, next) => {
+    if (!req.file) return next();
+    try {
+      const buf = await fs.readFile(req.file.path);
+      const detected = await fileTypeFromBuffer(buf);
+      if (!detected || !allowedMimeSet.has(detected.mime)) {
+        await fs.unlink(req.file.path).catch(() => {});
+        return sendError(res, 400, `Invalid file type. Only ${allowedLabel} images are allowed`);
+      }
+      next();
+    } catch (err) {
+      next(err);
+    }
+  },
   UploadController.uploadLogo
 );
 
