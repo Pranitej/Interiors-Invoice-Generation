@@ -20,4 +20,6 @@ const userSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+userSchema.index({ companyId: 1, deletedAt: 1 });
+
 export default mongoose.model("User", userSchema);

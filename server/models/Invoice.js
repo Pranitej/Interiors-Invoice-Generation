@@ -143,5 +143,8 @@ const InvoiceSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
+InvoiceSchema.index({ companyId: 1, deletedAt: 1, createdAt: -1 });
+InvoiceSchema.index({ createdBy: 1 });
+
 export default mongoose.models.Invoice ||
   mongoose.model("Invoice", InvoiceSchema);
