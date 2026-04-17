@@ -58,16 +58,37 @@ export async function createCompany({
 }
 
 export async function listCompanies() {
-  const companies = await Company.find().sort({ createdAt: -1 });
-  return Promise.all(
-    companies.map(async (company) => {
-      const [userCount, invoiceCount] = await Promise.all([
-        User.countDocuments({ companyId: company._id }),
-        Invoice.countDocuments({ companyId: company._id, deletedAt: null }),
-      ]);
-      return { ...company.toObject(), userCount, invoiceCount };
-    })
-  );
+  return Company.aggregate([
+    { $sort: { createdAt: -1 } },
+    {
+      $lookup: {
+        from: "users",
+        localField: "_id",
+        foreignField: "companyId",
+        as: "_users",
+      },
+    },
+    {
+      $lookup: {
+        from: "invoices",
+        let: { cid: "$_id" },
+        pipeline: [
+          { $match: { $expr: { $and: [
+            { $eq: ["$companyId", "$$cid"] },
+            { $eq: ["$deletedAt", null] }
+          ] } } },
+        ],
+        as: "_invoices",
+      },
+    },
+    {
+      $addFields: {
+        userCount: { $size: "$_users" },
+        invoiceCount: { $size: "$_invoices" },
+      },
+    },
+    { $project: { _users: 0, _invoices: 0 } },
+  ]);
 }
 
 export async function getCompanyById(id) {
