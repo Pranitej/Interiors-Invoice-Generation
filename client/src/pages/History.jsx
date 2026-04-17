@@ -84,7 +84,7 @@ export default function History() {
       setFetchError(null);
       const res = await api.get("/invoices");
       setInvoices(res.data?.data?.invoices || []);
-    } catch (error) {
+    } catch {
       setFetchError("Failed to load invoices. Please refresh the page.");
     } finally {
       setLoading(false);
@@ -100,7 +100,7 @@ export default function History() {
     try {
       const res = await api.get("/invoices/trash");
       setTrashedInvoices(res.data?.data || []);
-    } catch (err) {
+    } catch {
       setFetchError("Failed to load trash. Please refresh the page.");
     } finally {
       setLoadingTrash(false);
