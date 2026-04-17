@@ -8,14 +8,22 @@ import { runExpiryCheck, runTrashCleanup } from "../services/subscription.servic
 
 const { dailySchedule, timezone } = config.cron;
 
-function wrap(name, fn) {
+function wrap(name, fn, retries = 3) {
   return async () => {
     const start = Date.now();
-    try {
-      const result = await fn();
-      console.log(`[Cron:${name}] completed in ${Date.now() - start}ms`, result);
-    } catch (err) {
-      console.error(`[Cron:${name}] failed:`, err.message);
+    for (let attempt = 1; attempt <= retries; attempt++) {
+      try {
+        const result = await fn();
+        console.log(`[Cron:${name}] completed in ${Date.now() - start}ms`, result);
+        return;
+      } catch (err) {
+        console.error(`[Cron:${name}] attempt ${attempt}/${retries} failed:`, err.message);
+        if (attempt < retries) {
+          await new Promise((r) => setTimeout(r, attempt * 5000));
+        } else {
+          console.error(`[Cron:${name}] all ${retries} attempts failed — skipping this run`);
+        }
+      }
     }
   };
 }
