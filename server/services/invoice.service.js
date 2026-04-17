@@ -9,6 +9,15 @@ function escapeRegex(str) {
 }
 
 export async function createInvoice({ body, companyId, userId }) {
+  const { client, pricing, rooms } = body;
+
+  if (!client || typeof client !== "object")
+    throw new AppError(400, "client object is required");
+  if (!pricing || typeof pricing.frameRate !== "number" || typeof pricing.boxRate !== "number")
+    throw new AppError(400, "pricing.frameRate and pricing.boxRate (numbers) are required");
+  if (!Array.isArray(rooms))
+    throw new AppError(400, "rooms must be an array");
+
   const invoice = new Invoice({ ...body, companyId, createdBy: userId });
   await invoice.save();
   return invoice;
@@ -66,6 +75,14 @@ export async function getInvoiceById(id, companyId, createdBy = null) {
 export async function updateInvoice(id, companyId, data, ownerId = null) {
   if (!mongoose.Types.ObjectId.isValid(id))
     throw new AppError(400, "Invalid invoice ID");
+
+  if (data.pricing !== undefined) {
+    if (typeof data.pricing.frameRate !== "number" || typeof data.pricing.boxRate !== "number")
+      throw new AppError(400, "pricing.frameRate and pricing.boxRate must be numbers");
+  }
+  if (data.rooms !== undefined && !Array.isArray(data.rooms))
+    throw new AppError(400, "rooms must be an array");
+
   const { companyId: _c, createdBy: _u, _id: _i, ...safeData } = data;
   const filter = { _id: id, deletedAt: null };
   if (companyId) filter.companyId = companyId;
