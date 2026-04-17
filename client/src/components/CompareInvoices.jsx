@@ -37,7 +37,6 @@ const CompareInvoices = forwardRef(
         }
       }
       fetchInvoices();
-      console.log("Hello");
     }, [invoiceAId, invoiceBId, onLoadedA, onLoadedB]);
 
     if (loading) {

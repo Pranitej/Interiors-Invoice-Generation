@@ -19,6 +19,7 @@ import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import hpp from "hpp";
 import xss from "xss";
+import AppError from "./utils/AppError.js";
 
 const app = express();
 
@@ -92,6 +93,10 @@ app.use("/api/upload", uploadRouter);
 app.use("/api/subscription", subscriptionRouter);
 
 app.get("/", (_, res) => sendSuccess(res, null, 200, `${config.platform.name} API`));
+
+app.use((_req, _res, next) => {
+  next(new AppError(404, "Route not found"));
+});
 
 app.use(errorHandler);
 

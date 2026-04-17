@@ -39,7 +39,7 @@ export async function createCompany({
     website: website ?? "",
   });
 
-  const hashedPassword = await bcrypt.hash(adminPassword, 10);
+  const hashedPassword = await bcrypt.hash(adminPassword, config.auth.bcryptRounds);
   const adminUser = await User.create({
     username: adminUsername,
     password: hashedPassword,
