@@ -49,6 +49,7 @@ function embedLocalImages(html) {
     (match, filename) => {
       try {
         const filePath = path.join(PUBLIC_DIR, filename);
+        if (!filePath.startsWith(PUBLIC_DIR + path.sep) && filePath !== PUBLIC_DIR) return match;
         if (!fs.existsSync(filePath)) return match;
         const ext = path.extname(filename).toLowerCase();
         const mime = extToMime[ext] || "application/octet-stream";

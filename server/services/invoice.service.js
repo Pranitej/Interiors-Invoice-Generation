@@ -4,6 +4,10 @@ import Invoice from "../models/Invoice.js";
 import AppError from "../utils/AppError.js";
 import config from "../config.js";
 
+function escapeRegex(str) {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 export async function createInvoice({ body, companyId, userId }) {
   const invoice = new Invoice({ ...body, companyId, createdBy: userId });
   await invoice.save();
@@ -28,8 +32,8 @@ export async function listInvoices({
   const searchFilter = q
     ? {
         $or: [
-          { "client.name": { $regex: q, $options: "i" } },
-          { "client.mobile": { $regex: q, $options: "i" } },
+          { "client.name": { $regex: escapeRegex(q), $options: "i" } },
+          { "client.mobile": { $regex: escapeRegex(q), $options: "i" } },
         ],
       }
     : {};
