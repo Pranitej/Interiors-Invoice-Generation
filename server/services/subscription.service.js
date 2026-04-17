@@ -98,27 +98,38 @@ export async function activateSubscription({ companyId, expiryDate, amount, mode
   if (isNaN(parsedExpiry.getTime())) throw new AppError(400, "Invalid expiryDate");
   if (parsedExpiry <= new Date()) throw new AppError(400, "expiryDate must be in the future");
 
-  const company = await Company.findById(companyId);
-  if (!company) throw new AppError(404, "Company not found");
+  const session = await mongoose.startSession();
+  session.startTransaction();
+  try {
+    const company = await Company.findById(companyId).session(session);
+    if (!company) throw new AppError(404, "Company not found");
 
-  company.isActive = true;
-  company.invoicesBlocked = false;
-  company.subscriptionExpiryDate = parsedExpiry;
-  company.inactiveRemarks = "";
+    company.isActive = true;
+    // Only unblock invoices if the cron auto-expired them — don't override a manual admin block
+    const wasAutoExpired = company.inactiveRemarks === "Subscription expired — access suspended by system";
+    if (wasAutoExpired) company.invoicesBlocked = false;
+    company.subscriptionExpiryDate = parsedExpiry;
+    company.inactiveRemarks = "";
+    await company.save({ session });
 
-  await company.save();
+    await SubscriptionTransaction.create([{
+      companyId,
+      type: "activated",
+      amount: company.subscriptionAmount,
+      expiryDate: parsedExpiry,
+      modeOfPayment,
+      remarks: remarks || "",
+      performedBy,
+    }], { session });
 
-  await SubscriptionTransaction.create({
-    companyId,
-    type: "activated",
-    amount: company.subscriptionAmount,
-    expiryDate: parsedExpiry,
-    modeOfPayment,
-    remarks: remarks || "",
-    performedBy,
-  });
-
-  return company;
+    await session.commitTransaction();
+    return company;
+  } catch (err) {
+    await session.abortTransaction();
+    throw err;
+  } finally {
+    session.endSession();
+  }
 }
 
 // ─── Deactivate Company ───────────────────────────────────────────────────────
