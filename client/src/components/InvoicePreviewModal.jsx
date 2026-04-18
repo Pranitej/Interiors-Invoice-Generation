@@ -1,10 +1,19 @@
 import { useEffect, useState } from "react";
 import { X, Shield, UserCheck } from "lucide-react";
-import AdminInvoice from "./AdminInvoice";
-import ClientInvoice from "./ClientInvoice";
+import AdminInvoiceT1 from "./AdminInvoiceT1";
+import AdminInvoiceT2 from "./AdminInvoiceT2";
+import AdminInvoiceT3 from "./AdminInvoiceT3";
+import ClientInvoiceT1 from "./ClientInvoiceT1";
+import ClientInvoiceT2 from "./ClientInvoiceT2";
+import ClientInvoiceT3 from "./ClientInvoiceT3";
 
 export default function InvoicePreviewModal({ invoice, company, onClose }) {
   const [viewMode, setViewMode] = useState("admin");
+
+  const adminMap = { 1: AdminInvoiceT1, 2: AdminInvoiceT2, 3: AdminInvoiceT3 };
+  const clientMap = { 1: ClientInvoiceT1, 2: ClientInvoiceT2, 3: ClientInvoiceT3 };
+  const AdminInvoice = adminMap[company?.adminInvoiceTemplate ?? 1] ?? AdminInvoiceT1;
+  const ClientInvoice = clientMap[company?.clientInvoiceTemplate ?? 1] ?? ClientInvoiceT1;
 
   useEffect(() => {
     const handleKey = (e) => {

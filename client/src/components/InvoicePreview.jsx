@@ -1,7 +1,11 @@
 import { useState } from "react";
 import { formatINR } from "../utils/calculations";
-import AdminInvoice from "../components/AdminInvoice";
-import ClientInvoice from "./ClientInvoice";
+import AdminInvoiceT1 from "../components/AdminInvoiceT1";
+import AdminInvoiceT2 from "../components/AdminInvoiceT2";
+import AdminInvoiceT3 from "../components/AdminInvoiceT3";
+import ClientInvoiceT1 from "../components/ClientInvoiceT1";
+import ClientInvoiceT2 from "../components/ClientInvoiceT2";
+import ClientInvoiceT3 from "../components/ClientInvoiceT3";
 import { Shield, UserCheck } from "lucide-react";
 
 export default function InvoicePreview({
@@ -20,6 +24,11 @@ export default function InvoicePreview({
   company,
 }) {
   const [viewMode, setViewMode] = useState("admin"); // 'admin' or 'client'
+
+  const adminMap = { 1: AdminInvoiceT1, 2: AdminInvoiceT2, 3: AdminInvoiceT3 };
+  const clientMap = { 1: ClientInvoiceT1, 2: ClientInvoiceT2, 3: ClientInvoiceT3 };
+  const AdminInvoice = adminMap[company?.adminInvoiceTemplate ?? 1] ?? AdminInvoiceT1;
+  const ClientInvoice = clientMap[company?.clientInvoiceTemplate ?? 1] ?? ClientInvoiceT1;
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
