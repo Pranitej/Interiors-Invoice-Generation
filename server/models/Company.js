@@ -19,6 +19,10 @@ const CompanySchema = new mongoose.Schema(
     subscriptionExpiryDate: { type: Date, default: null },
     subscriptionAmount: { type: Number, default: null },
     inactiveRemarks: { type: String, default: "" },
+    // Invoice template preferences
+    adminInvoiceTemplate:   { type: Number, enum: [1, 2, 3], default: 1 },
+    clientInvoiceTemplate:  { type: Number, enum: [1, 2, 3], default: 1 },
+    compareInvoiceTemplate: { type: Number, enum: [1, 2, 3], default: 1 },
   },
   { timestamps: true }
 );
