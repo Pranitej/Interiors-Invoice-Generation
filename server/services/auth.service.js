@@ -104,7 +104,11 @@ export async function updateUser(id, companyId, body) {
     throw new AppError(400, "Invalid user ID");
   const { username, password } = body;
   const updateData = {};
-  if (username !== undefined) updateData.username = username;
+  if (username !== undefined) {
+    const conflict = await User.findOne({ username, _id: { $ne: id } });
+    if (conflict) throw new AppError(400, "Username already taken");
+    updateData.username = username;
+  }
   if (password) updateData.password = await bcrypt.hash(password, bcryptRounds);
 
   const filter = { _id: id };

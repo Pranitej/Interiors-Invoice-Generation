@@ -175,8 +175,8 @@ export default function SuperAdminDashboard() {
           </button>
         </div>
 
-        <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
-          <table className="w-full text-sm">
+        <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-x-auto">
+          <table className="w-full text-sm min-w-[640px]">
             <thead className="bg-gray-50 dark:bg-gray-900/50 border-b border-gray-200 dark:border-gray-700">
               <tr>
                 {["Company", "Status", "Subscription", "Users", "Invoices", "Actions"].map((h) => (
@@ -202,7 +202,10 @@ export default function SuperAdminDashboard() {
                 return (
                   <tr key={company._id} className="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
                     <td className="px-4 py-3">
-                      <div className="font-medium text-gray-800 dark:text-white">{company.name}</div>
+                      <div
+                        className="font-medium text-blue-600 dark:text-blue-400 hover:underline cursor-pointer"
+                        onClick={() => navigate(`/companies/${company._id}`)}
+                      >{company.name}</div>
                       <div className="text-xs text-gray-400">{company.email}</div>
                     </td>
                     <td className="px-4 py-3">
