@@ -34,6 +34,26 @@ export default function CompanyProfileTab({ companyId, initialCompany, onUpdate 
     return () => clearTimeout(timer);
   }, [message.text]);
 
+  useEffect(() => {
+    if (!initialCompany) return;
+    setForm({
+      name: initialCompany.name ?? "",
+      tagline: initialCompany.tagline ?? "",
+      registeredOffice: initialCompany.registeredOffice ?? "",
+      industryAddress: initialCompany.industryAddress ?? "",
+      phones: Array.isArray(initialCompany.phones) ? initialCompany.phones : [],
+      email: initialCompany.email ?? "",
+      website: initialCompany.website ?? "",
+      termsAndConditions: Array.isArray(initialCompany.termsAndConditions)
+        ? initialCompany.termsAndConditions
+        : [],
+      logoFile: initialCompany.logoFile ?? "",
+      adminInvoiceTemplate: initialCompany.adminInvoiceTemplate ?? 1,
+      clientInvoiceTemplate: initialCompany.clientInvoiceTemplate ?? 1,
+      compareInvoiceTemplate: initialCompany.compareInvoiceTemplate ?? 1,
+    });
+  }, [initialCompany]);
+
   const logoUrl = form.logoFile
     ? `${import.meta.env.VITE_API_BASE}/public/${form.logoFile}`
     : null;

@@ -46,7 +46,7 @@ const _tailwindSafelist =
   "bg-pink-50 dark:bg-pink-900/20 text-pink-600 dark:text-pink-400 border-pink-200 dark:border-pink-800";
 
 export default function Profile() {
-  const { user: currentUser, setUser: setCurrentUser, setCompany, subscriptionStatus } =
+  const { user: currentUser, setUser: setCurrentUser, company, setCompany, subscriptionStatus } =
     useContext(AuthContext);
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("profile");
@@ -121,6 +121,15 @@ export default function Profile() {
       setLoading(false);
     }
   }, [currentUser, navigate]);
+
+  useEffect(() => {
+    if (!company) return;
+    setTemplatesForm({
+      adminInvoiceTemplate: company.adminInvoiceTemplate ?? 1,
+      clientInvoiceTemplate: company.clientInvoiceTemplate ?? 1,
+      compareInvoiceTemplate: company.compareInvoiceTemplate ?? 1,
+    });
+  }, [company]);
 
   const fetchUsers = async () => {
     try {
