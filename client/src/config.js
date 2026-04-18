@@ -21,7 +21,7 @@ const config = {
   },
 
   company: {
-    maxTerms: 5,  // keep in sync with server/config.js company.maxTerms
+    maxTerms: 10, // keep in sync with server/config.js company.maxTerms
   },
 };
 

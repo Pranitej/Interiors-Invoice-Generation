@@ -1,6 +1,7 @@
 // src/components/ClientInvoiceT1.jsx
 import React, { forwardRef } from "react";
 import { formatINR } from "../utils/calculations";
+
 const ClientInvoiceT1 = forwardRef(({ invoice, company }, ref) => {
   if (!invoice) return null;
 
@@ -114,415 +115,559 @@ const ClientInvoiceT1 = forwardRef(({ invoice, company }, ref) => {
     ? `INV-${String(invoice._id).slice(-6).toUpperCase()}`
     : "";
 
+  const logoURL = company?.logoFile
+    ? `${import.meta.env.VITE_API_BASE}/public/${company.logoFile}`
+    : null;
+
   /* ========================================================= */
-  /* STYLE CONSTANTS                                           */
+  /* STYLE CONSTANTS - Editorial Design                        */
   /* ========================================================= */
 
   const s = {
-    // Root wrapper
-    // "bg-white text-black p-4 text-xs w-full max-w-none min-w-full"
-    // + inline style: width 800px, fontFamily
+    // Root - Cream paper background with subtle border
     root: {
-      backgroundColor: "#ffffff",
-      color: "#000000",
-      padding: "16px",
+      backgroundColor: "#faf7f0",
+      padding: "56px 48px",
       fontSize: "12px",
-      width: "800px",
-      maxWidth: "none",
+      color: "#1f1d1b",
+      width: "100%",
+      maxWidth: "210mm",
       minWidth: "100%",
-      fontFamily: "'Inter', 'Segoe UI', Arial, sans-serif",
+      fontFamily: '"Helvetica Neue", Arial, sans-serif',
+      fontWeight: "300",
+      border: "1px solid #e4dccc",
+      boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
     },
 
-    // ── Header ──────────────────────────────────────────────
-    // "border-b-2 border-gray-800 pb-3 mb-4"
-    header: {
-      borderBottom: "2px solid #1f2937",
-      paddingBottom: "12px",
-      marginBottom: "16px",
+    // Typography
+    serifDisplay: {
+      fontFamily: '"Georgia", "Cormorant Garamond", serif',
+      fontWeight: "400",
     },
-    // "flex justify-between items-start"
-    headerInner: {
+    tabularNums: {
+      fontVariantNumeric: "tabular-nums",
+    },
+
+    // Header section with double border effect
+    headerWrapper: {
+      marginBottom: "40px",
+    },
+    headerTop: {
+      borderTop: "2px solid #a89d8c",
+      borderBottom: "1px solid #a89d8c",
+      padding: "28px 0",
+      marginBottom: "0",
+    },
+    headerMain: {
       display: "flex",
       justifyContent: "space-between",
       alignItems: "flex-start",
     },
-    // "flex items-start gap-3"
     headerLeft: {
-      display: "flex",
-      alignItems: "flex-start",
-      gap: "12px",
+      flex: 1,
     },
-    // "w-16 h-16 flex-shrink-0 mt-1"
-    logoContainer: {
+    companyName: {
+      fontFamily: '"Georgia", "Cormorant Garamond", serif',
+      fontSize: "38px",
+      fontWeight: "400",
+      letterSpacing: "-0.01em",
+      color: "#1f1d1b",
+      margin: "0 0 10px 0",
+      lineHeight: "1.1",
+    },
+    companyMeta: {
+      fontSize: "10px",
+      color: "#5c564e",
+      lineHeight: "1.7",
+      margin: 0,
+      fontWeight: "300",
+    },
+    logoMonogram: {
       width: "64px",
       height: "64px",
+      border: "1.5px solid #a07c3a",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: "#ffffff",
       flexShrink: 0,
-      marginTop: "4px",
+      boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
     },
-    // "w-full h-full object-contain"
     logoImg: {
       width: "100%",
       height: "100%",
       objectFit: "contain",
     },
-    // "text-2xl font-bold tracking-tight"
-    companyName: {
-      fontSize: "24px",
-      fontWeight: "700",
-      letterSpacing: "-0.025em",
-      margin: 0,
-    },
-    // "text-[10px] text-gray-600 leading-tight mt-1"
-    companyAddressLine: {
-      fontSize: "10px",
-      color: "#4b5563",
-      lineHeight: "1.25",
-      marginTop: "4px",
-      marginBottom: 0,
-    },
-    // "text-[10px] text-gray-600"
-    companyInfoLine: {
-      fontSize: "10px",
-      color: "#4b5563",
-      margin: 0,
-    },
-    // "font-medium"
-    infoLabel: {
-      fontWeight: "500",
+    monogramFallback: {
+      fontFamily: '"Georgia", serif',
+      fontSize: "28px",
+      color: "#a07c3a",
+      fontWeight: "400",
     },
 
-    // ── Generic spacing ──────────────────────────────────────
-    // "mb-4"
-    mb4: { marginBottom: "16px" },
-    // "mb-3"
-    mb3: { marginBottom: "12px" },
-    // "mb-2"
-    mb2: { marginBottom: "8px" },
-    // "mb-1"
-    mb1: { marginBottom: "4px" },
-
-    // ── Shared table base ────────────────────────────────────
-    // "w-full border-collapse text-[11px]"
-    table11: {
-      width: "100%",
-      borderCollapse: "collapse",
-      fontSize: "11px",
-    },
-    // "w-full border-collapse text-[10px] mb-1"
-    table10mb1: {
-      width: "100%",
-      borderCollapse: "collapse",
-      fontSize: "10px",
-      marginBottom: "4px",
-    },
-    // "w-full text-[10px] border"
-    table10border: {
-      width: "100%",
-      fontSize: "10px",
-      border: "1px solid #d1d5db",
-      borderCollapse: "collapse",
-    },
-
-    // ── thead row backgrounds ────────────────────────────────
-    // "bg-gray-100"
-    bgGray100: { backgroundColor: "#f3f4f6" },
-    // "bg-gray-50"
-    bgGray50: { backgroundColor: "#f9fafb" },
-
-    // ── th / td shared ───────────────────────────────────────
-    // "p-1.5 text-left font-bold border border-gray-300"
-    thSectionHeader: {
-      padding: "6px",
-      textAlign: "left",
-      fontWeight: "700",
-      border: "1px solid #d1d5db",
-    },
-    // "p-1.5 border border-gray-300 font-medium"
-    tdLabel: {
-      padding: "6px",
-      border: "1px solid #d1d5db",
-      fontWeight: "500",
-    },
-    // "p-1.5 border border-gray-300"
-    tdValue: {
-      padding: "6px",
-      border: "1px solid #d1d5db",
-    },
-    // "p-1.5 border border-gray-300 font-semibold"
-    tdValueSemibold: {
-      padding: "6px",
-      border: "1px solid #d1d5db",
-      fontWeight: "600",
-    },
-    // "p-1.5 border border-gray-300 text-center"
-    tdCenter15: {
-      padding: "6px",
-      border: "1px solid #d1d5db",
-      textAlign: "center",
-    },
-    // "p-1.5 border border-gray-300 text-[10px] text-gray-600"
-    tdNote: {
-      padding: "6px",
-      border: "1px solid #d1d5db",
-      fontSize: "10px",
-      color: "#4b5563",
-    },
-    // "ml-1 text-[10px] font-medium text-gray-600"
-    invoiceTypeBadge: {
-      marginLeft: "4px",
-      fontSize: "10px",
-      fontWeight: "500",
-      color: "#4b5563",
-    },
-    // "text-gray-700 underline"
-    locationLink: {
-      color: "#374151",
-      textDecoration: "underline",
-    },
-
-    // ── xs table th / td ─────────────────────────────────────
-    // "p-1 border border-gray-300 text-left font-medium"
-    thLeft: {
-      padding: "4px",
-      border: "1px solid #d1d5db",
-      textAlign: "left",
-      fontWeight: "500",
-    },
-    // "p-1 border border-gray-300 text-center font-medium"
-    thCenter: {
-      padding: "4px",
-      border: "1px solid #d1d5db",
-      textAlign: "center",
-      fontWeight: "500",
-    },
-    // "p-1 border border-gray-300 align-top"
-    tdAlignTop: {
-      padding: "4px",
-      border: "1px solid #d1d5db",
-      verticalAlign: "top",
-    },
-    // "p-1 border border-gray-300 text-center"
-    tdCenter: {
-      padding: "4px",
-      border: "1px solid #d1d5db",
-      textAlign: "center",
-    },
-    // "p-1 border border-gray-300 text-right"
-    tdRight: {
-      padding: "4px",
-      border: "1px solid #d1d5db",
-      textAlign: "right",
-    },
-    // "p-1 border border-gray-300 align-top text-right font-semibold"
-    tdAlignTopRightSemibold: {
-      padding: "4px",
-      border: "1px solid #d1d5db",
-      verticalAlign: "top",
-      textAlign: "right",
-      fontWeight: "600",
-    },
-    // "p-1 border border-gray-300 text-right font-medium"
-    tdRightMedium: {
-      padding: "4px",
-      border: "1px solid #d1d5db",
-      textAlign: "right",
-      fontWeight: "500",
-    },
-    // "p-1 border border-gray-300"
-    tdPlain: {
-      padding: "4px",
-      border: "1px solid #d1d5db",
-    },
-    // "border p-1 font-bold"
-    tdBoldPlain: {
-      border: "1px solid #d1d5db",
-      padding: "4px",
-      fontWeight: "700",
-    },
-    // "border p-1 text-right font-bold"
-    tdBoldRight: {
-      border: "1px solid #d1d5db",
-      padding: "4px",
-      textAlign: "right",
-      fontWeight: "700",
-    },
-    // "border p-1 text-left w-2/5"
-    thExtrasDesc: {
-      border: "1px solid #d1d5db",
-      padding: "4px",
-      textAlign: "left",
-      width: "40%",
-    },
-    // "border p-1 text-right w-1/5"
-    thExtrasRight: {
-      border: "1px solid #d1d5db",
-      padding: "4px",
-      textAlign: "right",
-      width: "20%",
-    },
-    // "border p-1"
-    tdBorderPlain: {
-      border: "1px solid #d1d5db",
-      padding: "4px",
-    },
-    // "border p-1 text-right"
-    tdBorderRight: {
-      border: "1px solid #d1d5db",
-      padding: "4px",
-      textAlign: "right",
-    },
-    // "border p-1 text-right font-medium"
-    tdBorderRightMedium: {
-      border: "1px solid #d1d5db",
-      padding: "4px",
-      textAlign: "right",
-      fontWeight: "500",
-    },
-
-    // ── Room header ──────────────────────────────────────────
-    // "flex justify-between items-center mb-1 bg-gray-100 p-1.5"
-    roomHeader: {
+    // Invoice title section
+    invoiceTitleSection: {
       display: "flex",
       justifyContent: "space-between",
-      alignItems: "center",
+      alignItems: "flex-end",
+      marginBottom: "48px",
+      paddingBottom: "24px",
+      borderBottom: "1px solid #a89d8c",
+    },
+    invoiceMetaGrid: {
+      display: "grid",
+      gridTemplateColumns: "auto auto",
+      gap: "20px 40px",
+    },
+    metaLabel: {
+      fontSize: "9px",
+      textTransform: "uppercase",
+      letterSpacing: "0.12em",
+      color: "#5c564e",
+      fontWeight: "500",
       marginBottom: "4px",
-      backgroundColor: "#f3f4f6",
-      padding: "6px",
     },
-    // "font-bold text-[11px]"
-    roomTitle: {
-      fontWeight: "700",
-      fontSize: "11px",
+    metaValue: {
+      fontSize: "12px",
+      color: "#1f1d1b",
+      fontWeight: "400",
+      fontVariantNumeric: "tabular-nums",
     },
-    // "text-[10px] text-gray-600 ml-2"
-    roomDesc: {
-      fontSize: "10px",
-      color: "#4b5563",
+    invoiceTitle: {
+      fontFamily: '"Georgia", "Cormorant Garamond", serif',
+      fontSize: "52px",
+      fontWeight: "400",
+      letterSpacing: "0.08em",
+      color: "#1f1d1b",
+      textAlign: "right",
+      margin: 0,
+      lineHeight: "1",
+    },
+    invoiceTypeBadge: {
+      fontSize: "9px",
+      textTransform: "uppercase",
+      letterSpacing: "0.1em",
+      color: "#a07c3a",
       marginLeft: "8px",
+      fontWeight: "400",
     },
-    // "text-right"
-    textRight: { textAlign: "right" },
-    // "flex gap-4 text-[10px]"
+
+    // Client block - parchment style
+    clientBlock: {
+      backgroundColor: "#e4dccc",
+      border: "1px solid #a89d8c",
+      borderLeft: "3px solid #a07c3a",
+      padding: "28px 32px",
+      marginBottom: "48px",
+      boxShadow: "inset 0 1px 2px rgba(255,255,255,0.8)",
+    },
+    clientGrid: {
+      display: "grid",
+      gridTemplateColumns: "1fr 1fr",
+      gap: "24px 48px",
+    },
+    clientLabel: {
+      fontSize: "9px",
+      textTransform: "uppercase",
+      letterSpacing: "0.12em",
+      color: "#5c564e",
+      marginBottom: "6px",
+      fontWeight: "500",
+    },
+    clientValue: {
+      fontSize: "13px",
+      color: "#1f1d1b",
+      fontWeight: "400",
+      lineHeight: "1.6",
+    },
+    clientLink: {
+      color: "#5c564e",
+      textDecoration: "none",
+      borderBottom: "1px solid #a07c3a",
+      paddingBottom: "2px",
+    },
+
+    // Pricing section
+    pricingSection: {
+      marginBottom: "48px",
+    },
+    pricingGrid: {
+      display: "grid",
+      gridTemplateColumns: "1fr 1fr 2fr",
+      border: "1px solid #a89d8c",
+      backgroundColor: "#ffffff",
+    },
+    pricingCell: {
+      padding: "20px 24px",
+      borderRight: "1px solid #e4dccc",
+    },
+    pricingCellLast: {
+      padding: "20px 24px",
+    },
+    pricingLabel: {
+      fontSize: "9px",
+      textTransform: "uppercase",
+      letterSpacing: "0.1em",
+      color: "#5c564e",
+      marginBottom: "8px",
+      fontWeight: "500",
+    },
+    pricingValue: {
+      fontFamily: '"Georgia", "Cormorant Garamond", serif',
+      fontSize: "22px",
+      color: "#1f1d1b",
+      fontVariantNumeric: "tabular-nums",
+    },
+    pricingNote: {
+      fontSize: "10px",
+      color: "#5c564e",
+      fontStyle: "italic",
+      lineHeight: "1.6",
+    },
+
+    // Room section
+    roomSection: {
+      marginBottom: "40px",
+      border: "1px solid #e4dccc",
+      padding: "24px",
+      backgroundColor: "#ffffff",
+    },
+    roomHeader: {
+      marginBottom: "20px",
+    },
+    roomName: {
+      fontFamily: '"Georgia", "Cormorant Garamond", serif',
+      fontSize: "20px",
+      fontWeight: "400",
+      color: "#1f1d1b",
+      margin: "0 0 12px 0",
+    },
+    roomDivider: {
+      height: "1px",
+      backgroundColor: "#a07c3a",
+      marginBottom: "16px",
+      background: "linear-gradient(90deg, #a07c3a 0%, #e4dccc 100%)",
+    },
+    roomMeta: {
+      display: "flex",
+      justifyContent: "space-between",
+      marginBottom: "20px",
+    },
+    roomDesc: {
+      fontSize: "11px",
+      color: "#5c564e",
+      fontStyle: "italic",
+    },
     roomRates: {
       display: "flex",
-      gap: "16px",
+      gap: "28px",
       fontSize: "10px",
+      color: "#5c564e",
+      fontWeight: "400",
     },
 
-    // ── Room total row ───────────────────────────────────────
-    // "bg-gray-100" applied to <tr>
-    roomTotalRow: { backgroundColor: "#f3f4f6" },
+    // Table styles with fixed layout
+    tableWrapper: {
+      border: "1px solid #e4dccc",
+      marginBottom: "16px",
+      overflow: "auto",
+    },
+    table: {
+      width: "100%",
+      borderCollapse: "collapse",
+      tableLayout: "fixed",
+    },
+    tableHeader: {
+      borderBottom: "1px solid #a89d8c",
+      backgroundColor: "#faf7f0",
+    },
+    th: {
+      padding: "14px 10px",
+      fontSize: "9px",
+      textTransform: "uppercase",
+      letterSpacing: "0.1em",
+      color: "#5c564e",
+      fontWeight: "500",
+      textAlign: "left",
+      borderBottom: "1px solid #a89d8c",
+    },
+    thCenter: {
+      padding: "14px 10px",
+      fontSize: "9px",
+      textTransform: "uppercase",
+      letterSpacing: "0.1em",
+      color: "#5c564e",
+      fontWeight: "500",
+      textAlign: "center",
+      borderBottom: "1px solid #a89d8c",
+    },
+    thRight: {
+      padding: "14px 10px",
+      fontSize: "9px",
+      textTransform: "uppercase",
+      letterSpacing: "0.1em",
+      color: "#5c564e",
+      fontWeight: "500",
+      textAlign: "right",
+      borderBottom: "1px solid #a89d8c",
+    },
+    td: {
+      padding: "12px 10px",
+      fontSize: "11px",
+      color: "#1f1d1b",
+      fontWeight: "300",
+      fontVariantNumeric: "tabular-nums",
+      borderBottom: "1px solid #f0ebe0",
+      overflow: "hidden",
+      textOverflow: "ellipsis",
+      whiteSpace: "nowrap",
+    },
+    tdCenter: {
+      padding: "12px 10px",
+      fontSize: "11px",
+      color: "#1f1d1b",
+      fontWeight: "300",
+      textAlign: "center",
+      fontVariantNumeric: "tabular-nums",
+      borderBottom: "1px solid #f0ebe0",
+    },
+    tdRight: {
+      padding: "12px 10px",
+      fontSize: "11px",
+      color: "#1f1d1b",
+      fontWeight: "300",
+      textAlign: "right",
+      fontVariantNumeric: "tabular-nums",
+      borderBottom: "1px solid #f0ebe0",
+    },
+    tdBold: {
+      padding: "12px 10px",
+      fontSize: "11px",
+      color: "#1f1d1b",
+      fontWeight: "600",
+      textAlign: "right",
+      fontVariantNumeric: "tabular-nums",
+      borderBottom: "1px solid #f0ebe0",
+    },
+    rowEven: {
+      backgroundColor: "#ffffff",
+    },
+    rowOdd: {
+      backgroundColor: "#faf7f0",
+    },
 
-    // ── Extras section ───────────────────────────────────────
-    // "font-bold text-sm mb-2 border-b pb-1"
-    sectionHeading: {
-      fontWeight: "700",
-      fontSize: "14px",
-      marginBottom: "8px",
-      borderBottom: "1px solid #d1d5db",
-      paddingBottom: "4px",
-      marginTop: 0,
+    // Room total row
+    roomTotalWrapper: {
+      marginTop: "8px",
     },
-
-    // ── Summary section ──────────────────────────────────────
-    // "border p-1 font-medium"
-    tdSummaryLabel: {
-      border: "1px solid #d1d5db",
-      padding: "4px",
+    roomTotalTable: {
+      width: "100%",
+      borderCollapse: "collapse",
+      border: "1px solid #e4dccc",
+    },
+    roomTotalRow: {
+      backgroundColor: "#faf7f0",
+    },
+    roomTotalLabel: {
+      padding: "14px 16px",
+      fontSize: "11px",
+      textTransform: "uppercase",
+      letterSpacing: "0.1em",
+      color: "#5c564e",
       fontWeight: "500",
+      border: "1px solid #e4dccc",
     },
-    // "border p-1 text-right"
-    tdSummaryValue: {
-      border: "1px solid #d1d5db",
-      padding: "4px",
-      textAlign: "right",
-    },
-    // "border p-1 font-medium text-red-600"
-    tdDiscountLabel: {
-      border: "1px solid #d1d5db",
-      padding: "4px",
-      fontWeight: "500",
-      color: "#dc2626",
-    },
-    // "border p-1 text-right font-medium text-red-600"
-    tdDiscountValue: {
-      border: "1px solid #d1d5db",
-      padding: "4px",
-      textAlign: "right",
-      fontWeight: "500",
-      color: "#dc2626",
-    },
-    // "border p-1 font-medium" on bg-gray-50 row
-    tdSubTotalLabel: {
-      border: "1px solid #d1d5db",
-      padding: "4px",
-      fontWeight: "500",
-      backgroundColor: "#f9fafb",
-    },
-    // "border p-1 text-right font-medium" on bg-gray-50 row
-    tdSubTotalValue: {
-      border: "1px solid #d1d5db",
-      padding: "4px",
-      textAlign: "right",
-      fontWeight: "500",
-      backgroundColor: "#f9fafb",
-    },
-    // "border p-1 font-bold" on bg-gray-100 row
-    tdFinalLabel: {
-      border: "1px solid #d1d5db",
-      padding: "4px",
-      fontWeight: "700",
-      backgroundColor: "#f3f4f6",
-    },
-    // "border p-1 text-right font-bold text-base" on bg-gray-100 row
-    tdFinalValue: {
-      border: "1px solid #d1d5db",
-      padding: "4px",
-      textAlign: "right",
-      fontWeight: "700",
+    roomTotalValue: {
+      padding: "14px 16px",
+      fontFamily: '"Georgia", "Cormorant Garamond", serif',
       fontSize: "16px",
-      backgroundColor: "#f3f4f6",
+      color: "#1f1d1b",
+      textAlign: "right",
+      fontWeight: "400",
+      border: "1px solid #e4dccc",
+      fontVariantNumeric: "tabular-nums",
     },
 
-    // ── Footer ───────────────────────────────────────────────
-    // "mt-6 pt-4 border-t"
-    footer: {
-      marginTop: "24px",
-      paddingTop: "16px",
-      borderTop: "1px solid #d1d5db",
+    // Extras section
+    extrasSection: {
+      marginBottom: "40px",
+      border: "1px solid #e4dccc",
+      padding: "24px",
+      backgroundColor: "#ffffff",
     },
-    // "grid grid-cols-2 gap-4 text-[10px] text-gray-600"
+    extrasHeader: {
+      fontFamily: '"Georgia", "Cormorant Garamond", serif',
+      fontSize: "20px",
+      fontWeight: "400",
+      color: "#1f1d1b",
+      margin: "0 0 24px 0",
+      paddingBottom: "16px",
+      borderBottom: "1px solid #a07c3a",
+    },
+    extrasTotalRow: {
+      backgroundColor: "#faf7f0",
+    },
+    extrasTotalLabel: {
+      padding: "14px 16px",
+      fontSize: "11px",
+      textTransform: "uppercase",
+      letterSpacing: "0.1em",
+      color: "#5c564e",
+      fontWeight: "500",
+      border: "1px solid #e4dccc",
+    },
+    extrasTotalValue: {
+      padding: "14px 16px",
+      fontSize: "14px",
+      color: "#1f1d1b",
+      textAlign: "right",
+      fontWeight: "600",
+      border: "1px solid #e4dccc",
+      fontVariantNumeric: "tabular-nums",
+    },
+
+    // Grand total section
+    summarySection: {
+      marginBottom: "40px",
+      border: "1px solid #e4dccc",
+      padding: "24px",
+      backgroundColor: "#ffffff",
+    },
+    summaryHeader: {
+      fontFamily: '"Georgia", "Cormorant Garamond", serif',
+      fontSize: "20px",
+      fontWeight: "400",
+      color: "#1f1d1b",
+      margin: "0 0 24px 0",
+      paddingBottom: "16px",
+      borderBottom: "1px solid #a07c3a",
+    },
+    summaryTable: {
+      width: "100%",
+      maxWidth: "420px",
+      marginLeft: "auto",
+      borderCollapse: "collapse",
+    },
+    summaryLabel: {
+      padding: "10px 0",
+      fontSize: "11px",
+      textTransform: "uppercase",
+      letterSpacing: "0.1em",
+      color: "#5c564e",
+      textAlign: "right",
+      fontWeight: "500",
+      width: "60%",
+    },
+    summaryValue: {
+      padding: "10px 0 10px 36px",
+      fontSize: "13px",
+      color: "#1f1d1b",
+      textAlign: "right",
+      fontVariantNumeric: "tabular-nums",
+      fontWeight: "400",
+      width: "40%",
+    },
+    discountLabel: {
+      padding: "10px 0",
+      fontSize: "11px",
+      textTransform: "uppercase",
+      letterSpacing: "0.1em",
+      color: "#8b2518",
+      textAlign: "right",
+      fontWeight: "500",
+      width: "60%",
+    },
+    discountValue: {
+      padding: "10px 0 10px 36px",
+      fontSize: "13px",
+      color: "#8b2518",
+      textAlign: "right",
+      fontVariantNumeric: "tabular-nums",
+      fontWeight: "500",
+      width: "40%",
+    },
+    finalPayableRow: {
+      borderTop: "1px solid #a89d8c",
+    },
+    finalPayableLabel: {
+      padding: "18px 0 12px 0",
+      fontSize: "11px",
+      textTransform: "uppercase",
+      letterSpacing: "0.1em",
+      color: "#5c564e",
+      textAlign: "right",
+      fontWeight: "600",
+      width: "60%",
+    },
+    finalPayableValue: {
+      padding: "18px 0 12px 36px",
+      fontFamily: '"Georgia", "Cormorant Garamond", serif',
+      fontSize: "24px",
+      color: "#1f1d1b",
+      textAlign: "right",
+      fontVariantNumeric: "tabular-nums",
+      fontWeight: "400",
+      borderBottom: "2px solid #a07c3a",
+      width: "40%",
+    },
+
+    // Footer
+    footer: {
+      marginTop: "48px",
+      paddingTop: "28px",
+      borderTop: "1px solid #a89d8c",
+    },
     footerGrid: {
       display: "grid",
       gridTemplateColumns: "1fr 1fr",
-      gap: "16px",
-      fontSize: "10px",
-      color: "#4b5563",
+      gap: "40px",
     },
-    // "font-medium mb-1"
     footerLabel: {
-      fontWeight: "500",
-      marginBottom: "4px",
-      margin: "0 0 4px 0",
+      fontSize: "9px",
+      textTransform: "uppercase",
+      letterSpacing: "0.12em",
+      color: "#a07c3a",
+      marginBottom: "12px",
+      fontWeight: "600",
     },
-    // "list-disc list-inside"
-    footerList: {
-      listStyleType: "disc",
-      listStylePosition: "inside",
-      margin: 0,
-      padding: 0,
-    },
-    // "mt-4 text-center text-[10px] text-gray-500"
-    footerNote: {
-      marginTop: "16px",
-      textAlign: "center",
+    footerText: {
       fontSize: "10px",
-      color: "#6b7280",
+      color: "#5c564e",
+      margin: "0 0 4px 0",
+      lineHeight: "1.6",
     },
-
-    // Alternating rows
-    rowEven: { backgroundColor: "#ffffff" },
-    rowOdd: { backgroundColor: "#f9fafb" },
+    termsList: {
+      listStyle: "none",
+      padding: 0,
+      margin: 0,
+    },
+    termsItem: {
+      fontSize: "10px",
+      color: "#5c564e",
+      marginBottom: "6px",
+      display: "flex",
+      gap: "12px",
+      lineHeight: "1.5",
+    },
+    termsNumber: {
+      color: "#a07c3a",
+      flexShrink: 0,
+      fontWeight: "600",
+      minWidth: "20px",
+    },
+    footerThanks: {
+      marginTop: "32px",
+      paddingTop: "20px",
+      textAlign: "center",
+      borderTop: "0.5px solid #a89d8c",
+    },
+    footerThanksText: {
+      fontSize: "9px",
+      textTransform: "uppercase",
+      letterSpacing: "0.15em",
+      color: "#a07c3a",
+      fontWeight: "500",
+    },
   };
 
   /* ========================================================= */
@@ -532,154 +677,128 @@ const ClientInvoiceT1 = forwardRef(({ invoice, company }, ref) => {
   return (
     <div ref={ref} style={s.root}>
       {/* Header */}
-      <div style={s.header}>
-        <div style={s.headerInner}>
-          <div style={s.headerLeft}>
-            {/* Logo */}
-            <div style={s.logoContainer}>
-              <img
-                src={`${import.meta.env.VITE_API_BASE}/public/${company?.logoFile}`}
-                alt={`${company?.name} Logo`}
-                style={s.logoImg}
-                onError={(e) => {
-                  e.currentTarget.style.display = "none";
-                  const parent = e.currentTarget.parentElement;
-                  parent.innerHTML = `<div style="width:64px;height:64px;border:1px solid #e2e8f0;background:#f8fafc;display:flex;align-items:center;justify-content:center;border-radius:6px;"><svg xmlns='http://www.w3.org/2000/svg' width='36' height='36' viewBox='0 0 24 24' fill='none' stroke='#94a3b8' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><path d='M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z'/><polyline points='9 22 9 12 15 12 15 22'/></svg></div>`;
-                }}
-              />
-            </div>
-
-            <div>
+      <div style={s.headerWrapper}>
+        <div style={s.headerTop}>
+          <div style={s.headerMain}>
+            <div style={s.headerLeft}>
               <h1 style={s.companyName}>{company?.name}</h1>
-              <p style={s.companyAddressLine}>
-                <span style={s.infoLabel}>Regd Office:</span>{" "}
+              <p style={s.companyMeta}>
                 {company?.registeredOffice}
+                {company?.industryAddress && (
+                  <>
+                    <br />
+                    {company.industryAddress}
+                  </>
+                )}
               </p>
-              {company?.industryAddress && (
-                <p style={s.companyInfoLine}>
-                  <span style={s.infoLabel}>Industry:</span>{" "}
-                  {company.industryAddress}
-                </p>
-              )}
-              <p style={s.companyInfoLine}>
-                <span style={s.infoLabel}>Contact: </span>
-                {company?.phones.join(", ")} |{" "}
-                <span style={s.infoLabel}>Email: </span>
-                {company?.email}
+              <p style={s.companyMeta}>
+                {company?.phones.join(" · ")} · {company?.email}
+                {company?.website && <> · {company.website}</>}
               </p>
-              {company?.website && (
-                <p style={s.companyInfoLine}>
-                  <span style={s.infoLabel}>Website: </span>
-                  {company.website}
-                </p>
+            </div>
+            <div style={s.logoMonogram}>
+              {logoURL ? (
+                <img
+                  src={logoURL}
+                  alt=""
+                  style={s.logoImg}
+                  onError={(e) => {
+                    e.currentTarget.style.display = "none";
+                  }}
+                />
+              ) : (
+                <span style={s.monogramFallback}>
+                  {company?.name?.charAt(0) || "A"}
+                </span>
               )}
             </div>
           </div>
         </div>
       </div>
 
+      {/* Invoice Title */}
+      <div style={s.invoiceTitleSection}>
+        <div style={s.invoiceMetaGrid}>
+          <div>
+            <div style={s.metaLabel}>INVOICE NO.</div>
+            <div style={s.metaValue}>
+              {invoiceIdShort || "—"}
+              {invoice.invoiceType && (
+                <span style={s.invoiceTypeBadge}>({invoice.invoiceType})</span>
+              )}
+            </div>
+          </div>
+          <div>
+            <div style={s.metaLabel}>DATE</div>
+            <div style={s.metaValue}>{invoiceDate || "—"}</div>
+          </div>
+        </div>
+        <h2 style={s.invoiceTitle}>INVOICE</h2>
+      </div>
+
       {/* Client Details */}
-      <div style={s.mb4}>
-        <table style={s.table11}>
-          <thead>
-            <tr style={s.bgGray100}>
-              <th colSpan="4" style={s.thSectionHeader}>
-                CLIENT &amp; INVOICE DETAILS
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td style={s.tdLabel} width="25%">
-                Client Name
-              </td>
-              <td style={s.tdValue} width="25%">
-                {client.name || "—"}
-                {invoice.invoiceType ? (
-                  <span style={s.invoiceTypeBadge}>
-                    ({invoice.invoiceType})
-                  </span>
-                ) : null}
-              </td>
-              <td style={s.tdLabel} width="25%">
-                Proforma Invoice No
-              </td>
-              <td style={s.tdValueSemibold} width="25%">
-                {invoiceIdShort || "—"}
-              </td>
-            </tr>
-            <tr>
-              <td style={s.tdLabel}>Mobile</td>
-              <td style={s.tdValue}>{client.mobile || "—"}</td>
-              <td style={s.tdLabel}>Date</td>
-              <td style={s.tdValue}>{invoiceDate || "—"}</td>
-            </tr>
-            <tr>
-              <td style={s.tdLabel}>Email</td>
-              <td style={s.tdValue}>{client.email || "—"}</td>
-              <td style={s.tdLabel}>Site Address</td>
-              <td style={s.tdValue}>{client.siteAddress || "—"}</td>
-            </tr>
-            {client.siteMapLink && (
-              <tr>
-                <td style={s.tdLabel}>Location Map</td>
-                <td colSpan="3" style={s.tdValue}>
-                  <a
-                    href={client.siteMapLink}
-                    target="_blank"
-                    rel="noreferrer"
-                    style={s.locationLink}
-                  >
-                    {client.siteMapLink.length > 60
-                      ? client.siteMapLink.substring(0, 60) + "..."
-                      : client.siteMapLink}
-                  </a>
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+      <div style={s.clientBlock}>
+        <div style={s.clientGrid}>
+          <div>
+            <div style={s.clientLabel}>CLIENT</div>
+            <div style={s.clientValue}>{client.name || "—"}</div>
+          </div>
+          <div>
+            <div style={s.clientLabel}>MOBILE</div>
+            <div style={s.clientValue}>{client.mobile || "—"}</div>
+          </div>
+          <div>
+            <div style={s.clientLabel}>EMAIL</div>
+            <div style={s.clientValue}>{client.email || "—"}</div>
+          </div>
+          <div>
+            <div style={s.clientLabel}>SITE ADDRESS</div>
+            <div style={s.clientValue}>{client.siteAddress || "—"}</div>
+          </div>
+          {client.siteMapLink && (
+            <div style={{ gridColumn: "span 2" }}>
+              <div style={s.clientLabel}>LOCATION</div>
+              <a
+                href={client.siteMapLink}
+                target="_blank"
+                rel="noreferrer"
+                style={s.clientLink}
+              >
+                {client.siteMapLink.length > 50
+                  ? client.siteMapLink.substring(0, 50) + "..."
+                  : client.siteMapLink}
+              </a>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Pricing Summary */}
-      <div style={s.mb4}>
-        <table style={s.table11}>
-          <thead>
-            <tr style={s.bgGray100}>
-              <th colSpan="3" style={s.thSectionHeader}>
-                PRICING RATES (per sqft)
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td style={s.tdLabel} width="33%">
-                Frame Rate
-              </td>
-              <td style={s.tdLabel} width="33%">
-                Box Rate
-              </td>
-              <td style={s.tdLabel} width="34%">
-                Note
-              </td>
-            </tr>
-            <tr>
-              <td style={s.tdCenter15}>
-                {frameworkRate ? formatINR(frameworkRate) : "—"}
-              </td>
-              <td style={s.tdCenter15}>
-                {boxRate
-                  ? formatINR(boxRate)
-                  : frameworkRate
-                    ? formatINR(frameworkRate * 1.4)
-                    : "—"}
-              </td>
-              <td style={s.tdNote}>
-                Room-specific prices may vary based on requirements.
-              </td>
-            </tr>
-          </tbody>
-        </table>
+      <div style={s.pricingSection}>
+        <div style={s.pricingGrid}>
+          <div style={s.pricingCell}>
+            <div style={s.pricingLabel}>FRAME RATE (per sqft)</div>
+            <div style={s.pricingValue}>
+              {frameworkRate ? formatINR(frameworkRate) : "—"}
+            </div>
+          </div>
+          <div style={s.pricingCell}>
+            <div style={s.pricingLabel}>BOX RATE (per sqft)</div>
+            <div style={s.pricingValue}>
+              {boxRate
+                ? formatINR(boxRate)
+                : frameworkRate
+                  ? formatINR(frameworkRate * 1.4)
+                  : "—"}
+            </div>
+          </div>
+          <div style={s.pricingCellLast}>
+            <div style={s.pricingLabel}>NOTE</div>
+            <div style={s.pricingNote}>
+              Room-specific prices may vary based on requirements.
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Rooms Breakdown */}
@@ -697,228 +816,227 @@ const ClientInvoiceT1 = forwardRef(({ invoice, company }, ref) => {
         const roomTotal = calculateRoomTotal(room);
 
         return (
-          <div key={roomIndex} style={s.mb3}>
-            {/* Room Header */}
+          <div key={roomIndex} style={s.roomSection}>
             <div style={s.roomHeader}>
-              <div>
-                <span style={s.roomTitle}>
-                  ROOM: {room.name || `Room ${roomIndex + 1}`}
-                </span>
+              <h3 style={s.roomName}>{room.name || `Room ${roomIndex + 1}`}</h3>
+              <div style={s.roomDivider} />
+              <div style={s.roomMeta}>
                 {room.description && (
-                  <span style={s.roomDesc}>({room.description})</span>
+                  <span style={s.roomDesc}>{room.description}</span>
                 )}
-              </div>
-              <div style={s.textRight}>
                 <div style={s.roomRates}>
-                  <span>
-                    <span style={s.infoLabel}>Frame Rate:</span>{" "}
-                    {formatINR(roomFrameRate)}
-                  </span>
-                  <span>
-                    <span style={s.infoLabel}>Box Rate:</span>{" "}
-                    {formatINR(roomBoxRate)}
-                  </span>
+                  <span>Frame: {formatINR(roomFrameRate)}/sqft</span>
+                  <span>Box: {formatINR(roomBoxRate)}/sqft</span>
                 </div>
               </div>
             </div>
 
             {/* Items Table */}
             {(room.items || []).length > 0 && (
-              <table style={s.table10mb1}>
-                <thead>
-                  <tr style={s.bgGray50}>
-                    <th style={s.thLeft} width="20%">
-                      Item
-                    </th>
-                    <th style={s.thCenter} width="12%">
-                      Work Type
-                    </th>
-                    {/* Width, Height, Depth columns intentionally omitted (commented out in original) */}
-                    <th style={s.thCenter} width="12%">
-                      Area (sqft)
-                    </th>
-                    <th style={s.thCenter} width="10%">
-                      Price
-                    </th>
-                    <th style={s.thCenter} width="10%">
-                      Total
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {(room.items || []).map((item, itemIndex) => {
-                    const hasFrame = item.frame && item.frame.area > 0;
-                    const hasBox = item.box && item.box.area > 0;
-                    const itemTotal = calculateItemTotal(item);
-                    const rowSpan = hasFrame && hasBox ? 2 : 1;
-                    const rowBg = itemIndex % 2 === 0 ? s.rowEven : s.rowOdd;
+              <div style={s.tableWrapper}>
+                <table style={s.table}>
+                  <colgroup>
+                    <col style={{ width: "35%" }} />
+                    <col style={{ width: "15%" }} />
+                    <col style={{ width: "15%" }} />
+                    <col style={{ width: "15%" }} />
+                    <col style={{ width: "20%" }} />
+                  </colgroup>
+                  <thead>
+                    <tr style={s.tableHeader}>
+                      <th style={s.th}>ITEM</th>
+                      <th style={s.thCenter}>TYPE</th>
+                      <th style={s.thRight}>AREA (sqft)</th>
+                      <th style={s.thRight}>RATE</th>
+                      <th style={s.thRight}>TOTAL</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {(room.items || []).map((item, itemIndex) => {
+                      const hasFrame = item.frame && item.frame.area > 0;
+                      const hasBox = item.box && item.box.area > 0;
+                      const itemTotal = calculateItemTotal(item);
+                      const rowSpan = hasFrame && hasBox ? 2 : 1;
+                      const rowStyle =
+                        itemIndex % 2 === 0 ? s.rowEven : s.rowOdd;
 
-                    return (
-                      <React.Fragment key={itemIndex}>
-                        {hasFrame && (
-                          <tr style={rowBg}>
-                            {rowSpan > 1 ? (
-                              <td rowSpan={rowSpan} style={s.tdAlignTop}>
-                                <div style={s.infoLabel}>{item.name}</div>
+                      return (
+                        <React.Fragment key={itemIndex}>
+                          {hasFrame && (
+                            <tr style={rowStyle}>
+                              {rowSpan > 1 ? (
+                                <td
+                                  rowSpan={rowSpan}
+                                  style={{ ...s.td, fontWeight: "500" }}
+                                >
+                                  {item.name}
+                                </td>
+                              ) : (
+                                <td style={{ ...s.td, fontWeight: "500" }}>
+                                  {item.name}
+                                </td>
+                              )}
+                              <td style={s.tdCenter}>Frame</td>
+                              <td style={s.tdRight}>
+                                {item.frame.area.toFixed(2)}
                               </td>
-                            ) : (
-                              <td style={s.tdAlignTop}>
-                                <div style={s.infoLabel}>{item.name}</div>
+                              <td style={s.tdRight}>
+                                {formatINR(item.frame.price)}
                               </td>
-                            )}
-                            <td style={s.tdCenter}>Frame</td>
-                            {/* Width, Height, Depth cells intentionally omitted (commented out in original) */}
-                            <td style={s.tdCenter}>
-                              {item.frame.area.toFixed(2)}
-                            </td>
-                            <td style={s.tdRight}>
-                              {formatINR(item.frame.price)}
-                            </td>
-                            {rowSpan > 1 ? (
-                              <td
-                                rowSpan={rowSpan}
-                                style={s.tdAlignTopRightSemibold}
-                              >
-                                {formatINR(itemTotal)}
+                              {rowSpan > 1 ? (
+                                <td rowSpan={rowSpan} style={s.tdBold}>
+                                  {formatINR(itemTotal)}
+                                </td>
+                              ) : (
+                                <td style={s.tdBold}>{formatINR(itemTotal)}</td>
+                              )}
+                            </tr>
+                          )}
+                          {hasBox && (
+                            <tr style={rowStyle}>
+                              {!hasFrame && (
+                                <td style={{ ...s.td, fontWeight: "500" }}>
+                                  {item.name}
+                                </td>
+                              )}
+                              <td style={s.tdCenter}>Box</td>
+                              <td style={s.tdRight}>
+                                {item.box.area.toFixed(2)}
                               </td>
-                            ) : (
-                              <td style={s.tdAlignTopRightSemibold}>
-                                {formatINR(itemTotal)}
+                              <td style={s.tdRight}>
+                                {formatINR(item.box.price)}
                               </td>
-                            )}
-                          </tr>
-                        )}
-                        {hasBox && (
-                          <tr style={rowBg}>
-                            {!hasFrame && (
-                              <td style={s.tdAlignTop}>
-                                <div style={s.infoLabel}>{item.name}</div>
-                              </td>
-                            )}
-                            <td style={s.tdCenter}>Box</td>
-                            {/* Width, Height, Depth cells intentionally omitted (commented out in original) */}
-                            <td style={s.tdCenter}>
-                              {item.box.area.toFixed(2)}
-                            </td>
-                            <td style={s.tdRight}>
-                              {formatINR(item.box.price)}
-                            </td>
-                            {!hasFrame && (
-                              <td style={s.tdAlignTopRightSemibold}>
-                                {formatINR(itemTotal)}
-                              </td>
-                            )}
-                          </tr>
-                        )}
-                      </React.Fragment>
-                    );
-                  })}
-                </tbody>
-              </table>
+                              {!hasFrame && (
+                                <td style={s.tdBold}>{formatINR(itemTotal)}</td>
+                              )}
+                            </tr>
+                          )}
+                        </React.Fragment>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
             )}
 
             {/* Accessories Table */}
             {room.accessories?.length > 0 && (
-              <table style={s.table10mb1}>
-                <thead>
-                  <tr style={s.bgGray50}>
-                    <th colSpan="4" style={s.thLeft}>
-                      ACCESSORIES
-                    </th>
-                  </tr>
-                  <tr style={s.bgGray100}>
-                    <th style={s.thLeft} width="50%">
-                      Name
-                    </th>
-                    <th style={s.thCenter} width="17%">
-                      Unit Price
-                    </th>
-                    <th style={s.thCenter} width="16%">
-                      Qty
-                    </th>
-                    <th style={s.thCenter} width="17%">
-                      Total
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {room.accessories.map((acc, idx) => {
-                    const total = (acc.price || 0) * (acc.qty || 0);
-                    return (
-                      <tr
-                        key={idx}
-                        style={idx % 2 === 0 ? s.rowEven : s.rowOdd}
-                      >
-                        <td style={s.tdPlain}>{acc.name}</td>
-                        <td style={s.tdRight}>{formatINR(acc.price)}</td>
-                        <td style={s.tdCenter}>{acc.qty}</td>
-                        <td style={s.tdRightMedium}>{formatINR(total)}</td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+              <div style={s.tableWrapper}>
+                <table style={s.table}>
+                  <colgroup>
+                    <col style={{ width: "40%" }} />
+                    <col style={{ width: "20%" }} />
+                    <col style={{ width: "15%" }} />
+                    <col style={{ width: "25%" }} />
+                  </colgroup>
+                  <thead>
+                    <tr style={s.tableHeader}>
+                      <th style={s.th} colSpan={4}>
+                        ACCESSORIES
+                      </th>
+                    </tr>
+                    <tr style={s.tableHeader}>
+                      <th style={s.th}>NAME</th>
+                      <th style={s.thRight}>UNIT PRICE</th>
+                      <th style={s.thCenter}>QTY</th>
+                      <th style={s.thRight}>TOTAL</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {room.accessories.map((acc, idx) => {
+                      const total = (acc.price || 0) * (acc.qty || 0);
+                      return (
+                        <tr
+                          key={idx}
+                          style={idx % 2 === 0 ? s.rowEven : s.rowOdd}
+                        >
+                          <td style={s.td}>{acc.name}</td>
+                          <td style={s.tdRight}>{formatINR(acc.price)}</td>
+                          <td style={s.tdCenter}>{acc.qty}</td>
+                          <td style={s.tdBold}>{formatINR(total)}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
             )}
 
             {/* Room Total */}
-            <table style={s.table10border}>
-              <tbody>
-                <tr style={s.bgGray100}>
-                  <td style={s.tdBoldPlain} colSpan="3">
-                    Room Total (Items + Accessories)
-                  </td>
-                  <td style={s.tdBoldRight}>{formatINR(roomTotal || 0)}</td>
-                </tr>
-              </tbody>
-            </table>
+            <div style={s.roomTotalWrapper}>
+              <table style={s.roomTotalTable}>
+                <tbody>
+                  <tr style={s.roomTotalRow}>
+                    <td style={s.roomTotalLabel} colSpan="3">
+                      Room Total (Items + Accessories)
+                    </td>
+                    <td style={s.roomTotalValue}>
+                      {formatINR(roomTotal || 0)}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
         );
       })}
 
       {/* Extras */}
       {extras.length > 0 && (
-        <div style={s.mb4}>
-          <h3 style={s.sectionHeading}>Additional Services</h3>
-          <table style={s.table10border}>
-            <thead>
-              <tr style={s.bgGray50}>
-                <th style={s.thExtrasDesc}>Description</th>
-                <th style={s.thExtrasRight}>Quantity/Area</th>
-                <th style={s.thExtrasRight}>Rate</th>
-                <th style={s.thExtrasRight}>Amount</th>
-              </tr>
-            </thead>
-            <tbody>
-              {extras.map((ex) => {
-                const inputs = safeInputs(ex.inputs || {});
-                const key = ex._id || ex.id || ex.key;
+        <div style={s.extrasSection}>
+          <h3 style={s.extrasHeader}>Additional Services</h3>
+          <div style={s.tableWrapper}>
+            <table style={s.table}>
+              <colgroup>
+                <col style={{ width: "40%" }} />
+                <col style={{ width: "20%" }} />
+                <col style={{ width: "20%" }} />
+                <col style={{ width: "20%" }} />
+              </colgroup>
+              <thead>
+                <tr style={s.tableHeader}>
+                  <th style={s.th}>DESCRIPTION</th>
+                  <th style={s.thRight}>QUANTITY/AREA</th>
+                  <th style={s.thRight}>RATE</th>
+                  <th style={s.thRight}>AMOUNT</th>
+                </tr>
+              </thead>
+              <tbody>
+                {extras.map((ex, idx) => {
+                  const inputs = safeInputs(ex.inputs || {});
+                  const key = ex._id || ex.id || ex.key;
 
-                return (
-                  <tr key={key}>
-                    <td style={s.tdBorderPlain}>{ex.label}</td>
-                    <td style={s.tdBorderRight}>
-                      {ex.type === "ceiling"
-                        ? inputs.surfaces?.length || 1
-                        : ex.type === "area_based"
-                          ? `${inputs.area} sq.ft`
-                          : "Fixed"}
-                    </td>
-                    <td style={s.tdBorderRight}>
-                      {ex.type === "ceiling"
-                        ? "As per design"
-                        : ex.type === "area_based"
-                          ? formatINR(inputs.unitPrice)
-                          : formatINR(inputs.price)}
-                    </td>
-                    <td style={s.tdBorderRightMedium}>{formatINR(ex.total)}</td>
-                  </tr>
-                );
-              })}
-              <tr style={s.bgGray50}>
-                <td style={s.tdBoldPlain} colSpan="3">
+                  return (
+                    <tr key={key} style={idx % 2 === 0 ? s.rowEven : s.rowOdd}>
+                      <td style={s.td}>{ex.label}</td>
+                      <td style={s.tdRight}>
+                        {ex.type === "ceiling"
+                          ? inputs.surfaces?.length || 1
+                          : ex.type === "area_based"
+                            ? `${inputs.area} sq.ft`
+                            : "Fixed"}
+                      </td>
+                      <td style={s.tdRight}>
+                        {ex.type === "ceiling"
+                          ? "As per design"
+                          : ex.type === "area_based"
+                            ? formatINR(inputs.unitPrice)
+                            : formatINR(inputs.price)}
+                      </td>
+                      <td style={s.tdBold}>{formatINR(ex.total)}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+          <table style={{ ...s.roomTotalTable, marginTop: "16px" }}>
+            <tbody>
+              <tr style={s.extrasTotalRow}>
+                <td style={s.extrasTotalLabel} colSpan="3">
                   Extras Total
                 </td>
-                <td style={s.tdBoldRight}>{formatINR(extrasTotal)}</td>
+                <td style={s.extrasTotalValue}>{formatINR(extrasTotal)}</td>
               </tr>
             </tbody>
           </table>
@@ -926,65 +1044,72 @@ const ClientInvoiceT1 = forwardRef(({ invoice, company }, ref) => {
       )}
 
       {/* Summary */}
-      <div style={s.mb4}>
-        <h3 style={s.sectionHeading}>Summary</h3>
-        <table style={s.table10border}>
+      <div style={s.summarySection}>
+        <h3 style={s.summaryHeader}>Summary</h3>
+        <table style={s.summaryTable}>
+          <colgroup>
+            <col style={{ width: "60%" }} />
+            <col style={{ width: "40%" }} />
+          </colgroup>
           <tbody>
             <tr>
-              <td style={s.tdSummaryLabel}>Total Room Work</td>
-              <td style={s.tdSummaryValue}>{formatINR(roomsTotal)}</td>
+              <td style={s.summaryLabel}>Total Room Work</td>
+              <td style={s.summaryValue}>{formatINR(roomsTotal)}</td>
             </tr>
             {extrasTotal > 0 && (
               <tr>
-                <td style={s.tdSummaryLabel}>Additional Services</td>
-                <td style={s.tdSummaryValue}>+ {formatINR(extrasTotal)}</td>
+                <td style={s.summaryLabel}>Additional Services</td>
+                <td style={s.summaryValue}>+ {formatINR(extrasTotal)}</td>
               </tr>
             )}
-            {/* Sub Total */}
             <tr>
-              <td style={s.tdSubTotalLabel}>Sub Total</td>
-              <td style={s.tdSubTotalValue}>{formatINR(grandTotal)}</td>
+              <td style={s.summaryLabel}>Subtotal</td>
+              <td style={s.summaryValue}>{formatINR(grandTotal)}</td>
             </tr>
-            {/* Discount */}
             {safeDiscount > 0 && (
               <tr>
-                <td style={s.tdDiscountLabel}>Discount</td>
-                <td style={s.tdDiscountValue}>- {formatINR(safeDiscount)}</td>
+                <td style={s.discountLabel}>Discount</td>
+                <td style={s.discountValue}>− {formatINR(safeDiscount)}</td>
               </tr>
             )}
-            {/* Final Amount */}
-            <tr>
-              <td style={s.tdFinalLabel}>FINAL AMOUNT</td>
-              <td style={s.tdFinalValue}>{formatINR(finalPayable)}</td>
+            <tr style={s.finalPayableRow}>
+              <td style={s.finalPayableLabel}>Final Amount</td>
+              <td style={s.finalPayableValue}>{formatINR(finalPayable)}</td>
             </tr>
           </tbody>
         </table>
       </div>
 
-      {/* Terms and Footer */}
+      {/* Footer */}
       <div style={s.footer}>
         <div style={s.footerGrid}>
           <div>
-            <p style={s.footerLabel}>Contact Details:</p>
-            <p style={{ margin: 0 }}>{company?.phones.join(" | ")}</p>
-            <p style={{ margin: 0 }}>{company?.email}</p>
+            <div style={s.footerLabel}>Contact Details</div>
+            <p style={s.footerText}>{company?.phones.join(" · ")}</p>
+            <p style={s.footerText}>{company?.email}</p>
+            {company?.website && <p style={s.footerText}>{company.website}</p>}
           </div>
           {(company?.termsAndConditions ?? []).length > 0 && (
             <div>
-              <p style={s.footerLabel}>Terms:</p>
-              <ul style={s.footerList}>
+              <div style={s.footerLabel}>Terms &amp; Conditions</div>
+              <ul style={s.termsList}>
                 {company.termsAndConditions.map((term, i) => (
-                  <li key={i}>{term}</li>
+                  <li key={i} style={s.termsItem}>
+                    <span style={s.termsNumber}>
+                      {String(i + 1).padStart(2, "0")}
+                    </span>
+                    <span>{term}</span>
+                  </li>
                 ))}
               </ul>
             </div>
           )}
         </div>
-        <div style={s.footerNote}>
-          <p style={{ margin: 0 }}>
+        <div style={s.footerThanks}>
+          <span style={s.footerThanksText}>
             Thank you for considering {company?.name}. We look forward to
             serving you.
-          </p>
+          </span>
         </div>
       </div>
     </div>

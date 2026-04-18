@@ -22,7 +22,10 @@ const CompareInvoicesT1 = forwardRef(
         try {
           setLoading(true);
           setError(null);
-          const res = await api.post("/invoices/compare", { invoiceAId, invoiceBId });
+          const res = await api.post("/invoices/compare", {
+            invoiceAId,
+            invoiceBId,
+          });
           setInvoiceA(res.data.data.invoiceA);
           setInvoiceB(res.data.data.invoiceB);
           onLoadedA?.(res.data.data.invoiceA);
@@ -41,65 +44,30 @@ const CompareInvoicesT1 = forwardRef(
 
     if (loading) {
       return (
-        <div
-          style={{
-            textAlign: "center",
-            padding: "48px 0",
-          }}
-        >
-          <div
-            style={{
-              display: "inline-block",
-              animation: "spin 1s linear infinite",
-              borderRadius: "50%",
-              height: "32px",
-              width: "32px",
-              borderBottom: "2px solid #4b5563",
-            }}
-          ></div>
-          <p
-            style={{
-              marginTop: "8px",
-              color: "#4b5563",
-            }}
-          >
-            Loading comparison report...
-          </p>
-          <style>
-            {`
-              @keyframes spin {
-                from { transform: rotate(0deg); }
-                to { transform: rotate(360deg); }
-              }
-            `}
-          </style>
+        <div style={s.loadingContainer}>
+          <div style={s.spinner}></div>
+          <p style={s.loadingText}>Loading comparison report...</p>
+          <style>{`
+            @keyframes spin {
+              from { transform: rotate(0deg); }
+              to { transform: rotate(360deg); }
+            }
+          `}</style>
         </div>
       );
     }
 
     if (error) {
       return (
-        <div
-          style={{
-            textAlign: "center",
-            padding: "48px 0",
-            color: "#dc2626",
-          }}
-        >
-          <p>{error}</p>
+        <div style={s.errorContainer}>
+          <p style={s.errorText}>{error}</p>
         </div>
       );
     }
 
     if (!invoiceA || !invoiceB) {
       return (
-        <div
-          style={{
-            textAlign: "center",
-            padding: "48px 0",
-            color: "#6b7280",
-          }}
-        >
+        <div style={s.emptyContainer}>
           Please select two invoices to compare
         </div>
       );
@@ -213,539 +181,235 @@ function InvoiceComparisonReport({ invoiceA, invoiceB, company }, ref) {
     100
   ).toFixed(1);
 
-  // Fixed width for printing
-  const pageWidth = "210mm"; // A4 width
-  const contentWidth = "190mm";
+  const logoURL = company?.logoFile
+    ? `${import.meta.env.VITE_API_BASE}/public/${company.logoFile}`
+    : `${import.meta.env.VITE_API_BASE}/public/${config.platform.logoFile}`;
+
+  const companyData = company || config.platform;
 
   return (
-    <div
-      ref={ref}
-      id="invoice-comparison-report"
-      style={{
-        backgroundColor: "white",
-        color: "#1f2937",
-        fontFamily: "'Inter', 'Segoe UI', Arial, sans-serif",
-        fontSize: "14px",
-        lineHeight: "1.5",
-        width: pageWidth,
-        margin: "0 auto",
-        border: "1px solid #d1d5db",
-        boxShadow: "0 1px 3px 0 rgba(0, 0, 0, 0.1)",
-        WebkitPrintColorAdjust: "exact",
-        printColorAdjust: "exact",
-      }}
-    >
-      {/* Report Header */}
-      <div
-        style={{
-          borderBottom: "2px solid #1f2937",
-          padding: "8px 10px",
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "flex-start",
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              alignItems: "flex-start",
-              gap: "12px",
-            }}
-          >
-            {/* Logo Container */}
-            <div
-              style={{
-                width: "64px",
-                height: "64px",
-                flexShrink: 0,
-                marginTop: "4px",
-              }}
-            >
+    <div ref={ref} id="invoice-comparison-report" style={s.root}>
+      {/* Header */}
+      <div style={s.headerWrapper}>
+        <div style={s.headerTop}>
+          <div style={s.headerMain}>
+            <div style={s.headerLeft}>
+              <h1 style={s.companyName}>{companyData.name}</h1>
+              <p style={s.companyMeta}>
+                {companyData.registeredOffice}
+                {companyData.industryAddress && (
+                  <>
+                    <br />
+                    {companyData.industryAddress}
+                  </>
+                )}
+              </p>
+              <p style={s.companyMeta}>
+                {companyData.phones.join(" · ")} · {companyData.email}
+              </p>
+            </div>
+            <div style={s.logoMonogram}>
               <img
-                src={`${import.meta.env.VITE_API_BASE}/public/${(company ?? config.platform).logoFile}`}
-                alt={`${(company ?? config.platform).name} Logo`}
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  objectFit: "contain",
-                }}
+                src={logoURL}
+                alt=""
+                style={s.logoImg}
                 onError={(e) => {
                   e.currentTarget.style.display = "none";
-                  const parent = e.currentTarget.parentElement;
-                  parent.innerHTML = `<div style="width:64px;height:64px;border:1px solid #e2e8f0;background:#f8fafc;display:flex;align-items:center;justify-content:center;border-radius:6px;"><svg xmlns='http://www.w3.org/2000/svg' width='36' height='36' viewBox='0 0 24 24' fill='none' stroke='#94a3b8' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><path d='M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z'/><polyline points='9 22 9 12 15 12 15 22'/></svg></div>`;
                 }}
               />
-            </div>
-
-            <div>
-              <h1
-                style={{
-                  fontSize: "24px",
-                  fontWeight: "bold",
-                  letterSpacing: "-0.025em",
-                  margin: 0,
-                }}
-              >
-                {(company ?? config.platform).name}
-              </h1>
-              <p
-                style={{
-                  fontSize: "10px",
-                  color: "#4b5563",
-                  lineHeight: "1.25",
-                  marginTop: "4px",
-                  marginBottom: "2px",
-                }}
-              >
-                <span style={{ fontWeight: "500" }}>Regd Office:</span>{" "}
-                {(company ?? config.platform).registeredOffice}
-              </p>
-              <p
-                style={{
-                  fontSize: "10px",
-                  color: "#4b5563",
-                  marginBottom: "2px",
-                }}
-              >
-                <span style={{ fontWeight: "500" }}>Industry:</span>{" "}
-                {(company ?? config.platform).industryAddress}
-              </p>
-              <p
-                style={{
-                  fontSize: "10px",
-                  color: "#4b5563",
-                }}
-              >
-                <span style={{ fontWeight: "500" }}>Contact: </span>
-                {(company ?? config.platform).phones.join(", ")} |{" "}
-                <span style={{ fontWeight: "500" }}>Email: </span>
-                {(company ?? config.platform).email}
-              </p>
+              {!logoURL && (
+                <span style={s.monogramFallback}>
+                  {companyData.name?.charAt(0) || "A"}
+                </span>
+              )}
             </div>
           </div>
         </div>
       </div>
 
-      {/* Invoice Comparison Header */}
-      <div
-        style={{
-          padding: "24px 40px",
-          backgroundColor: "#f9fafb",
-          borderBottom: "1px solid #e5e7eb",
-        }}
-      >
+      {/* Report Title */}
+      <div style={s.reportTitleSection}>
+        <div style={s.reportMeta}>
+          <div style={s.metaLabel}>COMPARISON REPORT</div>
+          <div style={s.metaValue}>
+            {new Date().toLocaleDateString("en-IN", {
+              day: "numeric",
+              month: "short",
+              year: "numeric",
+            })}
+          </div>
+        </div>
+        <h2 style={s.reportTitle}>INVOICE COMPARISON</h2>
+      </div>
+
+      {/* Total Difference Banner */}
+      <div style={s.differenceBanner}>
+        <div style={s.differenceLabel}>Total Difference</div>
         <div
           style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
+            ...s.differenceValue,
+            color:
+              totalDifference > 0
+                ? "#059669"
+                : totalDifference < 0
+                  ? "#8b2518"
+                  : "#1f1d1b",
           }}
         >
-          <div>
-            <h2
-              style={{
-                fontSize: "18px",
-                fontWeight: "bold",
-                color: "#1f2937",
-                margin: 0,
-              }}
-            >
-              INVOICE COMPARISON
-            </h2>
-            <p
-              style={{
-                fontSize: "14px",
-                color: "#4b5563",
-                marginTop: "4px",
-                marginBottom: 0,
-              }}
-            >
-              Detailed comparison between two invoices
-            </p>
-          </div>
-          <div style={{ textAlign: "right" }}>
-            <p
-              style={{
-                fontSize: "14px",
-                color: "#4b5563",
-                marginBottom: "4px",
-              }}
-            >
-              Total Difference
-            </p>
-            <p
-              style={{
-                fontSize: "20px",
-                fontWeight: "bold",
-                margin: 0,
-                color:
-                  totalDifference > 0
-                    ? "#059669"
-                    : totalDifference < 0
-                      ? "#dc2626"
-                      : "#1f2937",
-              }}
-            >
-              {totalDifference > 0 ? "+" : ""}
-              {formatINR(Math.abs(totalDifference))}
-            </p>
-          </div>
+          {totalDifference > 0 ? "+" : ""}
+          {formatINR(Math.abs(totalDifference))}
+        </div>
+        <div style={s.differenceMeta}>
+          {percentageDifference}% · {roomsA.length} vs {roomsB.length} rooms
         </div>
       </div>
 
       {/* Invoice Details Side by Side */}
-      <div
-        style={{
-          padding: "24px 40px",
-          borderBottom: "1px solid #e5e7eb",
-        }}
-      >
-        <h3
-          style={{
-            fontSize: "16px",
-            fontWeight: "bold",
-            color: "#1f2937",
-            marginBottom: "16px",
-          }}
-        >
-          INVOICE DETAILS
-        </h3>
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr",
-            gap: "32px",
-            width: contentWidth,
-          }}
-        >
+      <div style={s.sectionBlock}>
+        <h3 style={s.sectionHeader}>INVOICE DETAILS</h3>
+        <div style={s.twoColumnGrid}>
           {/* Invoice A */}
-          <div>
-            <div
-              style={{
-                border: "1px solid #e5e7eb",
-                borderRadius: "6px",
-                padding: "16px",
-              }}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  marginBottom: "12px",
-                }}
-              >
-                <h4
-                  style={{
-                    fontWeight: "bold",
-                    color: "#1f2937",
-                    margin: 0,
-                  }}
-                >
-                  INVOICE A
-                </h4>
-                <span
-                  style={{
-                    fontSize: "12px",
-                    backgroundColor: "#f3f4f6",
-                    color: "#374151",
-                    padding: "2px 8px",
-                    borderRadius: "4px",
-                  }}
-                >
-                  {invoiceA.invoiceType || "Proforma"}
-                </span>
-              </div>
-              <table style={{ width: "100%", fontSize: "14px" }}>
-                <tbody>
-                  <DetailRow label="Invoice No" value={invoiceIdShortA} />
-                  <DetailRow label="Date" value={invoiceDateA} />
-                  <DetailRow label="Client" value={clientA.name} />
-                  <DetailRow label="Mobile" value={clientA.mobile} />
-                  <DetailRow
-                    label="Site Address"
-                    value={clientA.siteAddress}
-                    fullWidth
-                  />
-                  <tr style={{ borderTop: "1px solid #e5e7eb" }}>
-                    <td style={{ padding: "8px 0", fontWeight: "500" }}>
-                      Total Amount
-                    </td>
-                    <td
-                      style={{
-                        padding: "8px 0",
-                        textAlign: "right",
-                        fontWeight: "bold",
-                      }}
-                    >
-                      {formatINR(finalPayableA)}
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+          <div style={s.invoiceCard}>
+            <div style={s.invoiceCardHeader}>
+              <h4 style={s.invoiceCardTitle}>INVOICE A</h4>
+              <span style={s.invoiceTypeBadge}>
+                {invoiceA.invoiceType || "Proforma"}
+              </span>
             </div>
+            <table style={s.detailTable}>
+              <tbody>
+                <DetailRow label="Invoice No" value={invoiceIdShortA} />
+                <DetailRow label="Date" value={invoiceDateA} />
+                <DetailRow label="Client" value={clientA.name} />
+                <DetailRow label="Mobile" value={clientA.mobile} />
+                <DetailRow
+                  label="Site Address"
+                  value={clientA.siteAddress}
+                  fullWidth
+                />
+                <tr>
+                  <td colSpan="2" style={s.detailDivider}></td>
+                </tr>
+                <tr>
+                  <td style={s.detailTotalLabel}>Total Amount</td>
+                  <td style={s.detailTotalValue}>{formatINR(finalPayableA)}</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
 
           {/* Invoice B */}
-          <div>
-            <div
-              style={{
-                border: "1px solid #e5e7eb",
-                borderRadius: "6px",
-                padding: "16px",
-              }}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  marginBottom: "12px",
-                }}
-              >
-                <h4
-                  style={{
-                    fontWeight: "bold",
-                    color: "#1f2937",
-                    margin: 0,
-                  }}
-                >
-                  INVOICE B
-                </h4>
-                <span
-                  style={{
-                    fontSize: "12px",
-                    backgroundColor: "#f3f4f6",
-                    color: "#374151",
-                    padding: "2px 8px",
-                    borderRadius: "4px",
-                  }}
-                >
-                  {invoiceB.invoiceType || "Proforma"}
-                </span>
-              </div>
-              <table style={{ width: "100%", fontSize: "14px" }}>
-                <tbody>
-                  <DetailRow label="Invoice No" value={invoiceIdShortB} />
-                  <DetailRow label="Date" value={invoiceDateB} />
-                  <DetailRow label="Client" value={clientB.name} />
-                  <DetailRow label="Mobile" value={clientB.mobile} />
-                  <DetailRow
-                    label="Site Address"
-                    value={clientB.siteAddress}
-                    fullWidth
-                  />
-                  <tr style={{ borderTop: "1px solid #e5e7eb" }}>
-                    <td style={{ padding: "8px 0", fontWeight: "500" }}>
-                      Total Amount
-                    </td>
-                    <td
-                      style={{
-                        padding: "8px 0",
-                        textAlign: "right",
-                        fontWeight: "bold",
-                      }}
-                    >
-                      {formatINR(finalPayableB)}
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+          <div style={s.invoiceCard}>
+            <div style={s.invoiceCardHeader}>
+              <h4 style={s.invoiceCardTitle}>INVOICE B</h4>
+              <span style={s.invoiceTypeBadge}>
+                {invoiceB.invoiceType || "Proforma"}
+              </span>
             </div>
+            <table style={s.detailTable}>
+              <tbody>
+                <DetailRow label="Invoice No" value={invoiceIdShortB} />
+                <DetailRow label="Date" value={invoiceDateB} />
+                <DetailRow label="Client" value={clientB.name} />
+                <DetailRow label="Mobile" value={clientB.mobile} />
+                <DetailRow
+                  label="Site Address"
+                  value={clientB.siteAddress}
+                  fullWidth
+                />
+                <tr>
+                  <td colSpan="2" style={s.detailDivider}></td>
+                </tr>
+                <tr>
+                  <td style={s.detailTotalLabel}>Total Amount</td>
+                  <td style={s.detailTotalValue}>{formatINR(finalPayableB)}</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
 
       {/* Quick Comparison Summary */}
-      <div
-        style={{
-          padding: "24px 40px",
-          borderBottom: "1px solid #e5e7eb",
-        }}
-      >
-        <h3
-          style={{
-            fontSize: "16px",
-            fontWeight: "bold",
-            color: "#1f2937",
-            marginBottom: "16px",
-          }}
-        >
-          QUICK COMPARISON
-        </h3>
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr 1fr 1fr",
-            gap: "16px",
-            width: contentWidth,
-          }}
-        >
+      <div style={s.sectionBlock}>
+        <h3 style={s.sectionHeader}>QUICK COMPARISON</h3>
+        <div style={s.quickCompareGrid}>
           <SummaryCard
             label="Rooms Difference"
             valueA={roomsTotalA}
             valueB={roomsTotalB}
+            clientAName={clientA.name}
+            clientBName={clientB.name}
           />
           <SummaryCard
             label="Extras Difference"
             valueA={extrasTotalA}
             valueB={extrasTotalB}
+            clientAName={clientA.name}
+            clientBName={clientB.name}
           />
           <SummaryCard
             label="Discount Difference"
             valueA={discountA}
             valueB={discountB}
+            clientAName={clientA.name}
+            clientBName={clientB.name}
+            isDiscount
           />
           <SummaryCard
             label="Total Difference"
             valueA={finalPayableA}
             valueB={finalPayableB}
+            clientAName={clientA.name}
+            clientBName={clientB.name}
             highlight
           />
-        </div>
-        <div
-          style={{
-            marginTop: "16px",
-            paddingTop: "16px",
-            borderTop: "1px solid #e5e7eb",
-          }}
-        >
-          <p
-            style={{
-              fontSize: "14px",
-              color: "#4b5563",
-              margin: 0,
-            }}
-          >
-            Percentage Difference:{" "}
-            <span style={{ fontWeight: "500" }}>{percentageDifference}%</span> |{" "}
-            {roomsA.length} rooms vs {roomsB.length} rooms | {extrasA.length}{" "}
-            extras vs {extrasB.length} extras
-          </p>
         </div>
       </div>
 
       {/* Pricing Comparison */}
-      <div
-        style={{
-          padding: "24px 40px",
-          borderBottom: "1px solid #e5e7eb",
-        }}
-      >
-        <h3
-          style={{
-            fontSize: "16px",
-            fontWeight: "bold",
-            color: "#1f2937",
-            marginBottom: "16px",
-          }}
-        >
-          PRICING COMPARISON
-        </h3>
-        <table
-          style={{
-            width: "100%",
-            fontSize: "14px",
-            border: "1px solid #e5e7eb",
-          }}
-        >
-          <thead>
-            <tr style={{ backgroundColor: "#f9fafb" }}>
-              <th
-                style={{
-                  padding: "12px",
-                  textAlign: "left",
-                  fontWeight: "500",
-                  borderBottom: "1px solid #e5e7eb",
-                }}
-              >
-                Rate Type
-              </th>
-              <th
-                style={{
-                  padding: "12px",
-                  textAlign: "right",
-                  fontWeight: "500",
-                  borderBottom: "1px solid #e5e7eb",
-                }}
-              >
-                {clientA.name}
-              </th>
-              <th
-                style={{
-                  padding: "12px",
-                  textAlign: "right",
-                  fontWeight: "500",
-                  borderBottom: "1px solid #e5e7eb",
-                }}
-              >
-                {clientB.name}
-              </th>
-              <th
-                style={{
-                  padding: "12px",
-                  textAlign: "right",
-                  fontWeight: "500",
-                  borderBottom: "1px solid #e5e7eb",
-                }}
-              >
-                Difference
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            <ComparisonRow
-              label="Frame Work Rate (per sqft)"
-              valueA={frameworkRateA}
-              valueB={frameworkRateB}
-            />
-            <ComparisonRow
-              label="Box Work Rate (per sqft)"
-              valueA={boxRateA}
-              valueB={boxRateB}
-            />
-          </tbody>
-        </table>
+      <div style={s.sectionBlock}>
+        <h3 style={s.sectionHeader}>PRICING COMPARISON</h3>
+        <div style={s.tableWrapper}>
+          <table style={s.table}>
+            <colgroup>
+              <col style={{ width: "40%" }} />
+              <col style={{ width: "20%" }} />
+              <col style={{ width: "20%" }} />
+              <col style={{ width: "20%" }} />
+            </colgroup>
+            <thead>
+              <tr style={s.tableHeader}>
+                <th style={s.th}>RATE TYPE</th>
+                <th style={s.thRight}>{clientA.name}</th>
+                <th style={s.thRight}>{clientB.name}</th>
+                <th style={s.thRight}>DIFFERENCE</th>
+              </tr>
+            </thead>
+            <tbody>
+              <ComparisonRow
+                label="Frame Work Rate (per sqft)"
+                valueA={frameworkRateA}
+                valueB={frameworkRateB}
+              />
+              <ComparisonRow
+                label="Box Work Rate (per sqft)"
+                valueA={boxRateA}
+                valueB={boxRateB}
+              />
+            </tbody>
+          </table>
+        </div>
       </div>
 
-      {/* Roomwise Comparison - Professional Compact */}
+      {/* Roomwise Comparison */}
       {(roomsA.length > 0 || roomsB.length > 0) && (
-        <div
-          style={{
-            padding: "24px 40px",
-            borderBottom: "1px solid #e5e7eb",
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              marginBottom: "16px",
-            }}
-          >
-            <h3
-              style={{
-                fontSize: "16px",
-                fontWeight: "bold",
-                color: "#1f2937",
-                margin: 0,
-              }}
-            >
-              ROOM WISE COMPARISON
-            </h3>
-            <div
-              style={{
-                fontSize: "14px",
-                color: "#4b5563",
-              }}
-            >
-              {roomsA.length} rooms vs {roomsB.length} rooms
-            </div>
+        <div style={s.sectionBlock}>
+          <div style={s.sectionHeaderWithMeta}>
+            <h3 style={s.sectionHeader}>ROOM WISE COMPARISON</h3>
+            <span style={s.sectionMeta}>
+              {roomsA.length} vs {roomsB.length} rooms
+            </span>
           </div>
 
           {(() => {
@@ -764,7 +428,6 @@ function InvoiceComparisonReport({ invoiceA, invoiceB, company }, ref) {
                 aggB.roomTotal,
               );
 
-              // Get room-specific rates
               const roomFrameRateA =
                 typeof roomA.frameRate === "number"
                   ? roomA.frameRate
@@ -779,636 +442,141 @@ function InvoiceComparisonReport({ invoiceA, invoiceB, company }, ref) {
                 typeof roomB.boxRate === "number" ? roomB.boxRate : boxRateB;
 
               return (
-                <div
-                  key={idx}
-                  style={{
-                    marginBottom: "16px",
-                    border: "1px solid #e5e7eb",
-                    borderRadius: "4px",
-                    overflow: "hidden",
-                  }}
-                >
+                <div key={idx} style={s.roomCard}>
                   {/* Room Header */}
-                  <div
-                    style={{
-                      backgroundColor: "#f3f4f6",
-                      padding: "12px 16px",
-                    }}
-                  >
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                      }}
-                    >
-                      <div>
-                        <div
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "12px",
-                          }}
-                        >
-                          <span
-                            style={{
-                              fontSize: "14px",
-                              fontWeight: "600",
-                              color: "#374151",
-                            }}
-                          >
-                            Room {idx + 1}
-                          </span>
-                          <span
-                            style={{
-                              fontSize: "14px",
-                              fontWeight: "500",
-                              color: "#1f2937",
-                            }}
-                          >
-                            {roomA.name || roomB.name || "Unnamed Room"}
-                          </span>
-                        </div>
-                        {roomA.description || roomB.description ? (
-                          <p
-                            style={{
-                              fontSize: "12px",
-                              color: "#4b5563",
-                              marginTop: "4px",
-                              marginBottom: 0,
-                            }}
-                          >
-                            {roomA.description || roomB.description}
-                          </p>
-                        ) : null}
-                      </div>
-                      <div style={{ textAlign: "right" }}>
-                        <div
-                          style={{
-                            fontSize: "12px",
-                            color: "#4b5563",
-                          }}
-                        >
-                          Total Difference
-                        </div>
-                        <div
-                          style={{
-                            fontSize: "14px",
-                            fontWeight: "600",
-                            color:
-                              roomDifference > 0
-                                ? "#059669"
-                                : roomDifference < 0
-                                  ? "#dc2626"
-                                  : "#4b5563",
-                          }}
-                        >
-                          {roomDifference > 0 ? "+" : ""}
-                          {formatINR(Math.abs(roomDifference))}
-                        </div>
+                  <div style={s.roomCardHeader}>
+                    <div>
+                      <span style={s.roomNumber}>Room {idx + 1}</span>
+                      <span style={s.roomNameText}>
+                        {roomA.name || roomB.name || "Unnamed Room"}
+                      </span>
+                      {(roomA.description || roomB.description) && (
+                        <span style={s.roomDescription}>
+                          ({roomA.description || roomB.description})
+                        </span>
+                      )}
+                    </div>
+                    <div style={s.roomDifference}>
+                      <div style={s.roomDifferenceLabel}>Difference</div>
+                      <div
+                        style={{
+                          ...s.roomDifferenceValue,
+                          color:
+                            roomDifference > 0
+                              ? "#059669"
+                              : roomDifference < 0
+                                ? "#8b2518"
+                                : "#5c564e",
+                        }}
+                      >
+                        {roomDifference > 0 ? "+" : ""}
+                        {formatINR(Math.abs(roomDifference))}
                       </div>
                     </div>
                   </div>
 
-                  {/* Room Content */}
-                  <div style={{ padding: 0 }}>
-                    {/* Comparison Table */}
-                    <div style={{ overflowX: "visible" }}>
-                      <table style={{ width: "100%", fontSize: "12px" }}>
-                        <thead>
-                          <tr style={{ borderBottom: "1px solid #e5e7eb" }}>
-                            <th
-                              style={{
-                                paddingBottom: "8px",
-                                textAlign: "center",
-                                fontWeight: "500",
-                                color: "#374151",
-                                borderRight: "2px solid #d1d5db",
-                              }}
-                              rowSpan="2"
-                            >
-                              Item
-                            </th>
+                  {/* Comparison Table */}
+                  <div id="hello" style={s.tableWrapper}>
+                    <table style={s.table}>
+                      <colgroup>
+                        <col style={{ width: "20%" }} />
+                        <col style={{ width: "13%" }} />
+                        <col style={{ width: "13%" }} />
+                        <col style={{ width: "13%" }} />
+                        <col style={{ width: "13%" }} />
+                        <col style={{ width: "13%" }} />
+                        <col style={{ width: "15%" }} />
+                      </colgroup>
+                      <thead>
+                        <tr style={s.tableHeader}>
+                          <th style={s.th}>ITEM</th>
+                          <th style={s.thRight} colSpan="3">
+                            {clientA.name}
+                          </th>
+                          <th style={s.thRight} colSpan="3">
+                            {clientB.name}
+                          </th>
+                        </tr>
+                        <tr style={s.tableSubHeader}>
+                          <th style={s.th}></th>
+                          <th style={s.thRight}>RATE</th>
+                          <th style={s.thRight}>AREA</th>
+                          <th style={s.thRight}>AMOUNT</th>
+                          <th style={s.thRight}>RATE</th>
+                          <th style={s.thRight}>AREA</th>
+                          <th style={s.thRight}>AMOUNT</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {/* Frame Work */}
+                        <tr style={idx % 2 === 0 ? s.rowEven : s.rowOdd}>
+                          <td style={s.td}>Frame Work</td>
+                          <td style={s.tdRight}>{formatINR(roomFrameRateA)}</td>
+                          <td style={s.tdRight}>
+                            {aggA.frameAreaTotal?.toFixed(2) || "0.00"}
+                          </td>
+                          <td style={s.tdRight}>
+                            {formatINR(aggA.framePriceTotal || 0)}
+                          </td>
+                          <td style={s.tdRight}>{formatINR(roomFrameRateB)}</td>
+                          <td style={s.tdRight}>
+                            {aggB.frameAreaTotal?.toFixed(2) || "0.00"}
+                          </td>
+                          <td style={s.tdRight}>
+                            {formatINR(aggB.framePriceTotal || 0)}
+                          </td>
+                        </tr>
 
-                            {/* Invoice A Header */}
-                            <th
-                              style={{
-                                padding: "4px 0",
-                                textAlign: "center",
-                                fontWeight: "500",
-                                color: "#374151",
-                                borderRight: "2px solid #d1d5db",
-                              }}
-                              colSpan="3"
-                            >
-                              {clientA.name}
-                            </th>
+                        {/* Box Work */}
+                        <tr style={idx % 2 === 0 ? s.rowOdd : s.rowEven}>
+                          <td style={s.td}>Box Work</td>
+                          <td style={s.tdRight}>{formatINR(roomBoxRateA)}</td>
+                          <td style={s.tdRight}>
+                            {aggA.boxAreaTotal?.toFixed(2) || "0.00"}
+                          </td>
+                          <td style={s.tdRight}>
+                            {formatINR(aggA.boxPriceTotal || 0)}
+                          </td>
+                          <td style={s.tdRight}>{formatINR(roomBoxRateB)}</td>
+                          <td style={s.tdRight}>
+                            {aggB.boxAreaTotal?.toFixed(2) || "0.00"}
+                          </td>
+                          <td style={s.tdRight}>
+                            {formatINR(aggB.boxPriceTotal || 0)}
+                          </td>
+                        </tr>
 
-                            {/* Invoice B Header */}
-                            <th
-                              style={{
-                                padding: "4px 0",
-                                textAlign: "center",
-                                fontWeight: "500",
-                                color: "#374151",
-                                borderRight: "2px solid #d1d5db",
-                              }}
-                              colSpan="3"
-                            >
-                              {clientB.name}
-                            </th>
+                        {/* Accessories */}
+                        <tr style={idx % 2 === 0 ? s.rowEven : s.rowOdd}>
+                          <td style={s.td}>Accessories</td>
+                          <td style={s.tdRightMuted}>—</td>
+                          <td style={s.tdRightMuted}>—</td>
+                          <td style={s.tdRight}>
+                            {formatINR(aggA.accessoriesTotal || 0)}
+                          </td>
+                          <td style={s.tdRightMuted}>—</td>
+                          <td style={s.tdRightMuted}>—</td>
+                          <td style={s.tdRight}>
+                            {formatINR(aggB.accessoriesTotal || 0)}
+                          </td>
+                        </tr>
 
-                            {/* Difference Header */}
-                            <th
-                              style={{
-                                paddingBottom: "8px",
-                                textAlign: "center",
-                                fontWeight: "500",
-                                color: "#374151",
-                              }}
-                              rowSpan="2"
-                            >
-                              Difference
-                            </th>
-                          </tr>
-                          <tr style={{ borderBottom: "1px solid #e5e7eb" }}>
-                            {/* Invoice A Sub-headers */}
-                            <th
-                              style={{
-                                padding: "4px 0",
-                                textAlign: "center",
-                                fontWeight: "500",
-                                color: "#374151",
-                                borderRight: "1px solid #e5e7eb",
-                              }}
-                            >
-                              Rate
-                            </th>
-                            <th
-                              style={{
-                                padding: "4px 0",
-                                textAlign: "center",
-                                fontWeight: "500",
-                                color: "#374151",
-                                borderRight: "1px solid #e5e7eb",
-                              }}
-                            >
-                              Area
-                            </th>
-                            <th
-                              style={{
-                                padding: "4px 0",
-                                textAlign: "center",
-                                fontWeight: "500",
-                                color: "#374151",
-                                borderRight: "2px solid #d1d5db",
-                              }}
-                            >
-                              Amount
-                            </th>
-
-                            {/* Invoice B Sub-headers */}
-                            <th
-                              style={{
-                                padding: "4px 0",
-                                textAlign: "center",
-                                fontWeight: "500",
-                                color: "#374151",
-                                borderRight: "1px solid #e5e7eb",
-                              }}
-                            >
-                              Rate
-                            </th>
-                            <th
-                              style={{
-                                padding: "4px 0",
-                                textAlign: "center",
-                                fontWeight: "500",
-                                color: "#374151",
-                                borderRight: "1px solid #e5e7eb",
-                              }}
-                            >
-                              Area
-                            </th>
-                            <th
-                              style={{
-                                padding: "4px 0",
-                                textAlign: "center",
-                                fontWeight: "500",
-                                color: "#374151",
-                                borderRight: "2px solid #d1d5db",
-                              }}
-                            >
-                              Amount
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {/* Frame Work */}
-                          <tr style={{ borderBottom: "1px solid #f3f4f6" }}>
-                            <td
-                              style={{
-                                padding: "8px",
-                                fontWeight: "500",
-                                borderRight: "2px solid #d1d5db",
-                              }}
-                            >
-                              Frame Work
-                            </td>
-
-                            {/* Invoice A */}
-                            <td
-                              style={{
-                                padding: "8px",
-                                textAlign: "center",
-                                fontWeight: "500",
-                                borderRight: "1px solid #e5e7eb",
-                              }}
-                            >
-                              {formatINR(roomFrameRateA)}
-                            </td>
-                            <td
-                              style={{
-                                padding: "8px",
-                                textAlign: "center",
-                                borderRight: "1px solid #e5e7eb",
-                              }}
-                            >
-                              {aggA.frameAreaTotal?.toFixed(2) || "0.00"}
-                            </td>
-                            <td
-                              style={{
-                                padding: "8px",
-                                textAlign: "center",
-                                fontWeight: "500",
-                                borderRight: "2px solid #d1d5db",
-                              }}
-                            >
-                              {formatINR(aggA.framePriceTotal || 0)}
-                            </td>
-
-                            {/* Invoice B */}
-                            <td
-                              style={{
-                                padding: "8px",
-                                textAlign: "center",
-                                fontWeight: "500",
-                                borderRight: "1px solid #e5e7eb",
-                              }}
-                            >
-                              {formatINR(roomFrameRateB)}
-                            </td>
-                            <td
-                              style={{
-                                padding: "8px",
-                                textAlign: "center",
-                                borderRight: "1px solid #e5e7eb",
-                              }}
-                            >
-                              {aggB.frameAreaTotal?.toFixed(2) || "0.00"}
-                            </td>
-                            <td
-                              style={{
-                                padding: "8px",
-                                textAlign: "center",
-                                fontWeight: "500",
-                                borderRight: "2px solid #d1d5db",
-                              }}
-                            >
-                              {formatINR(aggB.framePriceTotal || 0)}
-                            </td>
-
-                            {/* Difference */}
-                            <td style={{ padding: "8px", textAlign: "center" }}>
-                              <div>
-                                <div
-                                  style={{
-                                    fontWeight: "500",
-                                    color:
-                                      getDifference(
-                                        aggA.framePriceTotal,
-                                        aggB.framePriceTotal,
-                                      ) > 0
-                                        ? "#059669"
-                                        : getDifference(
-                                              aggA.framePriceTotal,
-                                              aggB.framePriceTotal,
-                                            ) < 0
-                                          ? "#dc2626"
-                                          : "#4b5563",
-                                  }}
-                                >
-                                  {getDifference(
-                                    aggA.framePriceTotal,
-                                    aggB.framePriceTotal,
-                                  ) > 0
-                                    ? "+"
-                                    : ""}
-                                  {formatINR(
-                                    Math.abs(
-                                      getDifference(
-                                        aggA.framePriceTotal,
-                                        aggB.framePriceTotal,
-                                      ),
-                                    ),
-                                  )}
-                                </div>
-                              </div>
-                            </td>
-                          </tr>
-
-                          {/* Box Work */}
-                          <tr style={{ borderBottom: "1px solid #f3f4f6" }}>
-                            <td
-                              style={{
-                                padding: "8px",
-                                fontWeight: "500",
-                                borderRight: "2px solid #d1d5db",
-                              }}
-                            >
-                              Box Work
-                            </td>
-
-                            {/* Invoice A */}
-                            <td
-                              style={{
-                                padding: "8px",
-                                textAlign: "center",
-                                fontWeight: "500",
-                                borderRight: "1px solid #e5e7eb",
-                              }}
-                            >
-                              {formatINR(roomBoxRateA)}
-                            </td>
-                            <td
-                              style={{
-                                padding: "8px",
-                                textAlign: "center",
-                                borderRight: "1px solid #e5e7eb",
-                              }}
-                            >
-                              {aggA.boxAreaTotal?.toFixed(2) || "0.00"}
-                            </td>
-                            <td
-                              style={{
-                                padding: "8px",
-                                textAlign: "center",
-                                fontWeight: "500",
-                                borderRight: "2px solid #d1d5db",
-                              }}
-                            >
-                              {formatINR(aggA.boxPriceTotal || 0)}
-                            </td>
-
-                            {/* Invoice B */}
-                            <td
-                              style={{
-                                padding: "8px",
-                                textAlign: "center",
-                                fontWeight: "500",
-                                borderRight: "1px solid #e5e7eb",
-                              }}
-                            >
-                              {formatINR(roomBoxRateB)}
-                            </td>
-                            <td
-                              style={{
-                                padding: "8px",
-                                textAlign: "center",
-                                borderRight: "1px solid #e5e7eb",
-                              }}
-                            >
-                              {aggB.boxAreaTotal?.toFixed(2) || "0.00"}
-                            </td>
-                            <td
-                              style={{
-                                padding: "8px",
-                                textAlign: "center",
-                                fontWeight: "500",
-                                borderRight: "2px solid #d1d5db",
-                              }}
-                            >
-                              {formatINR(aggB.boxPriceTotal || 0)}
-                            </td>
-
-                            {/* Difference */}
-                            <td style={{ padding: "8px", textAlign: "center" }}>
-                              <div>
-                                <div
-                                  style={{
-                                    fontWeight: "500",
-                                    color:
-                                      getDifference(
-                                        aggA.boxPriceTotal,
-                                        aggB.boxPriceTotal,
-                                      ) > 0
-                                        ? "#059669"
-                                        : getDifference(
-                                              aggA.boxPriceTotal,
-                                              aggB.boxPriceTotal,
-                                            ) < 0
-                                          ? "#dc2626"
-                                          : "#4b5563",
-                                  }}
-                                >
-                                  {getDifference(
-                                    aggA.boxPriceTotal,
-                                    aggB.boxPriceTotal,
-                                  ) > 0
-                                    ? "+"
-                                    : ""}
-                                  {formatINR(
-                                    Math.abs(
-                                      getDifference(
-                                        aggA.boxPriceTotal,
-                                        aggB.boxPriceTotal,
-                                      ),
-                                    ),
-                                  )}
-                                </div>
-                              </div>
-                            </td>
-                          </tr>
-
-                          {/* Accessories */}
-                          <tr style={{ borderBottom: "1px solid #f3f4f6" }}>
-                            <td
-                              style={{
-                                padding: "8px",
-                                fontWeight: "500",
-                                borderRight: "2px solid #d1d5db",
-                              }}
-                            >
-                              Accessories
-                            </td>
-
-                            {/* Invoice A */}
-                            <td
-                              style={{
-                                padding: "8px",
-                                textAlign: "center",
-                                color: "#9ca3af",
-                                borderRight: "1px solid #e5e7eb",
-                              }}
-                            >
-                              -
-                            </td>
-                            <td
-                              style={{
-                                padding: "8px",
-                                textAlign: "center",
-                                color: "#9ca3af",
-                                borderRight: "1px solid #e5e7eb",
-                              }}
-                            >
-                              -
-                            </td>
-                            <td
-                              style={{
-                                padding: "8px",
-                                textAlign: "center",
-                                fontWeight: "500",
-                                borderRight: "2px solid #d1d5db",
-                              }}
-                            >
-                              {formatINR(aggA.accessoriesTotal || 0)}
-                            </td>
-
-                            {/* Invoice B */}
-                            <td
-                              style={{
-                                padding: "8px",
-                                textAlign: "center",
-                                color: "#9ca3af",
-                                borderRight: "1px solid #e5e7eb",
-                              }}
-                            >
-                              -
-                            </td>
-                            <td
-                              style={{
-                                padding: "8px",
-                                textAlign: "center",
-                                color: "#9ca3af",
-                                borderRight: "1px solid #e5e7eb",
-                              }}
-                            >
-                              -
-                            </td>
-                            <td
-                              style={{
-                                padding: "8px",
-                                textAlign: "center",
-                                fontWeight: "500",
-                                borderRight: "2px solid #d1d5db",
-                              }}
-                            >
-                              {formatINR(aggB.accessoriesTotal || 0)}
-                            </td>
-
-                            {/* Difference */}
-                            <td
-                              style={{
-                                padding: "8px",
-                                textAlign: "center",
-                                fontWeight: "500",
-                              }}
-                            >
-                              <div
-                                style={{
-                                  color:
-                                    getDifference(
-                                      aggA.accessoriesTotal,
-                                      aggB.accessoriesTotal,
-                                    ) > 0
-                                      ? "#059669"
-                                      : getDifference(
-                                            aggA.accessoriesTotal,
-                                            aggB.accessoriesTotal,
-                                          ) < 0
-                                        ? "#dc2626"
-                                        : "#4b5563",
-                                }}
-                              >
-                                {getDifference(
-                                  aggA.accessoriesTotal,
-                                  aggB.accessoriesTotal,
-                                ) > 0
-                                  ? "+"
-                                  : ""}
-                                {formatINR(
-                                  Math.abs(
-                                    getDifference(
-                                      aggA.accessoriesTotal,
-                                      aggB.accessoriesTotal,
-                                    ),
-                                  ),
-                                )}
-                              </div>
-                            </td>
-                          </tr>
-
-                          {/* Room Total */}
-                          <tr style={{ backgroundColor: "#f9fafb" }}>
-                            <td
-                              style={{
-                                padding: "12px",
-                                fontWeight: "600",
-                                color: "#1f2937",
-                                borderRight: "2px solid #d1d5db",
-                              }}
-                            >
-                              Room Total
-                            </td>
-                            <td
-                              style={{
-                                padding: "12px",
-                                textAlign: "center",
-                                fontWeight: "600",
-                                color: "#1f2937",
-                                borderRight: "2px solid #d1d5db",
-                              }}
-                              colSpan="3"
-                            >
+                        {/* Room Total */}
+                        <tr style={s.roomTotalRow}>
+                          <td style={s.tdBold}>Room Total</td>
+                          <td style={s.tdRight} colSpan="3">
+                            <span style={s.tdBold}>
                               {formatINR(aggA.roomTotal)}
-                            </td>
-                            <td
-                              style={{
-                                padding: "12px",
-                                textAlign: "center",
-                                fontWeight: "600",
-                                color: "#1f2937",
-                                borderRight: "2px solid #d1d5db",
-                              }}
-                              colSpan="3"
-                            >
+                            </span>
+                          </td>
+                          <td style={s.tdRight} colSpan="3">
+                            <span style={s.tdBold}>
                               {formatINR(aggB.roomTotal)}
-                            </td>
-                            <td
-                              style={{ padding: "12px", textAlign: "center" }}
-                            >
-                              <div>
-                                <div
-                                  style={{
-                                    fontSize: "14px",
-                                    fontWeight: "600",
-                                    color:
-                                      roomDifference > 0
-                                        ? "#059669"
-                                        : roomDifference < 0
-                                          ? "#dc2626"
-                                          : "#1f2937",
-                                  }}
-                                >
-                                  {roomDifference > 0 ? "+" : ""}
-                                  {formatINR(Math.abs(roomDifference))}
-                                </div>
-                              </div>
-                            </td>
-                          </tr>
-                        </tbody>
-                      </table>
-                    </div>
+                            </span>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
                   </div>
                 </div>
               );
@@ -1419,22 +587,8 @@ function InvoiceComparisonReport({ invoiceA, invoiceB, company }, ref) {
 
       {/* Extras Comparison */}
       {(extrasA.length > 0 || extrasB.length > 0) && (
-        <div
-          style={{
-            padding: "24px 40px",
-            borderBottom: "1px solid #e5e7eb",
-          }}
-        >
-          <h3
-            style={{
-              fontSize: "16px",
-              fontWeight: "bold",
-              color: "#1f2937",
-              marginBottom: "16px",
-            }}
-          >
-            ADDITIONAL SERVICES COMPARISON
-          </h3>
+        <div style={s.sectionBlock}>
+          <h3 style={s.sectionHeader}>ADDITIONAL SERVICES</h3>
           {(() => {
             const allExtras = [
               ...new Set([
@@ -1445,126 +599,76 @@ function InvoiceComparisonReport({ invoiceA, invoiceB, company }, ref) {
 
             return (
               <>
-                <table
-                  style={{
-                    width: "100%",
-                    fontSize: "14px",
-                    border: "1px solid #e5e7eb",
-                    marginBottom: "16px",
-                  }}
-                >
-                  <thead>
-                    <tr style={{ backgroundColor: "#f9fafb" }}>
-                      <th
-                        style={{
-                          padding: "12px",
-                          textAlign: "left",
-                          fontWeight: "500",
-                          borderBottom: "1px solid #e5e7eb",
-                        }}
-                      >
-                        Service
-                      </th>
-                      <th
-                        style={{
-                          padding: "12px",
-                          textAlign: "right",
-                          fontWeight: "500",
-                          borderBottom: "1px solid #e5e7eb",
-                        }}
-                      >
-                        {clientA.name}
-                      </th>
-                      <th
-                        style={{
-                          padding: "12px",
-                          textAlign: "right",
-                          fontWeight: "500",
-                          borderBottom: "1px solid #e5e7eb",
-                        }}
-                      >
-                        {clientB.name}
-                      </th>
-                      <th
-                        style={{
-                          padding: "12px",
-                          textAlign: "right",
-                          fontWeight: "500",
-                          borderBottom: "1px solid #e5e7eb",
-                        }}
-                      >
-                        Difference
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {allExtras.map((label, idx) => {
-                      const extraA = extrasA.find(
-                        (e) => (e.label || "Service") === label,
-                      );
-                      const extraB = extrasB.find(
-                        (e) => (e.label || "Service") === label,
-                      );
-                      return (
-                        <ComparisonRow
-                          key={idx}
-                          label={label}
-                          valueA={extraA?.total || 0}
-                          valueB={extraB?.total || 0}
-                        />
-                      );
-                    })}
-                  </tbody>
-                </table>
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    padding: "16px",
-                    backgroundColor: "#f9fafb",
-                    border: "1px solid #e5e7eb",
-                    borderRadius: "4px",
-                  }}
-                >
-                  <span style={{ fontWeight: "500" }}>
+                <div style={s.tableWrapper}>
+                  <table style={s.table}>
+                    <colgroup>
+                      <col style={{ width: "40%" }} />
+                      <col style={{ width: "20%" }} />
+                      <col style={{ width: "20%" }} />
+                      <col style={{ width: "20%" }} />
+                    </colgroup>
+                    <thead>
+                      <tr style={s.tableHeader}>
+                        <th style={s.th}>SERVICE</th>
+                        <th style={s.thRight}>{clientA.name}</th>
+                        <th style={s.thRight}>{clientB.name}</th>
+                        <th style={s.thRight}>DIFFERENCE</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {allExtras.map((label, idx) => {
+                        const extraA = extrasA.find(
+                          (e) => (e.label || "Service") === label,
+                        );
+                        const extraB = extrasB.find(
+                          (e) => (e.label || "Service") === label,
+                        );
+                        return (
+                          <ComparisonRow
+                            key={idx}
+                            label={label}
+                            valueA={extraA?.total || 0}
+                            valueB={extraB?.total || 0}
+                            rowIndex={idx}
+                          />
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+                <div style={s.extrasSummary}>
+                  <span style={s.extrasSummaryLabel}>
                     Total Additional Services
                   </span>
-                  <div style={{ display: "flex", gap: "32px" }}>
-                    <div style={{ textAlign: "right" }}>
-                      <div style={{ fontSize: "14px", color: "#4b5563" }}>
-                        {clientA.name}
-                      </div>
-                      <div style={{ fontWeight: "500" }}>
+                  <div style={s.extrasSummaryValues}>
+                    <div style={s.extrasSummaryItem}>
+                      <span style={s.extrasSummaryClient}>{clientA.name}</span>
+                      <span style={s.extrasSummaryAmount}>
                         {formatINR(extrasTotalA)}
-                      </div>
+                      </span>
                     </div>
-                    <div style={{ textAlign: "right" }}>
-                      <div style={{ fontSize: "14px", color: "#4b5563" }}>
-                        {clientB.name}
-                      </div>
-                      <div style={{ fontWeight: "500" }}>
+                    <div style={s.extrasSummaryItem}>
+                      <span style={s.extrasSummaryClient}>{clientB.name}</span>
+                      <span style={s.extrasSummaryAmount}>
                         {formatINR(extrasTotalB)}
-                      </div>
+                      </span>
                     </div>
-                    <div style={{ textAlign: "right" }}>
-                      <div style={{ fontSize: "14px", color: "#4b5563" }}>
-                        Difference
-                      </div>
-                      <div
+                    <div style={s.extrasSummaryItem}>
+                      <span style={s.extrasSummaryClient}>Difference</span>
+                      <span
                         style={{
-                          fontWeight: "bold",
+                          ...s.extrasSummaryAmount,
                           color:
                             extrasDifference > 0
                               ? "#059669"
                               : extrasDifference < 0
-                                ? "#dc2626"
-                                : "#1f2937",
+                                ? "#8b2518"
+                                : "#1f1d1b",
                         }}
                       >
                         {extrasDifference > 0 ? "+" : ""}
                         {formatINR(Math.abs(extrasDifference))}
-                      </div>
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -1574,299 +678,160 @@ function InvoiceComparisonReport({ invoiceA, invoiceB, company }, ref) {
         </div>
       )}
 
-      {/* Final Summary Comparison */}
-      <div
-        style={{
-          padding: "24px 40px",
-        }}
-      >
-        <h3
-          style={{
-            fontSize: "16px",
-            fontWeight: "bold",
-            color: "#1f2937",
-            marginBottom: "16px",
-          }}
-        >
-          FINAL SUMMARY COMPARISON
-        </h3>
-        <table
-          style={{
-            width: "100%",
-            fontSize: "14px",
-            border: "1px solid #e5e7eb",
-          }}
-        >
-          <thead>
-            <tr style={{ backgroundColor: "#f9fafb" }}>
-              <th
-                style={{
-                  padding: "12px",
-                  textAlign: "left",
-                  fontWeight: "500",
-                  borderBottom: "1px solid #e5e7eb",
-                }}
-              >
-                Description
-              </th>
-              <th
-                style={{
-                  padding: "12px",
-                  textAlign: "right",
-                  fontWeight: "500",
-                  borderBottom: "1px solid #e5e7eb",
-                }}
-              >
-                {clientA.name}
-              </th>
-              <th
-                style={{
-                  padding: "12px",
-                  textAlign: "right",
-                  fontWeight: "500",
-                  borderBottom: "1px solid #e5e7eb",
-                }}
-              >
-                {clientB.name}
-              </th>
-              <th
-                style={{
-                  padding: "12px",
-                  textAlign: "right",
-                  fontWeight: "500",
-                  borderBottom: "1px solid #e5e7eb",
-                }}
-              >
-                Difference
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            <ComparisonRow
-              label="Rooms Total"
-              valueA={roomsTotalA}
-              valueB={roomsTotalB}
-            />
-            <ComparisonRow
-              label="Additional Services"
-              valueA={extrasTotalA}
-              valueB={extrasTotalB}
-            />
-            <tr style={{ backgroundColor: "#f9fafb" }}>
-              <td
-                style={{
-                  padding: "12px",
-                  fontWeight: "500",
-                  borderTop: "1px solid #e5e7eb",
-                  borderBottom: "1px solid #e5e7eb",
-                }}
-              >
-                Subtotal
-              </td>
-              <td
-                style={{
-                  padding: "12px",
-                  textAlign: "right",
-                  fontWeight: "500",
-                  borderTop: "1px solid #e5e7eb",
-                  borderBottom: "1px solid #e5e7eb",
-                }}
-              >
-                {formatINR(grandTotalA)}
-              </td>
-              <td
-                style={{
-                  padding: "12px",
-                  textAlign: "right",
-                  fontWeight: "500",
-                  borderTop: "1px solid #e5e7eb",
-                  borderBottom: "1px solid #e5e7eb",
-                }}
-              >
-                {formatINR(grandTotalB)}
-              </td>
-              <td
-                style={{
-                  padding: "12px",
-                  textAlign: "right",
-                  fontWeight: "500",
-                  borderTop: "1px solid #e5e7eb",
-                  borderBottom: "1px solid #e5e7eb",
-                }}
-              >
-                <span
+      {/* Final Summary */}
+      <div style={s.sectionBlock}>
+        <h3 style={s.sectionHeader}>FINAL SUMMARY</h3>
+        <div style={s.summaryWrapper}>
+          <table style={s.summaryTable}>
+            <colgroup>
+              <col style={{ width: "40%" }} />
+              <col style={{ width: "20%" }} />
+              <col style={{ width: "20%" }} />
+              <col style={{ width: "20%" }} />
+            </colgroup>
+            <tbody>
+              <tr>
+                <td style={s.summaryLabel}>Rooms Total</td>
+                <td style={s.summaryValue}>{formatINR(roomsTotalA)}</td>
+                <td style={s.summaryValue}>{formatINR(roomsTotalB)}</td>
+                <td
                   style={{
+                    ...s.summaryValue,
+                    color:
+                      getDifference(roomsTotalA, roomsTotalB) > 0
+                        ? "#059669"
+                        : getDifference(roomsTotalA, roomsTotalB) < 0
+                          ? "#8b2518"
+                          : "#1f1d1b",
+                  }}
+                >
+                  {getDifference(roomsTotalA, roomsTotalB) > 0 ? "+" : ""}
+                  {formatINR(Math.abs(getDifference(roomsTotalA, roomsTotalB)))}
+                </td>
+              </tr>
+              <tr>
+                <td style={s.summaryLabel}>Additional Services</td>
+                <td style={s.summaryValue}>{formatINR(extrasTotalA)}</td>
+                <td style={s.summaryValue}>{formatINR(extrasTotalB)}</td>
+                <td
+                  style={{
+                    ...s.summaryValue,
+                    color:
+                      extrasDifference > 0
+                        ? "#059669"
+                        : extrasDifference < 0
+                          ? "#8b2518"
+                          : "#1f1d1b",
+                  }}
+                >
+                  {extrasDifference > 0 ? "+" : ""}
+                  {formatINR(Math.abs(extrasDifference))}
+                </td>
+              </tr>
+              <tr style={s.summaryDivider}>
+                <td style={s.summarySubtotalLabel}>Subtotal</td>
+                <td style={s.summarySubtotalValue}>{formatINR(grandTotalA)}</td>
+                <td style={s.summarySubtotalValue}>{formatINR(grandTotalB)}</td>
+                <td
+                  style={{
+                    ...s.summarySubtotalValue,
                     color:
                       getDifference(grandTotalA, grandTotalB) > 0
                         ? "#059669"
                         : getDifference(grandTotalA, grandTotalB) < 0
-                          ? "#dc2626"
-                          : "#1f2937",
+                          ? "#8b2518"
+                          : "#1f1d1b",
                   }}
                 >
                   {getDifference(grandTotalA, grandTotalB) > 0 ? "+" : ""}
                   {formatINR(Math.abs(getDifference(grandTotalA, grandTotalB)))}
-                </span>
-              </td>
-            </tr>
-            <ComparisonRow
-              label="Discount"
-              valueA={discountA}
-              valueB={discountB}
-              isDiscount
-            />
-            <tr style={{ borderTop: "2px solid #d1d5db" }}>
-              <td
-                style={{
-                  padding: "12px",
-                  fontWeight: "bold",
-                  color: "#1f2937",
-                }}
-              >
-                FINAL AMOUNT
-              </td>
-              <td
-                style={{
-                  padding: "12px",
-                  textAlign: "right",
-                  fontWeight: "bold",
-                  color: "#1f2937",
-                }}
-              >
-                {formatINR(finalPayableA)}
-              </td>
-              <td
-                style={{
-                  padding: "12px",
-                  textAlign: "right",
-                  fontWeight: "bold",
-                  color: "#1f2937",
-                }}
-              >
-                {formatINR(finalPayableB)}
-              </td>
-              <td
-                style={{
-                  padding: "12px",
-                  textAlign: "right",
-                  fontWeight: "bold",
-                  color:
-                    totalDifference > 0
-                      ? "#059669"
-                      : totalDifference < 0
-                        ? "#dc2626"
-                        : "#1f2937",
-                }}
-              >
-                {totalDifference > 0 ? "+" : ""}
-                {formatINR(Math.abs(totalDifference))}
-              </td>
-            </tr>
-          </tbody>
-        </table>
+                </td>
+              </tr>
+              <tr>
+                <td style={s.summaryDiscountLabel}>Discount</td>
+                <td style={s.summaryDiscountValue}>
+                  {discountA > 0 ? `− ${formatINR(discountA)}` : "—"}
+                </td>
+                <td style={s.summaryDiscountValue}>
+                  {discountB > 0 ? `− ${formatINR(discountB)}` : "—"}
+                </td>
+                <td style={s.summaryDiscountValue}>
+                  {getDifference(discountA, discountB) !== 0 ? (
+                    <span
+                      style={{
+                        color:
+                          getDifference(discountA, discountB) > 0
+                            ? "#059669"
+                            : "#8b2518",
+                      }}
+                    >
+                      {getDifference(discountA, discountB) > 0 ? "+" : ""}
+                      {formatINR(Math.abs(getDifference(discountA, discountB)))}
+                    </span>
+                  ) : (
+                    "—"
+                  )}
+                </td>
+              </tr>
+              <tr style={s.finalRow}>
+                <td style={s.finalLabel}>FINAL AMOUNT</td>
+                <td style={s.finalValue}>{formatINR(finalPayableA)}</td>
+                <td style={s.finalValue}>{formatINR(finalPayableB)}</td>
+                <td
+                  style={{
+                    ...s.finalValue,
+                    color:
+                      totalDifference > 0
+                        ? "#059669"
+                        : totalDifference < 0
+                          ? "#8b2518"
+                          : "#1f1d1b",
+                  }}
+                >
+                  {totalDifference > 0 ? "+" : ""}
+                  {formatINR(Math.abs(totalDifference))}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {/* Footer */}
-      <div
-        style={{
-          borderTop: "2px solid #1f2937",
-          padding: "24px 40px",
-          backgroundColor: "#f9fafb",
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "flex-start",
-          }}
-        >
+      <div style={s.footer}>
+        <div style={s.footerGrid}>
           <div>
-            <h4
-              style={{
-                fontWeight: "500",
-                color: "#1f2937",
-                marginBottom: "8px",
-              }}
-            >
-              Contact Details
-            </h4>
-            <p
-              style={{
-                fontSize: "14px",
-                color: "#4b5563",
-                marginBottom: "4px",
-              }}
-            >
-              {(company ?? config.platform).phones.join(" | ")}
-            </p>
-            <p
-              style={{
-                fontSize: "14px",
-                color: "#4b5563",
-              }}
-            >
-              {(company ?? config.platform).email}
-            </p>
+            <div style={s.footerLabel}>Contact Details</div>
+            <p style={s.footerText}>{companyData.phones.join(" · ")}</p>
+            <p style={s.footerText}>{companyData.email}</p>
           </div>
-          <div style={{ textAlign: "right" }}>
-            <h4
-              style={{
-                fontWeight: "500",
-                color: "#1f2937",
-                marginBottom: "8px",
-              }}
-            >
-              Report Notes
-            </h4>
-            <ul
-              style={{
-                fontSize: "14px",
-                color: "#4b5563",
-                padding: 0,
-                margin: 0,
-                listStyle: "none",
-              }}
-            >
-              <li style={{ marginBottom: "4px" }}>
-                • Differences shown as Invoice A - Invoice B
+          <div>
+            <div style={s.footerLabel}>Report Notes</div>
+            <ul style={s.notesList}>
+              <li style={s.notesItem}>
+                <span style={s.notesNumber}>01</span>
+                <span>Differences shown as Invoice A - Invoice B</span>
               </li>
-              <li style={{ marginBottom: "4px" }}>
-                • Positive values indicate Invoice A is higher
+              <li style={s.notesItem}>
+                <span style={s.notesNumber}>02</span>
+                <span>Positive values indicate Invoice A is higher</span>
               </li>
-              <li style={{ marginBottom: "4px" }}>
-                • Negative values indicate Invoice B is higher
+              <li style={s.notesItem}>
+                <span style={s.notesNumber}>03</span>
+                <span>Negative values indicate Invoice B is higher</span>
               </li>
-              <li>• All amounts in Indian Rupees (INR)</li>
+              <li style={s.notesItem}>
+                <span style={s.notesNumber}>04</span>
+                <span>All amounts in Indian Rupees (INR)</span>
+              </li>
             </ul>
           </div>
         </div>
-        <div
-          style={{
-            marginTop: "24px",
-            paddingTop: "16px",
-            borderTop: "1px solid #e5e7eb",
-            textAlign: "center",
-          }}
-        >
-          <p
-            style={{
-              fontSize: "12px",
-              color: "#6b7280",
-              margin: 0,
-            }}
-          >
-            This is an automated comparison report generated by{" "}
-            {(company ?? config.platform).name} Invoice System
+        <div style={s.footerBottom}>
+          <p style={s.footerMeta}>
+            Automated comparison report · {companyData.name} Invoice System
           </p>
-          <p
-            style={{
-              fontSize: "12px",
-              color: "#6b7280",
-              marginTop: "4px",
-              marginBottom: 0,
-            }}
-          >
+          <p style={s.footerReportId}>
             Report ID: CMP-{Date.now().toString().slice(-8)}
           </p>
         </div>
@@ -1885,8 +850,8 @@ function DetailRow({ label, value, fullWidth = false }) {
   if (fullWidth) {
     return (
       <tr>
-        <td colSpan="2" style={{ padding: "4px 0", fontSize: "14px" }}>
-          <span style={{ fontWeight: "500" }}>{label}:</span> {value}
+        <td colSpan="2" style={s.detailFullRow}>
+          <span style={s.detailFullLabel}>{label}:</span> {value}
         </td>
       </tr>
     );
@@ -1894,52 +859,53 @@ function DetailRow({ label, value, fullWidth = false }) {
 
   return (
     <tr>
-      <td style={{ padding: "4px 0", fontWeight: "500" }}>{label}</td>
-      <td style={{ padding: "4px 0", textAlign: "right" }}>{value}</td>
+      <td style={s.detailLabel}>{label}</td>
+      <td style={s.detailValue}>{value}</td>
     </tr>
   );
 }
 
-function SummaryCard({ label, valueA, valueB, highlight = false }) {
+function SummaryCard({
+  label,
+  valueA,
+  valueB,
+  clientAName,
+  clientBName,
+  highlight = false,
+  isDiscount = false,
+}) {
   const diff = getDifference(valueA, valueB);
-  const diffClass = diff > 0 ? "#059669" : diff < 0 ? "#dc2626" : "#4b5563";
+  const diffColor = diff > 0 ? "#059669" : diff < 0 ? "#8b2518" : "#5c564e";
 
   return (
     <div
       style={{
-        border: highlight ? "1px solid #d1d5db" : "1px solid #e5e7eb",
-        borderRadius: "6px",
-        padding: "12px",
+        ...s.summaryCard,
+        borderLeft: highlight ? "3px solid #a07c3a" : "1px solid #e4dccc",
       }}
     >
-      <div
-        style={{
-          fontSize: "12px",
-          color: "#4b5563",
-          marginBottom: "4px",
-        }}
-      >
-        {label}
-      </div>
-      <div
-        style={{
-          fontSize: "18px",
-          fontWeight: "bold",
-          color: diffClass,
-        }}
-      >
+      <div style={s.summaryCardLabel}>{label}</div>
+      <div style={{ ...s.summaryCardDiff, color: diffColor }}>
         {diff > 0 ? "+" : ""}
         {formatINR(Math.abs(diff))}
       </div>
-      <div
-        style={{
-          fontSize: "12px",
-          color: "#6b7280",
-          marginTop: "8px",
-        }}
-      >
-        <div>A: {formatINR(valueA)}</div>
-        <div>B: {formatINR(valueB)}</div>
+      <div style={s.summaryCardDetails}>
+        <div style={s.summaryCardClient}>
+          <span>A ({clientAName?.split(" ")[0] || "A"}):</span>
+          <span>
+            {isDiscount && valueA > 0
+              ? `− ${formatINR(valueA)}`
+              : formatINR(valueA)}
+          </span>
+        </div>
+        <div style={s.summaryCardClient}>
+          <span>B ({clientBName?.split(" ")[0] || "B"}):</span>
+          <span>
+            {isDiscount && valueB > 0
+              ? `− ${formatINR(valueB)}`
+              : formatINR(valueB)}
+          </span>
+        </div>
       </div>
     </div>
   );
@@ -1951,33 +917,23 @@ function ComparisonRow({
   valueB,
   isArea = false,
   isDiscount = false,
+  rowIndex = 0,
 }) {
   const diff = getDifference(valueA, valueB);
-  const diffClass = diff > 0 ? "#059669" : diff < 0 ? "#dc2626" : "#4b5563";
+  const diffColor = diff > 0 ? "#059669" : diff < 0 ? "#8b2518" : "#5c564e";
 
   const formatValue = (val) => {
     if (isArea) return `${val?.toFixed(2) || "0.00"}`;
-    if (isDiscount && val > 0) return `- ${formatINR(val)}`;
+    if (isDiscount && val > 0) return `− ${formatINR(val)}`;
     return formatINR(val || 0);
   };
 
   return (
-    <tr style={{ borderBottom: "1px solid #f3f4f6" }}>
-      <td style={{ padding: "12px" }}>{label}</td>
-      <td style={{ padding: "12px", textAlign: "right", fontWeight: "500" }}>
-        {formatValue(valueA)}
-      </td>
-      <td style={{ padding: "12px", textAlign: "right", fontWeight: "500" }}>
-        {formatValue(valueB)}
-      </td>
-      <td
-        style={{
-          padding: "12px",
-          textAlign: "right",
-          fontWeight: "500",
-          color: diffClass,
-        }}
-      >
+    <tr style={rowIndex % 2 === 0 ? s.rowEven : s.rowOdd}>
+      <td style={s.td}>{label}</td>
+      <td style={s.tdRight}>{formatValue(valueA)}</td>
+      <td style={s.tdRight}>{formatValue(valueB)}</td>
+      <td style={{ ...s.tdRight, color: diffColor }}>
         {diff > 0 ? "+" : ""}
         {isArea
           ? `${Math.abs(diff)?.toFixed(2) || "0.00"}`
@@ -2051,6 +1007,628 @@ function calcRoomAggregates(room = {}, frameworkRate = 0, boxRate = 0) {
 function calcExtrasTotal(extras = []) {
   return extras.reduce((sum, ex) => sum + Number(ex.total || 0), 0);
 }
+
+/* -------------------------------
+   Styles - Editorial Design
+--------------------------------*/
+
+const s = {
+  // Root
+  root: {
+    backgroundColor: "#faf7f0",
+    padding: "48px 40px",
+    fontSize: "12px",
+    color: "#1f1d1b",
+    width: "100%",
+    maxWidth: "210mm",
+    minWidth: "100%",
+    fontFamily: '"Helvetica Neue", Arial, sans-serif',
+    fontWeight: "300",
+    border: "1px solid #e4dccc",
+    boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
+  },
+
+  // Loading states
+  loadingContainer: {
+    textAlign: "center",
+    padding: "48px 0",
+    backgroundColor: "#faf7f0",
+  },
+  spinner: {
+    display: "inline-block",
+    animation: "spin 1s linear infinite",
+    borderRadius: "50%",
+    height: "32px",
+    width: "32px",
+    borderBottom: "2px solid #a07c3a",
+  },
+  loadingText: {
+    marginTop: "16px",
+    color: "#5c564e",
+    fontSize: "11px",
+    textTransform: "uppercase",
+    letterSpacing: "0.1em",
+  },
+  errorContainer: {
+    textAlign: "center",
+    padding: "48px 0",
+    color: "#8b2518",
+    backgroundColor: "#faf7f0",
+  },
+  errorText: {
+    fontSize: "12px",
+  },
+  emptyContainer: {
+    textAlign: "center",
+    padding: "48px 0",
+    color: "#5c564e",
+    fontSize: "12px",
+    backgroundColor: "#faf7f0",
+  },
+
+  // Header
+  headerWrapper: {
+    marginBottom: "32px",
+  },
+  headerTop: {
+    borderTop: "2px solid #a89d8c",
+    borderBottom: "1px solid #a89d8c",
+    padding: "24px 0",
+  },
+  headerMain: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+  },
+  headerLeft: {
+    flex: 1,
+  },
+  companyName: {
+    fontFamily: '"Georgia", "Cormorant Garamond", serif',
+    fontSize: "36px",
+    fontWeight: "400",
+    letterSpacing: "-0.01em",
+    color: "#1f1d1b",
+    margin: "0 0 8px 0",
+    lineHeight: "1.1",
+  },
+  companyMeta: {
+    fontSize: "10px",
+    color: "#5c564e",
+    lineHeight: "1.6",
+    margin: 0,
+    fontWeight: "300",
+  },
+  logoMonogram: {
+    width: "56px",
+    height: "56px",
+    border: "1.5px solid #a07c3a",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#ffffff",
+    flexShrink: 0,
+  },
+  logoImg: {
+    width: "100%",
+    height: "100%",
+    objectFit: "contain",
+  },
+  monogramFallback: {
+    fontFamily: '"Georgia", serif',
+    fontSize: "24px",
+    color: "#a07c3a",
+    fontWeight: "400",
+  },
+
+  // Report Title
+  reportTitleSection: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "flex-end",
+    marginBottom: "24px",
+    paddingBottom: "16px",
+    borderBottom: "1px solid #a89d8c",
+  },
+  reportMeta: {
+    textAlign: "left",
+  },
+  metaLabel: {
+    fontSize: "9px",
+    textTransform: "uppercase",
+    letterSpacing: "0.12em",
+    color: "#5c564e",
+    fontWeight: "500",
+    marginBottom: "2px",
+  },
+  metaValue: {
+    fontSize: "12px",
+    color: "#1f1d1b",
+    fontWeight: "400",
+  },
+  reportTitle: {
+    fontFamily: '"Georgia", "Cormorant Garamond", serif',
+    fontSize: "36px",
+    fontWeight: "400",
+    letterSpacing: "0.05em",
+    color: "#1f1d1b",
+    textAlign: "right",
+    margin: 0,
+    lineHeight: "1",
+  },
+
+  // Difference Banner
+  differenceBanner: {
+    backgroundColor: "#ffffff",
+    border: "1px solid #e4dccc",
+    padding: "20px 28px",
+    marginBottom: "40px",
+    display: "flex",
+    alignItems: "baseline",
+    justifyContent: "space-between",
+  },
+  differenceLabel: {
+    fontSize: "11px",
+    textTransform: "uppercase",
+    letterSpacing: "0.1em",
+    color: "#5c564e",
+    fontWeight: "500",
+  },
+  differenceValue: {
+    fontFamily: '"Georgia", "Cormorant Garamond", serif',
+    fontSize: "32px",
+    fontWeight: "400",
+  },
+  differenceMeta: {
+    fontSize: "11px",
+    color: "#5c564e",
+  },
+
+  // Sections
+  sectionBlock: {
+    marginBottom: "40px",
+  },
+  sectionHeader: {
+    fontFamily: '"Georgia", "Cormorant Garamond", serif',
+    fontSize: "18px",
+    fontWeight: "400",
+    color: "#1f1d1b",
+    margin: "0 0 0px 0",
+    paddingBottom: "8px",
+    borderBottom: "0px solid #a07c3a",
+  },
+  sectionHeaderWithMeta: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "baseline",
+    marginBottom: "20px",
+    paddingBottom: "8px",
+    borderBottom: "1px solid #a07c3a",
+  },
+  sectionMeta: {
+    fontSize: "11px",
+    color: "#5c564e",
+  },
+
+  // Two Column Grid
+  twoColumnGrid: {
+    display: "grid",
+    gridTemplateColumns: "1fr 1fr",
+    gap: "24px",
+  },
+
+  // Invoice Cards
+  invoiceCard: {
+    backgroundColor: "#ffffff",
+    border: "1px solid #e4dccc",
+    padding: "20px",
+  },
+  invoiceCardHeader: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: "16px",
+    paddingBottom: "12px",
+    borderBottom: "1px solid #e4dccc",
+  },
+  invoiceCardTitle: {
+    fontSize: "14px",
+    fontWeight: "600",
+    color: "#1f1d1b",
+    margin: 0,
+    letterSpacing: "0.05em",
+  },
+  invoiceTypeBadge: {
+    fontSize: "9px",
+    textTransform: "uppercase",
+    letterSpacing: "0.1em",
+    color: "#a07c3a",
+    fontWeight: "500",
+  },
+  detailTable: {
+    width: "100%",
+    borderCollapse: "collapse",
+  },
+  detailLabel: {
+    padding: "6px 0",
+    fontSize: "10px",
+    textTransform: "uppercase",
+    letterSpacing: "0.08em",
+    color: "#5c564e",
+    fontWeight: "500",
+  },
+  detailValue: {
+    padding: "6px 0",
+    fontSize: "11px",
+    color: "#1f1d1b",
+    textAlign: "right",
+  },
+  detailFullRow: {
+    padding: "6px 0",
+    fontSize: "11px",
+    color: "#1f1d1b",
+  },
+  detailFullLabel: {
+    fontWeight: "500",
+    color: "#5c564e",
+  },
+  detailDivider: {
+    padding: 0,
+    borderTop: "1px solid #e4dccc",
+  },
+  detailTotalLabel: {
+    padding: "10px 0 0 0",
+    fontSize: "11px",
+    textTransform: "uppercase",
+    letterSpacing: "0.08em",
+    color: "#5c564e",
+    fontWeight: "600",
+  },
+  detailTotalValue: {
+    padding: "10px 0 0 0",
+    fontFamily: '"Georgia", "Cormorant Garamond", serif',
+    fontSize: "16px",
+    color: "#1f1d1b",
+    textAlign: "right",
+    fontWeight: "400",
+  },
+
+  // Quick Compare Grid
+  quickCompareGrid: {
+    display: "grid",
+    gridTemplateColumns: "1fr 1fr 1fr 1fr",
+    gap: "16px",
+  },
+  summaryCard: {
+    backgroundColor: "#ffffff",
+    padding: "16px",
+    border: "1px solid #e4dccc",
+  },
+  summaryCardLabel: {
+    fontSize: "9px",
+    textTransform: "uppercase",
+    letterSpacing: "0.08em",
+    color: "#5c564e",
+    marginBottom: "8px",
+    fontWeight: "500",
+  },
+  summaryCardDiff: {
+    fontFamily: '"Georgia", "Cormorant Garamond", serif',
+    fontSize: "20px",
+    fontWeight: "400",
+    marginBottom: "12px",
+  },
+  summaryCardDetails: {
+    borderTop: "0.5px solid #e4dccc",
+    paddingTop: "10px",
+  },
+  summaryCardClient: {
+    display: "flex",
+    justifyContent: "space-between",
+    fontSize: "10px",
+    color: "#5c564e",
+    marginBottom: "4px",
+  },
+
+  // Tables
+  tableWrapper: {
+    border: "1px solid #e4dccc",
+    overflow: "auto",
+    marginBottom: "0px",
+    backgroundColor: "#ffffff",
+  },
+  table: {
+    width: "100%",
+    borderCollapse: "collapse",
+    tableLayout: "fixed",
+  },
+  tableHeader: {
+    borderBottom: "1px solid #a89d8c",
+    backgroundColor: "#faf7f0",
+  },
+  tableSubHeader: {
+    borderBottom: "1px solid #e4dccc",
+    backgroundColor: "#faf7f0",
+  },
+  th: {
+    padding: "12px 10px",
+    fontSize: "9px",
+    textTransform: "uppercase",
+    letterSpacing: "0.1em",
+    color: "#5c564e",
+    fontWeight: "500",
+    textAlign: "left",
+  },
+  thRight: {
+    padding: "12px 10px",
+    fontSize: "9px",
+    textTransform: "uppercase",
+    letterSpacing: "0.1em",
+    color: "#5c564e",
+    fontWeight: "500",
+    textAlign: "right",
+  },
+  td: {
+    padding: "10px 10px",
+    fontSize: "11px",
+    color: "#1f1d1b",
+    fontWeight: "300",
+    borderBottom: "1px solid #f0ebe0",
+  },
+  tdRight: {
+    padding: "10px 10px",
+    fontSize: "11px",
+    color: "#1f1d1b",
+    fontWeight: "300",
+    textAlign: "right",
+    borderBottom: "1px solid #f0ebe0",
+    fontVariantNumeric: "tabular-nums",
+  },
+  tdRightMuted: {
+    padding: "10px 10px",
+    fontSize: "11px",
+    color: "#a89d8c",
+    textAlign: "right",
+    borderBottom: "1px solid #f0ebe0",
+  },
+  tdBold: {
+    padding: "10px 10px",
+    fontSize: "11px",
+    color: "#1f1d1b",
+    fontWeight: "600",
+  },
+  rowEven: {
+    backgroundColor: "#ffffff",
+  },
+  rowOdd: {
+    backgroundColor: "#faf7f0",
+  },
+
+  // Room Cards
+  roomCard: {
+    marginBottom: "24px",
+    border: "1px solid #e4dccc",
+    backgroundColor: "#ffffff",
+  },
+  roomCardHeader: {
+    padding: "16px 20px",
+    backgroundColor: "#faf7f0",
+    borderBottom: "1px solid #e4dccc",
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  roomNumber: {
+    fontSize: "11px",
+    fontWeight: "600",
+    color: "#a07c3a",
+    marginRight: "12px",
+    textTransform: "uppercase",
+    letterSpacing: "0.05em",
+  },
+  roomNameText: {
+    fontSize: "14px",
+    fontWeight: "500",
+    color: "#1f1d1b",
+  },
+  roomDifference: {
+    textAlign: "right",
+  },
+  roomDifferenceLabel: {
+    fontSize: "9px",
+    textTransform: "uppercase",
+    letterSpacing: "0.08em",
+    color: "#5c564e",
+  },
+  roomDifferenceValue: {
+    fontFamily: '"Georgia", "Cormorant Garamond", serif',
+    fontSize: "16px",
+    fontWeight: "400",
+  },
+  roomDescription: {
+    padding: "12px 20px",
+    fontSize: "10px",
+    color: "#5c564e",
+    fontStyle: "italic",
+    borderBottom: "0px solid #e4dccc",
+  },
+  roomTotalRow: {
+    backgroundColor: "#faf7f0",
+    borderTop: "1px solid #a89d8c",
+  },
+
+  // Extras Summary
+  extrasSummary: {
+    backgroundColor: "#faf7f0",
+    border: "1px solid #e4dccc",
+    padding: "16px 20px",
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  extrasSummaryLabel: {
+    fontSize: "11px",
+    textTransform: "uppercase",
+    letterSpacing: "0.08em",
+    color: "#5c564e",
+    fontWeight: "500",
+  },
+  extrasSummaryValues: {
+    display: "flex",
+    gap: "32px",
+  },
+  extrasSummaryItem: {
+    textAlign: "right",
+  },
+  extrasSummaryClient: {
+    fontSize: "9px",
+    color: "#5c564e",
+    marginRight: "12px",
+  },
+  extrasSummaryAmount: {
+    fontSize: "13px",
+    fontWeight: "500",
+    fontVariantNumeric: "tabular-nums",
+  },
+
+  // Summary Table
+  summaryWrapper: {
+    backgroundColor: "#ffffff",
+    border: "1px solid #e4dccc",
+    padding: "20px",
+  },
+  summaryTable: {
+    width: "100%",
+    borderCollapse: "collapse",
+  },
+  summaryLabel: {
+    padding: "8px 0",
+    fontSize: "11px",
+    color: "#5c564e",
+  },
+  summaryValue: {
+    padding: "8px 0",
+    fontSize: "12px",
+    color: "#1f1d1b",
+    textAlign: "right",
+    fontVariantNumeric: "tabular-nums",
+  },
+  summaryDivider: {
+    borderTop: "1px solid #e4dccc",
+  },
+  summarySubtotalLabel: {
+    padding: "12px 0 8px 0",
+    fontSize: "11px",
+    textTransform: "uppercase",
+    letterSpacing: "0.08em",
+    color: "#5c564e",
+    fontWeight: "500",
+  },
+  summarySubtotalValue: {
+    padding: "12px 0 8px 0",
+    fontSize: "13px",
+    color: "#1f1d1b",
+    textAlign: "right",
+    fontWeight: "500",
+    fontVariantNumeric: "tabular-nums",
+  },
+  summaryDiscountLabel: {
+    padding: "6px 0",
+    fontSize: "11px",
+    color: "#8b2518",
+  },
+  summaryDiscountValue: {
+    padding: "6px 0",
+    fontSize: "12px",
+    color: "#8b2518",
+    textAlign: "right",
+    fontVariantNumeric: "tabular-nums",
+  },
+  finalRow: {
+    borderTop: "1px solid #a89d8c",
+  },
+  finalLabel: {
+    padding: "16px 0 8px 0",
+    fontSize: "11px",
+    textTransform: "uppercase",
+    letterSpacing: "0.1em",
+    color: "#5c564e",
+    fontWeight: "600",
+  },
+  finalValue: {
+    padding: "16px 0 8px 0",
+    fontFamily: '"Georgia", "Cormorant Garamond", serif',
+    fontSize: "18px",
+    color: "#1f1d1b",
+    textAlign: "right",
+    fontWeight: "400",
+    fontVariantNumeric: "tabular-nums",
+  },
+
+  // Footer
+  footer: {
+    marginTop: "48px",
+    paddingTop: "28px",
+    borderTop: "1px solid #a89d8c",
+  },
+  footerGrid: {
+    display: "grid",
+    gridTemplateColumns: "1fr 1fr",
+    gap: "40px",
+  },
+  footerLabel: {
+    fontSize: "9px",
+    textTransform: "uppercase",
+    letterSpacing: "0.12em",
+    color: "#a07c3a",
+    marginBottom: "12px",
+    fontWeight: "600",
+  },
+  footerText: {
+    fontSize: "10px",
+    color: "#5c564e",
+    margin: "0 0 4px 0",
+    lineHeight: "1.6",
+  },
+  notesList: {
+    listStyle: "none",
+    padding: 0,
+    margin: 0,
+  },
+  notesItem: {
+    fontSize: "10px",
+    color: "#5c564e",
+    marginBottom: "8px",
+    display: "flex",
+    gap: "12px",
+    lineHeight: "1.5",
+  },
+  notesNumber: {
+    color: "#a07c3a",
+    flexShrink: 0,
+    fontWeight: "600",
+    minWidth: "20px",
+  },
+  footerBottom: {
+    marginTop: "28px",
+    paddingTop: "20px",
+    borderTop: "0.5px solid #e4dccc",
+    textAlign: "center",
+  },
+  footerMeta: {
+    fontSize: "9px",
+    textTransform: "uppercase",
+    letterSpacing: "0.12em",
+    color: "#a89d8c",
+    margin: 0,
+  },
+  footerReportId: {
+    fontSize: "9px",
+    color: "#a89d8c",
+    marginTop: "6px",
+    marginBottom: 0,
+  },
+};
 
 export default CompareInvoicesT1;
 export { InvoiceComparisonReport };
