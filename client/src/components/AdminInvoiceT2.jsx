@@ -180,7 +180,7 @@ const AdminInvoiceT2 = forwardRef(function AdminInvoiceT2({ invoice, company }, 
       value: { padding: "6px", border: "1px solid #0f172a", textAlign: "right", fontWeight: "700", fontSize: "16px", backgroundColor: "#0f172a", color: "#ffffff" },
     },
 
-    footer: { marginTop: "24px", paddingTop: "16px", borderTop: "3px solid #0f172a", fontSize: "10px", color: "#4b5563", padding: "16px" },
+    footer: { marginTop: "24px", borderTop: "3px solid #0f172a", fontSize: "10px", color: "#4b5563", padding: "16px" },
     footerGrid: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" },
     footerLabel: { fontWeight: "500", marginBottom: "4px", color: "#0f172a" },
     footerList: { listStyleType: "disc", paddingLeft: "16px", margin: 0 },
