@@ -143,6 +143,7 @@ const AdminInvoiceT3 = forwardRef(function AdminInvoiceT3({ invoice, company }, 
     roomDesc: { fontSize: "10px", color: "#ccfbf1", marginLeft: "8px" },
     roomRates: { display: "flex", gap: "16px", fontSize: "10px", color: "#ffffff" },
     roomRatesRight: { textAlign: "right" },
+    roomRateLabel: { fontWeight: "500", color: "#ccfbf1" },
     roomTotal: { textAlign: "right", fontSize: "11px", fontWeight: "700", marginTop: "4px" },
     roomTotalChip: { display: "inline-block", backgroundColor: "#0d9488", color: "#ffffff", padding: "2px 10px", borderRadius: "12px", fontSize: "11px", fontWeight: "700" },
 
@@ -369,11 +370,11 @@ const AdminInvoiceT3 = forwardRef(function AdminInvoiceT3({ invoice, company }, 
               <div style={s.roomRatesRight}>
                 <div style={s.roomRates}>
                   <span>
-                    <span style={s.infoLabel}>Frame Rate:</span>{" "}
+                    <span style={s.roomRateLabel}>Frame Rate:</span>{" "}
                     {formatINR(roomFrameRate)}
                   </span>
                   <span>
-                    <span style={s.infoLabel}>Box Rate:</span>{" "}
+                    <span style={s.roomRateLabel}>Box Rate:</span>{" "}
                     {formatINR(roomBoxRate)}
                   </span>
                 </div>
