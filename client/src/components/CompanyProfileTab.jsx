@@ -19,6 +19,9 @@ export default function CompanyProfileTab({ companyId, initialCompany, onUpdate 
       ? initialCompany.termsAndConditions
       : [],
     logoFile: initialCompany?.logoFile ?? "",
+    adminInvoiceTemplate: initialCompany?.adminInvoiceTemplate ?? 1,
+    clientInvoiceTemplate: initialCompany?.clientInvoiceTemplate ?? 1,
+    compareInvoiceTemplate: initialCompany?.compareInvoiceTemplate ?? 1,
   });
   const [saving, setSaving] = useState(false);
   const [logoUploading, setLogoUploading] = useState(false);
@@ -381,6 +384,69 @@ export default function CompanyProfileTab({ companyId, initialCompany, onUpdate 
                   <Plus className="w-4 h-4" />
                   Add Term
                 </button>
+              </div>
+            </div>
+
+            {/* Invoice Templates */}
+            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
+              <div className="p-5 border-b border-gray-200 dark:border-gray-700">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center">
+                    <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h2 className="text-lg font-bold text-gray-900 dark:text-white">Invoice Templates</h2>
+                    <p className="text-xs text-gray-600 dark:text-gray-400">Choose the design theme for each invoice type</p>
+                  </div>
+                </div>
+              </div>
+              <div className="p-5 space-y-6">
+                {[
+                  { key: "adminInvoiceTemplate", label: "Admin Invoice" },
+                  { key: "clientInvoiceTemplate", label: "Client Invoice" },
+                  { key: "compareInvoiceTemplate", label: "Compare Invoice" },
+                ].map(({ key, label }) => (
+                  <div key={key}>
+                    <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">{label}</p>
+                    <div className="flex gap-3 flex-wrap">
+                      {[
+                        { num: 1, name: "Classic Professional", swatches: ["#f3f4f6", "#d1d5db", "#1f2937"] },
+                        { num: 2, name: "Executive Navy", swatches: ["#0f172a", "#d97706", "#ffffff"] },
+                        { num: 3, name: "Modern Teal", swatches: ["#0d9488", "#f0fdfa", "#ffffff"] },
+                      ].map(({ num, name, swatches }) => {
+                        const selected = form[key] === num;
+                        return (
+                          <button
+                            key={num}
+                            type="button"
+                            onClick={() => setForm((f) => ({ ...f, [key]: num }))}
+                            className={`flex flex-col items-start p-3 rounded-lg border-2 transition-all w-40 ${
+                              selected
+                                ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20"
+                                : "border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500"
+                            }`}
+                          >
+                            <div className="flex gap-1.5 mb-2">
+                              {swatches.map((c, i) => (
+                                <div
+                                  key={i}
+                                  style={{ backgroundColor: c }}
+                                  className="w-5 h-5 rounded border border-gray-200"
+                                />
+                              ))}
+                            </div>
+                            <span className="text-xs font-semibold text-gray-800 dark:text-gray-200">
+                              Template {num}
+                            </span>
+                            <span className="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">{name}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
 
