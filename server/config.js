@@ -17,7 +17,7 @@ const config = {
 
   server: {
     port: process.env.PORT || 5000,
-    bodyLimitMb: 5,               // used as `${bodyLimitMb}mb` in server.js
+    bodyLimitMb: 5, // used as `${bodyLimitMb}mb` in server.js
     corsOrigin: process.env.CORS_ORIGIN || "http://localhost:5173",
     trustProxy: process.env.TRUST_PROXY === "true" ? 1 : false,
     isProduction: process.env.NODE_ENV === "production",
@@ -27,12 +27,12 @@ const config = {
     uri: process.env.MONGO_URI,
     maxPoolSize: 5,
     serverSelectionTimeoutSec: 5, // * 1000 in db.js
-    socketTimeoutSec: 45,         // * 1000 in db.js
+    socketTimeoutSec: 45, // * 1000 in db.js
   },
 
   auth: {
     jwtSecret: process.env.JWT_SECRET,
-    jwtExpiresInDays: 7,          // appended as `${n}d` in auth.service.js
+    jwtExpiresInDays: 7, // appended as `${n}d` in auth.service.js
     cookieMaxAgeMs: 7 * 24 * 60 * 60 * 1000,
     bcryptRounds: 10,
   },
@@ -44,17 +44,17 @@ const config = {
 
   pdf: {
     maxConcurrent: 2,
-    pdfTimeoutSec: 45,            // * 1000 in pdf.service.js
-    browserTimeoutSec: 60,        // * 1000 in pdf.service.js
+    pdfTimeoutSec: 45, // * 1000 in pdf.service.js
+    browserTimeoutSec: 60, // * 1000 in pdf.service.js
     retryCount: 2,
-    retryDelayBaseMs: 600,        // used as attempt * retryDelayBaseMs
+    retryDelayBaseMs: 600, // used as attempt * retryDelayBaseMs
     maxHtmlBytes: 512_000,
-    slotLeaseBufferSec: 10,       // added to pdfTimeoutSec for SLOT_LEASE_MS in pdf.service.js
+    slotLeaseBufferSec: 10, // added to pdfTimeoutSec for SLOT_LEASE_MS in pdf.service.js
   },
 
   upload: {
     allowedMimeTypes: ["image/jpeg", "image/png", "image/gif", "image/webp"],
-    maxFileSizeMb: 2,             // * 1024 * 1024 in upload.routes.js
+    maxFileSizeMb: 2, // * 1024 * 1024 in upload.routes.js
     destination: "public/",
   },
 
@@ -62,20 +62,20 @@ const config = {
     defaultPage: 1,
     defaultLimit: 50,
     maxLimit: 100,
-    trashRetentionDays: 30,       // * 24 * 60 * 60 * 1000 in invoice.service.js
+    trashRetentionDays: 30, // * 24 * 60 * 60 * 1000 in invoice.service.js
   },
 
   company: {
-    maxTerms: 5,   // maximum number of terms & conditions entries per company
+    maxTerms: 10, // maximum number of terms & conditions entries per company
   },
 
   subscription: {
-    warningDaysBeforeExpiry: 7,    // show banner this many days before expiry
-    defaultAmount: 0,              // default subscription amount (overridden by PlatformSettings)
+    warningDaysBeforeExpiry: 7, // show banner this many days before expiry
+    defaultAmount: 0, // default subscription amount (overridden by PlatformSettings)
   },
 
   cron: {
-    dailySchedule: "0 0 * * *",   // midnight every day
+    dailySchedule: "0 0 * * *", // midnight every day
     timezone: "Asia/Kolkata",
   },
 
@@ -87,9 +87,9 @@ const config = {
 
   security: {
     rateLimit: {
-      windowMinutes: 15,      // * 60 * 1000 in server.js
-      maxRequests: 200,       // requests per window per IP
-      authMaxRequests: 30,    // stricter limit for /api/auth routes
+      windowMinutes: 15, // * 60 * 1000 in server.js
+      maxRequests: 200, // requests per window per IP
+      authMaxRequests: 30, // stricter limit for /api/auth routes
     },
   },
 };
