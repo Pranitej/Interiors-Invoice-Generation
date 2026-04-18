@@ -5,8 +5,12 @@ import { useNavigate } from "react-router-dom";
 import { formatINR } from "../utils/calculations";
 import config from "../config.js";
 import { renderToStaticMarkup } from "react-dom/server";
-import AdminInvoice from "../components/AdminInvoice";
-import ClientInvoice from "../components/ClientInvoice";
+import AdminInvoiceT1 from "../components/AdminInvoiceT1";
+import AdminInvoiceT2 from "../components/AdminInvoiceT2";
+import AdminInvoiceT3 from "../components/AdminInvoiceT3";
+import ClientInvoiceT1 from "../components/ClientInvoiceT1";
+import ClientInvoiceT2 from "../components/ClientInvoiceT2";
+import ClientInvoiceT3 from "../components/ClientInvoiceT3";
 import {
   formatISTDate,
   formatISTDateTime,
@@ -190,7 +194,14 @@ export default function History() {
       setActiveInvoice(id);
 
       const invoice = (await api.get(`/invoices/${id}`)).data.data;
-      const Component = type === "admin" ? AdminInvoice : ClientInvoice;
+      const adminMap = { 1: AdminInvoiceT1, 2: AdminInvoiceT2, 3: AdminInvoiceT3 };
+      const clientMap = { 1: ClientInvoiceT1, 2: ClientInvoiceT2, 3: ClientInvoiceT3 };
+      const templateNum = type === "admin"
+        ? (company?.adminInvoiceTemplate ?? 1)
+        : (company?.clientInvoiceTemplate ?? 1);
+      const Component = type === "admin"
+        ? adminMap[templateNum] ?? AdminInvoiceT1
+        : clientMap[templateNum] ?? ClientInvoiceT1;
 
       // Only send the component HTML — no wrapping document needed.
       // pdf.js wraps it in a full HTML document with correct styles.
