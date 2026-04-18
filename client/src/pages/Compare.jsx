@@ -2,8 +2,9 @@ import { useEffect, useState, useContext } from "react";
 import API from "../api/api";
 import { AuthContext } from "../context/AuthContext";
 import SearchableInvoiceSelect from "../components/SearchableInvoiceSelect";
-import CompareInvoices from "../components/CompareInvoices";
-import { InvoiceComparisonReport } from "../components/CompareInvoices";
+import CompareInvoicesT1, { InvoiceComparisonReport as CompareReportT1 } from "../components/CompareInvoicesT1";
+import CompareInvoicesT2, { InvoiceComparisonReport as CompareReportT2 } from "../components/CompareInvoicesT2";
+import CompareInvoicesT3, { InvoiceComparisonReport as CompareReportT3 } from "../components/CompareInvoicesT3";
 import { renderToStaticMarkup } from "react-dom/server";
 import {
   Download,
@@ -26,6 +27,12 @@ export default function ComparePage() {
   const [loading, setLoading] = useState(true);
   const [downloading, setDownloading] = useState(false);
   const [error, setError] = useState(null);
+
+  const compareTemplateNum = company?.compareInvoiceTemplate ?? 1;
+  const compareDisplayMap = { 1: CompareInvoicesT1, 2: CompareInvoicesT2, 3: CompareInvoicesT3 };
+  const compareReportMap = { 1: CompareReportT1, 2: CompareReportT2, 3: CompareReportT3 };
+  const ActiveCompareDisplay = compareDisplayMap[compareTemplateNum] ?? CompareInvoicesT1;
+  const ActiveCompareReport = compareReportMap[compareTemplateNum] ?? CompareReportT1;
 
   useEffect(() => {
     fetchInvoices();
@@ -55,7 +62,7 @@ export default function ComparePage() {
     setDownloading(true);
     try {
       const html = renderToStaticMarkup(
-        <InvoiceComparisonReport
+        <ActiveCompareReport
           invoiceA={invoiceAData}
           invoiceB={invoiceBData}
           company={company}
@@ -449,7 +456,7 @@ export default function ComparePage() {
 
                 <div className="overflow-x-auto overflow-y-auto max-h-[calc(100vh-400px)] min-h-[400px]">
                   <div className="min-w-full p-4 md:p-6">
-                    <CompareInvoices
+                    <ActiveCompareDisplay
                       invoiceAId={invoiceAId}
                       invoiceBId={invoiceBId}
                       onLoadedA={setInvoiceAData}
