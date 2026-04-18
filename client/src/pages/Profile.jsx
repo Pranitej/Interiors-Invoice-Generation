@@ -31,6 +31,7 @@ import {
   LogIn,
   FileText,
   ZoomIn,
+  Palette,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { formatISTDateTime } from "../utils/dateTime";
@@ -38,6 +39,11 @@ import config from "../config.js";
 import CompanyLogoChanger from "../components/CompanyLogoChanger";
 import EditUserModal from "../components/EditUserModal";
 import DeleteUserModal from "../components/DeleteUserModal";
+
+// Tailwind JIT safelist for dynamic tab color classes
+// eslint-disable-next-line no-unused-vars
+const _tailwindSafelist =
+  "bg-pink-50 dark:bg-pink-900/20 text-pink-600 dark:text-pink-400 border-pink-200 dark:border-pink-800";
 
 export default function Profile() {
   const { user: currentUser, setUser: setCurrentUser, setCompany, subscriptionStatus } =
@@ -81,6 +87,12 @@ export default function Profile() {
     termsAndConditions: [],
   });
   const [companyLoading, setCompanyLoading] = useState(false);
+  const [templatesForm, setTemplatesForm] = useState({
+    adminInvoiceTemplate: 1,
+    clientInvoiceTemplate: 1,
+    compareInvoiceTemplate: 1,
+  });
+  const [templatesLoading, setTemplatesLoading] = useState(false);
   const [showPassword, setShowPassword] = useState({
     current: false,
     new: false,
@@ -153,9 +165,34 @@ export default function Profile() {
         website: c.website || "",
         termsAndConditions: Array.isArray(c.termsAndConditions) ? c.termsAndConditions : [],
       });
+      setTemplatesForm({
+        adminInvoiceTemplate: c.adminInvoiceTemplate ?? 1,
+        clientInvoiceTemplate: c.clientInvoiceTemplate ?? 1,
+        compareInvoiceTemplate: c.compareInvoiceTemplate ?? 1,
+      });
     } catch (error) {
       console.error("Failed to fetch company:", error);
       setMessage({ type: "error", text: "Failed to load company details" });
+    }
+  };
+
+  const handleTemplatesSave = async () => {
+    setMessage({ type: "", text: "" });
+    try {
+      setTemplatesLoading(true);
+      const response = await api.put("/companies/my", templatesForm);
+      const updatedCompany = response.data.data;
+      setCompany(updatedCompany);
+      localStorage.setItem("company", JSON.stringify(updatedCompany));
+      setMessage({ type: "success", text: "Invoice templates updated successfully!" });
+    } catch (error) {
+      console.error("Templates update failed:", error);
+      setMessage({
+        type: "error",
+        text: error.response?.data?.message || "Failed to update invoice templates",
+      });
+    } finally {
+      setTemplatesLoading(false);
     }
   };
 
@@ -337,6 +374,7 @@ export default function Profile() {
     ...(currentUser?.role === config.roles.COMPANY_ADMIN
       ? [
           { id: "company", label: "Company", icon: Building2, color: "indigo" },
+          { id: "invoice-styles", label: "Invoice Styles", icon: Palette, color: "pink" },
           { id: "users", label: "Manage Users", icon: Users, color: "purple" },
           { id: "subscription", label: "Subscription", icon: CreditCard, color: "green" },
         ]
@@ -384,6 +422,7 @@ export default function Profile() {
                 onClick={() => {
                   setActiveTab(tab.id);
                   if (tab.id === "company") fetchCompany();
+                  if (tab.id === "invoice-styles") fetchCompany();
                   if (tab.id === "subscription") fetchSubscription();
                 }}
                 className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all border ${
@@ -1089,6 +1128,95 @@ export default function Profile() {
                     No subscription data available.
                   </div>
                 )}
+              </div>
+            )}
+
+            {/* Invoice Styles Tab */}
+            {activeTab === "invoice-styles" && currentUser?.role === config.roles.COMPANY_ADMIN && (
+              <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
+                <div className="p-5 border-b border-gray-200 dark:border-gray-700">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-pink-500 to-pink-600 flex items-center justify-center">
+                      <Palette className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <h2 className="text-lg font-bold text-gray-900 dark:text-white">Invoice Styles</h2>
+                      <p className="text-xs text-gray-600 dark:text-gray-400">
+                        Choose the design theme for each invoice type
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div className="p-5 space-y-6">
+                  {[
+                    { key: "adminInvoiceTemplate", label: "Admin Invoice", hint: "Internal view with full pricing detail" },
+                    { key: "clientInvoiceTemplate", label: "Client Invoice", hint: "The version customers receive" },
+                    { key: "compareInvoiceTemplate", label: "Compare Invoice", hint: "Side-by-side comparison report" },
+                  ].map(({ key, label, hint }) => (
+                    <div key={key}>
+                      <div className="mb-3">
+                        <p className="text-sm font-semibold text-gray-800 dark:text-gray-200">{label}</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">{hint}</p>
+                      </div>
+                      <div className="flex gap-3 flex-wrap">
+                        {[
+                          { num: 1, name: "Classic Professional", swatches: ["#f3f4f6", "#d1d5db", "#1f2937"] },
+                          { num: 2, name: "Executive Navy", swatches: ["#0f172a", "#d97706", "#ffffff"] },
+                          { num: 3, name: "Modern Teal", swatches: ["#0d9488", "#f0fdfa", "#ffffff"] },
+                        ].map(({ num, name, swatches }) => {
+                          const selected = templatesForm[key] === num;
+                          return (
+                            <button
+                              key={num}
+                              type="button"
+                              onClick={() => setTemplatesForm((f) => ({ ...f, [key]: num }))}
+                              className={`flex flex-col items-start p-3 rounded-lg border-2 transition-all w-40 ${
+                                selected
+                                  ? "border-pink-500 bg-pink-50 dark:bg-pink-900/20"
+                                  : "border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500"
+                              }`}
+                            >
+                              <div className="flex gap-1.5 mb-2">
+                                {swatches.map((c, i) => (
+                                  <div
+                                    key={i}
+                                    style={{ backgroundColor: c }}
+                                    className="w-5 h-5 rounded border border-gray-200"
+                                  />
+                                ))}
+                              </div>
+                              <span className="text-xs font-semibold text-gray-800 dark:text-gray-200">
+                                Template {num}
+                              </span>
+                              <span className="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">{name}</span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ))}
+
+                  <div className="pt-2">
+                    <button
+                      type="button"
+                      onClick={handleTemplatesSave}
+                      disabled={templatesLoading}
+                      className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-700 text-white text-sm font-semibold rounded-lg shadow-sm hover:shadow transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {templatesLoading ? (
+                        <>
+                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                          Saving...
+                        </>
+                      ) : (
+                        <>
+                          <Save className="w-4 h-4" />
+                          Save Templates
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
               </div>
             )}
 
