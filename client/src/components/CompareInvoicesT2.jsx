@@ -1700,9 +1700,20 @@ function RoomComparisonRow({
               textAlign: "center",
               color: colors.gray[400],
             }}
-            colSpan="3"
+            colSpan="2"
           >
             —
+          </td>
+          <td
+            style={{
+              padding: "8px 12px",
+              textAlign: "right",
+              fontFamily: "'SF Mono', monospace",
+              fontWeight: "500",
+              color: colors.gray[700],
+            }}
+          >
+            {formatINR(amountA || 0)}
           </td>
           <td
             style={{
@@ -1710,9 +1721,20 @@ function RoomComparisonRow({
               textAlign: "center",
               color: colors.gray[400],
             }}
-            colSpan="3"
+            colSpan="2"
           >
             —
+          </td>
+          <td
+            style={{
+              padding: "8px 12px",
+              textAlign: "right",
+              fontFamily: "'SF Mono', monospace",
+              fontWeight: "500",
+              color: colors.gray[700],
+            }}
+          >
+            {formatINR(amountB || 0)}
           </td>
         </>
       )}

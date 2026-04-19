@@ -432,9 +432,9 @@ export default function CompanyProfileTab({ companyId, initialCompany, onUpdate 
                     <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">{label}</p>
                     <div className="flex gap-3 flex-wrap">
                       {[
-                        { num: 1, name: "Classic Professional", swatches: ["#f3f4f6", "#d1d5db", "#1f2937"] },
-                        { num: 2, name: "Executive Navy", swatches: ["#0f172a", "#d97706", "#ffffff"] },
-                        { num: 3, name: "Modern Teal", swatches: ["#0d9488", "#f0fdfa", "#ffffff"] },
+                        { num: 1, name: "Editorial Luxe", swatches: ["#faf7f0", "#a07c3a", "#1f1d1b"] },
+                        { num: 2, name: "Corporate Blue", swatches: ["#eff6ff", "#2563eb", "#111827"] },
+                        { num: 3, name: "Heritage Sage", swatches: ["#faf9f7", "#d4a853", "#1a2e3d"] },
                       ].map(({ num, name, swatches }) => {
                         const selected = form[key] === num;
                         return (

@@ -563,7 +563,7 @@ function InvoiceComparisonReport({ invoiceA, invoiceB, company }, ref) {
 
                         {/* Room Total */}
                         <tr style={s.roomTotalRow}>
-                          <td style={s.tdBold}>Room Total</td>
+                          <td style={s.roomNameTd}>Room Total</td>
                           <td style={s.tdRight} colSpan="3">
                             <span style={s.tdBold}>
                               {formatINR(aggA.roomTotal)}
@@ -1391,8 +1391,14 @@ const s = {
     textAlign: "right",
     borderBottom: "1px solid #f0ebe0",
   },
-  tdBold: {
+  roomNameTd: {
     padding: "10px 10px",
+    fontSize: "11px",
+    color: "#1f1d1b",
+    fontWeight: "600",
+  },
+  tdBold: {
+    padding: "10px 0px",
     fontSize: "11px",
     color: "#1f1d1b",
     fontWeight: "600",
