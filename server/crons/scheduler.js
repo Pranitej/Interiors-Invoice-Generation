@@ -1,10 +1,12 @@
 // server/crons/scheduler.js
-// Runs two daily jobs:
+// Runs three daily jobs (also once immediately on server start):
 //   1. Auto-expire subscriptions whose expiryDate has passed
 //   2. Permanently delete trashed invoices older than the retention window
+//   3. Delete orphaned image files not linked to any model
 import cron from "node-cron";
 import config from "../config.js";
 import { runExpiryCheck, runTrashCleanup } from "../services/subscription.service.js";
+import { runImageCleanup } from "../services/imageCleanup.service.js";
 
 const { dailySchedule, timezone } = config.cron;
 
@@ -28,18 +30,18 @@ function wrap(name, fn, retries = 3) {
   };
 }
 
-export function startScheduler() {
-  cron.schedule(dailySchedule, wrap("ExpiryCheck", runExpiryCheck), {
-    timezone,
-    scheduled: true,
-  });
+const jobs = [
+  { name: "ExpiryCheck", fn: runExpiryCheck },
+  { name: "TrashCleanup", fn: runTrashCleanup },
+  { name: "ImageCleanup", fn: runImageCleanup },
+];
 
-  cron.schedule(dailySchedule, wrap("TrashCleanup", runTrashCleanup), {
-    timezone,
-    scheduled: true,
-  });
+export async function startScheduler() {
+  for (const { name, fn } of jobs) {
+    cron.schedule(dailySchedule, wrap(name, fn), { timezone, scheduled: true });
+  }
 
-  console.log(
-    `[Cron] Scheduler started — running daily at midnight (${timezone})`
-  );
+  console.log(`[Cron] Scheduler started — running daily at midnight (${timezone})`);
+
+  await Promise.allSettled(jobs.map(({ name, fn }) => wrap(name, fn)()));
 }

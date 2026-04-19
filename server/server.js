@@ -88,7 +88,7 @@ app.use("/api/auth", authLimiter);
 
 await connectDB();
 await seeding();
-startScheduler();
+await startScheduler();
 
 app.use("/api/invoices", invoiceRouter);
 app.use("/api/auth", authRouter);
