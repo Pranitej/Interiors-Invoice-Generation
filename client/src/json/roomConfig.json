@@ -211,7 +211,15 @@
         }
       ],
       "descriptions": ["Pooja Room", "Prayer Area", "Other"],
-      "accessories": [{ "name": "Door", "price": 0 }]
+      "accessories": [
+        { "name": "Door", "price": 0 },
+        { "name": "Acrylic god photo with light", "price": 0 },
+        { "name": "Acrylic god photo without light", "price": 0 },
+        { "name": "Glass god photo with light", "price": 0 },
+        { "name": "Glass god photo without light", "price": 0 },
+        { "name": "Aluminium profile glass door", "price": 0 },
+        { "name": "Panelling", "price": 0 }
+      ]
     },
 
     {
