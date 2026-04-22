@@ -728,7 +728,8 @@ export default function History() {
                   key={invoice._id}
                   className="bg-white dark:bg-gray-800 rounded-lg border border-red-100 dark:border-red-900/30 transition-colors"
                 >
-                  <div className="flex items-center p-4 gap-4 flex-wrap">
+                  {/* Desktop View */}
+                  <div className="hidden sm:flex sm:items-center p-4 gap-3">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
                         <User
@@ -742,16 +743,18 @@ export default function History() {
                           {daysLeft(invoice.deletedAt)}d left
                         </span>
                       </div>
-                      <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-                        <Calendar size={11} />
-                        <span>Deleted {formatISTDate(invoice.deletedAt)}</span>
-                        <span className="mx-1">•</span>
+                      <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-gray-500 dark:text-gray-400">
+                        <span className="inline-flex items-center gap-1">
+                          <Calendar size={11} />
+                          Deleted {formatISTDate(invoice.deletedAt)}
+                        </span>
+                        <span>•</span>
                         <span className="font-medium text-green-600 dark:text-green-400">
                           {formatINR(invoice.finalPayableAfterDiscount)}
                         </span>
                         {user?.role === config.roles.COMPANY_ADMIN && (
                           <>
-                            <span className="mx-1">•</span>
+                            <span>•</span>
                             <span className="inline-flex items-center gap-1 text-indigo-600 dark:text-indigo-400">
                               <User size={10} />
                               {invoice.createdBy?.username || "—"}
@@ -763,14 +766,65 @@ export default function History() {
                     <div className="flex items-center gap-2 flex-shrink-0">
                       <button
                         onClick={() => handleRestore(invoice._id)}
-                        className="inline-flex items-center gap-1 px-3 py-1.5 bg-green-50 hover:bg-green-100 dark:bg-green-900/20 dark:hover:bg-green-900/40 text-green-700 dark:text-green-400 text-sm font-medium rounded transition-colors"
+                        className="inline-flex items-center justify-center gap-1 px-3 py-1.5 bg-green-50 hover:bg-green-100 dark:bg-green-900/20 dark:hover:bg-green-900/40 text-green-700 dark:text-green-400 text-sm font-medium rounded transition-colors"
                       >
                         Restore
                       </button>
                       {user?.role === config.roles.COMPANY_ADMIN && (
                         <button
                           onClick={() => handlePermDelete(invoice._id)}
-                          className="inline-flex items-center gap-1 px-3 py-1.5 bg-red-50 hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/40 text-red-700 dark:text-red-400 text-sm font-medium rounded transition-colors"
+                          className="inline-flex items-center justify-center gap-1 px-3 py-1.5 bg-red-50 hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/40 text-red-700 dark:text-red-400 text-sm font-medium rounded transition-colors"
+                        >
+                          Delete Forever
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Mobile View */}
+                  <div className="sm:hidden p-4">
+                    <div className="flex items-start justify-between gap-2 mb-3">
+                      <div className="flex items-center gap-2 min-w-0 flex-1">
+                        <User
+                          size={14}
+                          className="text-gray-400 flex-shrink-0"
+                        />
+                        <span className="font-medium text-gray-900 dark:text-white truncate">
+                          {invoice.client?.name || "Unnamed Client"}
+                        </span>
+                      </div>
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 flex-shrink-0">
+                        {daysLeft(invoice.deletedAt)}d left
+                      </span>
+                    </div>
+                    <div className="space-y-1.5 mb-3 text-xs text-gray-500 dark:text-gray-400">
+                      <div className="flex items-center justify-between">
+                        <span className="inline-flex items-center gap-1">
+                          <Calendar size={11} />
+                          Deleted {formatISTDate(invoice.deletedAt)}
+                        </span>
+                        <span className="font-semibold text-green-600 dark:text-green-400 text-sm">
+                          {formatINR(invoice.finalPayableAfterDiscount)}
+                        </span>
+                      </div>
+                      {user?.role === config.roles.COMPANY_ADMIN && (
+                        <div className="inline-flex items-center gap-1 text-indigo-600 dark:text-indigo-400">
+                          <User size={10} />
+                          {invoice.createdBy?.username || "—"}
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2 pt-3 border-t border-gray-100 dark:border-gray-700">
+                      <button
+                        onClick={() => handleRestore(invoice._id)}
+                        className="flex-1 inline-flex items-center justify-center gap-1 px-3 py-2 bg-green-50 hover:bg-green-100 dark:bg-green-900/20 dark:hover:bg-green-900/40 text-green-700 dark:text-green-400 text-sm font-medium rounded transition-colors"
+                      >
+                        Restore
+                      </button>
+                      {user?.role === config.roles.COMPANY_ADMIN && (
+                        <button
+                          onClick={() => handlePermDelete(invoice._id)}
+                          className="flex-1 inline-flex items-center justify-center gap-1 px-3 py-2 bg-red-50 hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/40 text-red-700 dark:text-red-400 text-sm font-medium rounded transition-colors"
                         >
                           Delete Forever
                         </button>
