@@ -50,6 +50,7 @@ const config = {
     retryDelayBaseMs: 600, // used as attempt * retryDelayBaseMs
     maxHtmlBytes: 512_000,
     slotLeaseBufferSec: 10, // added to pdfTimeoutSec for SLOT_LEASE_MS in pdf.service.js
+    chromiumExecutablePath: process.env.PUPPETEER_EXECUTABLE_PATH || null,
   },
 
   upload: {

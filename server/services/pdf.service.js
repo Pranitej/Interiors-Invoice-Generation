@@ -16,6 +16,7 @@ const {
   retryDelayBaseMs,
   maxHtmlBytes,
   slotLeaseBufferSec,
+  chromiumExecutablePath,
 } = config.pdf;
 
 const PDF_TIMEOUT_MS = pdfTimeoutSec * 1000;
@@ -46,6 +47,7 @@ async function getBrowser() {
   if (_browser && _browser.isConnected()) return _browser;
   _browser = await puppeteer.launch({
     headless: true,
+    ...(chromiumExecutablePath ? { executablePath: chromiumExecutablePath } : {}),
     args: [
       "--no-sandbox",
       "--disable-setuid-sandbox",

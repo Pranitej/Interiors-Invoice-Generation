@@ -3,5 +3,17 @@
 /server/node_modules
 /.vscode
 /.worktrees
-/server/.env
 /docs
+
+# Uploaded files — generated at runtime, not part of source
+/server/public/*
+!/server/public/.gitkeep
+
+# Environment files — never commit real secrets
+/server/.env
+/client/.env
+/client/.env.*
+
+# Re-allow example files
+!/server/.env.example
+!/client/.env.example
