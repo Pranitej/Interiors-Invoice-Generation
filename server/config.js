@@ -7,7 +7,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const config = {
-  platform: { name: "Interiors SaaS" },
+  platform: { name: process.env.APP_NAME || "CraftQuote" },
 
   roles: {
     SUPER_ADMIN: "super_admin",

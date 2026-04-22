@@ -829,7 +829,7 @@ function InvoiceComparisonReport({ invoiceA, invoiceB, company }, ref) {
         </div>
         <div style={s.footerBottom}>
           <p style={s.footerMeta}>
-            Automated comparison report · {companyData.name} Invoice System
+            Automated comparison report · {companyData.name} · CraftQuote
           </p>
           <p style={s.footerReportId}>
             Report ID: CMP-{Date.now().toString().slice(-8)}

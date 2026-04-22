@@ -4,7 +4,7 @@
 
 const config = {
   platform: {
-    name: "Interiors SaaS",
+    name: "CraftQuote",
     tagline: "Powering Interior Design Businesses",
   },
 
