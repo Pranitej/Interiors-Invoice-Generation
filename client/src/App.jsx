@@ -84,7 +84,7 @@ function App() {
       <div
         className={`${theme} min-h-screen bg-gray-50 dark:bg-slate-900 text-gray-900 dark:text-gray-100`}
       >
-        <BrowserRouter>
+        <BrowserRouter basename="/craftquote">
           <Header theme={theme} toggleTheme={toggleTheme} />
           <SubscriptionBanner />
           <main className="max-w-6xl mx-auto p-4">
