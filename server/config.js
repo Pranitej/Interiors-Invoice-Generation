@@ -76,7 +76,15 @@ const config = {
 
   cron: {
     dailySchedule: "0 0 * * *", // midnight every day
+    backupSchedule: "0 2 * * *", // 2am every day
     timezone: "Asia/Kolkata",
+  },
+
+  backup: {
+    enabled: process.env.BACKUP_ENABLED === "true",
+    dir: process.env.BACKUP_DIR || "/backups",
+    retentionDays: 7, // delete backups older than this
+    mongoUri: process.env.MONGO_URI,
   },
 
   permissions: {

@@ -73,7 +73,9 @@ function App() {
     fetchSubscriptionStatus();
     // Refresh subscription status every 5 minutes while logged in
     if (!user || user.role === "super_admin") return;
-    const interval = setInterval(fetchSubscriptionStatus, 5 * 60 * 1000);
+    const interval = setInterval(() => {
+      if (document.visibilityState === "visible") fetchSubscriptionStatus();
+    }, 5 * 60 * 1000);
     return () => clearInterval(interval);
   }, [fetchSubscriptionStatus, user]);
 
