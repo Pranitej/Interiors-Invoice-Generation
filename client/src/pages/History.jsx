@@ -82,7 +82,7 @@ export default function History() {
   const [permDeleteTarget, setPermDeleteTarget] = useState(null);
   const [fetchError, setFetchError] = useState(null);
   const [previewInvoice, setPreviewInvoice] = useState(null);
-  const [previewLoading, setPreviewLoading] = useState(null);
+  const [previewLoading, setPreviewLoading] = useState(null); // invoice._id while fetching preview, null when idle
   const [downloadTarget, setDownloadTarget] = useState(null);
 
   const navigate = useNavigate();
