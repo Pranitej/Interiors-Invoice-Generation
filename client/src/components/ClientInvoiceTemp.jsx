@@ -461,7 +461,9 @@ const ClientInvoice = forwardRef(({ invoice, company }, ref) => {
                     <td className="border p-1">{ex.label}</td>
                     <td className="border p-1 text-right">
                       {ex.type === "ceiling"
-                        ? inputs.surfaces?.length || 1
+                        ? inputs.surfaces?.length > 0
+                          ? inputs.surfaces.map((s) => s.label).join(", ")
+                          : "As per design"
                         : ex.type === "area_based"
                           ? `${inputs.area} sq.ft`
                           : "Fixed"}
