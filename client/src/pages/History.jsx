@@ -954,6 +954,73 @@ export default function History() {
           </div>
         </div>
       )}
+
+      {/* Download Options Modal */}
+      {downloadTarget && (
+        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-5 max-w-sm w-full mx-4 shadow-xl">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <Download size={18} className="text-gray-700 dark:text-gray-300" />
+                <h3 className="text-base font-semibold text-gray-900 dark:text-white">
+                  Download Invoice
+                </h3>
+              </div>
+              <button
+                onClick={() => setDownloadTarget(null)}
+                className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 rounded transition-colors"
+              >
+                <X size={18} />
+              </button>
+            </div>
+            <div className="space-y-3 mb-4">
+              <button
+                onClick={() => {
+                  const id = downloadTarget;
+                  setDownloadTarget(null);
+                  handleDownload(id, "client");
+                }}
+                className="w-full flex items-start gap-3 p-4 bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/20 dark:hover:bg-blue-900/40 border border-blue-200 dark:border-blue-800 rounded-lg transition-colors text-left"
+              >
+                <User size={20} className="text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
+                <div>
+                  <p className="font-medium text-blue-700 dark:text-blue-300 text-sm">Client PDF</p>
+                  <p className="text-xs text-blue-600/70 dark:text-blue-400/70 mt-0.5">Share with your client</p>
+                </div>
+              </button>
+              <button
+                onClick={() => {
+                  const id = downloadTarget;
+                  setDownloadTarget(null);
+                  handleDownload(id, "admin");
+                }}
+                className="w-full flex items-start gap-3 p-4 bg-purple-50 hover:bg-purple-100 dark:bg-purple-900/20 dark:hover:bg-purple-900/40 border border-purple-200 dark:border-purple-800 rounded-lg transition-colors text-left"
+              >
+                <Shield size={20} className="text-purple-600 dark:text-purple-400 mt-0.5 flex-shrink-0" />
+                <div>
+                  <p className="font-medium text-purple-700 dark:text-purple-300 text-sm">Admin PDF</p>
+                  <p className="text-xs text-purple-600/70 dark:text-purple-400/70 mt-0.5">Internal copy with full cost breakdown</p>
+                </div>
+              </button>
+            </div>
+            <button
+              onClick={() => setDownloadTarget(null)}
+              className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Invoice Preview Modal */}
+      {previewInvoice && (
+        <InvoicePreviewModal
+          invoice={previewInvoice}
+          company={company}
+          onClose={() => setPreviewInvoice(null)}
+        />
+      )}
     </div>
   );
 }
