@@ -975,6 +975,7 @@ export default function History() {
             </div>
             <div className="space-y-3 mb-4">
               <button
+                type="button"
                 onClick={() => {
                   const id = downloadTarget;
                   setDownloadTarget(null);
@@ -989,6 +990,7 @@ export default function History() {
                 </div>
               </button>
               <button
+                type="button"
                 onClick={() => {
                   const id = downloadTarget;
                   setDownloadTarget(null);
