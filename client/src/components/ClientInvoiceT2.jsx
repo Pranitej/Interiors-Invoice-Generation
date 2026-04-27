@@ -63,6 +63,9 @@ const ClientInvoiceT2 = forwardRef(({ invoice, company }, ref) => {
 
   const roomsTotals = rooms.map((room) => calcRoomAggregates(room));
   const roomsTotal = roomsTotals.reduce((sum, r) => sum + r.roomTotal, 0);
+  const totalFrameWork = roomsTotals.reduce((sum, r) => sum + r.framePriceTotal, 0);
+  const totalBoxWork = roomsTotals.reduce((sum, r) => sum + r.boxPriceTotal, 0);
+  const totalAccessoriesCount = rooms.reduce((sum, r) => sum + (r.accessories?.length || 0), 0);
   const extrasTotal = extras.reduce(
     (sum, ex) => sum + Number(ex.total || 0),
     0,
@@ -431,6 +434,34 @@ const ClientInvoiceT2 = forwardRef(({ invoice, company }, ref) => {
       borderCollapse: "collapse",
       marginTop: "0",
       tableLayout: "fixed",
+    },
+
+    // Work summary section
+    workSummaryGrid: {
+      display: "flex",
+      gap: "12px",
+      marginBottom: "20px",
+    },
+    workSummaryCard: {
+      flex: 1,
+      backgroundColor: colors.gray[50],
+      border: `1px solid ${colors.gray[200]}`,
+      borderRadius: "10px",
+      padding: "14px 16px",
+    },
+    workSummaryLabel: {
+      fontSize: "11px",
+      fontWeight: "600",
+      textTransform: "uppercase",
+      letterSpacing: "0.05em",
+      color: colors.gray[500],
+      marginBottom: "6px",
+    },
+    workSummaryValue: {
+      fontSize: "16px",
+      fontWeight: "700",
+      color: colors.gray[800],
+      fontFamily: "'SF Mono', monospace",
     },
 
     // Extras section
@@ -939,6 +970,31 @@ const ClientInvoiceT2 = forwardRef(({ invoice, company }, ref) => {
               </div>
             );
           })}
+        </>
+      )}
+
+      {/* Work Summary */}
+      {rooms.length > 0 && (
+        <>
+          <div style={s.sectionHeader}>
+            <div style={s.sectionTitle}>Work Summary</div>
+          </div>
+          <div style={s.workSummaryGrid}>
+            <div style={s.workSummaryCard}>
+              <div style={s.workSummaryLabel}>Total Frame Work</div>
+              <div style={s.workSummaryValue}>{formatINR(totalFrameWork)}</div>
+            </div>
+            <div style={s.workSummaryCard}>
+              <div style={s.workSummaryLabel}>Total Box Work</div>
+              <div style={s.workSummaryValue}>{formatINR(totalBoxWork)}</div>
+            </div>
+            <div style={s.workSummaryCard}>
+              <div style={s.workSummaryLabel}>Total Accessories</div>
+              <div style={s.workSummaryValue}>
+                {totalAccessoriesCount} item{totalAccessoriesCount !== 1 ? "s" : ""}
+              </div>
+            </div>
+          </div>
         </>
       )}
 
