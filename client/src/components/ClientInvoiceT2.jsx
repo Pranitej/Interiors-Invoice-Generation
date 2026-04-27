@@ -63,9 +63,15 @@ const ClientInvoiceT2 = forwardRef(({ invoice, company }, ref) => {
 
   const roomsTotals = rooms.map((room) => calcRoomAggregates(room));
   const roomsTotal = roomsTotals.reduce((sum, r) => sum + r.roomTotal, 0);
-  const totalFrameWork = roomsTotals.reduce((sum, r) => sum + r.framePriceTotal, 0);
-  const totalBoxWork = roomsTotals.reduce((sum, r) => sum + r.boxPriceTotal, 0);
-  const totalAccessoriesCount = rooms.reduce((sum, r) => sum + (r.accessories?.length || 0), 0);
+  const totalFrameWork = roomsTotals.reduce(
+    (sum, r) => sum + r.frameAreaTotal,
+    0,
+  );
+  const totalBoxWork = roomsTotals.reduce((sum, r) => sum + r.boxAreaTotal, 0);
+  const totalAccessoriesCount = rooms.reduce(
+    (sum, r) => sum + (r.accessories?.length || 0),
+    0,
+  );
   const extrasTotal = extras.reduce(
     (sum, ex) => sum + Number(ex.total || 0),
     0,
@@ -786,7 +792,7 @@ const ClientInvoiceT2 = forwardRef(({ invoice, company }, ref) => {
       {rooms.length > 0 && (
         <>
           <div style={s.sectionHeader}>
-            <div style={s.sectionTitle}>Roomwise Breakdown</div>
+            <div style={s.sectionTitle}>Rooms Breakdown</div>
             <span style={s.sectionBadge}>{rooms.length} room(s)</span>
           </div>
 
@@ -851,7 +857,8 @@ const ClientInvoiceT2 = forwardRef(({ invoice, company }, ref) => {
                   </thead>
                   <tbody>
                     {(room.items || []).map((item, itemIndex) => {
-                      const hasFrame = item.frame && Number(item.frame.area) > 0;
+                      const hasFrame =
+                        item.frame && Number(item.frame.area) > 0;
                       const hasBox = item.box && Number(item.box.area) > 0;
                       const itemTotal =
                         (Number(item.frame?.price) || 0) +
@@ -982,16 +989,23 @@ const ClientInvoiceT2 = forwardRef(({ invoice, company }, ref) => {
           <div style={s.workSummaryGrid}>
             <div style={s.workSummaryCard}>
               <div style={s.workSummaryLabel}>Total Frame Work</div>
-              <div style={s.workSummaryValue}>{formatINR(totalFrameWork)}</div>
+              <div style={s.workSummaryValue}>
+                {totalFrameWork.toFixed(2) + " "}
+                <small>SQFT</small>
+              </div>
             </div>
             <div style={s.workSummaryCard}>
               <div style={s.workSummaryLabel}>Total Box Work</div>
-              <div style={s.workSummaryValue}>{formatINR(totalBoxWork)}</div>
+              <div style={s.workSummaryValue}>
+                {totalBoxWork.toFixed(2) + " "}
+                <small>SQFT</small>
+              </div>
             </div>
             <div style={s.workSummaryCard}>
               <div style={s.workSummaryLabel}>Total Accessories</div>
               <div style={s.workSummaryValue}>
-                {totalAccessoriesCount} item{totalAccessoriesCount !== 1 ? "s" : ""}
+                {totalAccessoriesCount} item
+                {totalAccessoriesCount !== 1 ? "s" : ""}
               </div>
             </div>
           </div>

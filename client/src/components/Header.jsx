@@ -1,7 +1,14 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useContext, useState, useRef, useEffect } from "react";
 import { AuthContext } from "../context/AuthContext";
-import { History, Plus, Scale, User, UserStar, LayoutDashboard } from "lucide-react";
+import {
+  History,
+  Plus,
+  Scale,
+  User,
+  UserStar,
+  LayoutDashboard,
+} from "lucide-react";
 import config from "../config.js";
 
 export default function Header({ theme, toggleTheme }) {
@@ -63,7 +70,8 @@ export default function Header({ theme, toggleTheme }) {
   // Filter navigation links based on user role
   const getFilteredLinks = () => {
     if (!user) return [];
-    if (user.role === "super_admin") return navigationLinks.filter((link) => link.showForSuperAdmin);
+    if (user.role === "super_admin")
+      return navigationLinks.filter((link) => link.showForSuperAdmin);
     return navigationLinks.filter((link) =>
       user.role === "company_admin" ? link.showForAdmin : link.showForUser,
     );
@@ -103,6 +111,7 @@ export default function Header({ theme, toggleTheme }) {
 
   const handleProfileClick = () => {
     navigate("/profile");
+    setIsMobileMenuOpen(false);
   };
 
   return (
@@ -117,7 +126,9 @@ export default function Header({ theme, toggleTheme }) {
               onClick={handleMobileLinkClick}
             >
               <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-600 to-blue-500 dark:from-blue-500 dark:to-blue-400 flex items-center justify-center shadow-md">
-                <span className="text-white font-bold text-base">{brandConfig.name[0]}</span>
+                <span className="text-white font-bold text-base">
+                  {brandConfig.name[0]}
+                </span>
               </div>
               <div className="flex flex-col">
                 <span className="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
@@ -162,7 +173,11 @@ export default function Header({ theme, toggleTheme }) {
                     {user.username}
                   </span>
                   <span className="text-xs text-gray-500 dark:text-gray-400">
-                    {user.role === "company_admin" ? "Administrator" : user.role === "super_admin" ? "Super Admin" : "User"}
+                    {user.role === "company_admin"
+                      ? "Administrator"
+                      : user.role === "super_admin"
+                        ? "Super Admin"
+                        : "User"}
                   </span>
                 </div>
                 <div
@@ -281,14 +296,14 @@ export default function Header({ theme, toggleTheme }) {
                   <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-700">
                     <div className="flex items-center gap-3">
                       <div
-                        onClick={() => navigate("/profile")}
+                        onClick={() => handleProfileClick()}
                         className="w-10 cursor-pointer h-10 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white text-base font-medium shadow-sm"
                       >
                         {user.role !== "company_user" ? <UserStar /> : <User />}
                       </div>
                       <div
                         className="cursor-pointer"
-                        onClick={() => navigate("/profile")}
+                        onClick={() => handleProfileClick()}
                       >
                         <div className="font-medium text-gray-800 dark:text-white">
                           {user.username}
@@ -307,7 +322,11 @@ export default function Header({ theme, toggleTheme }) {
                               d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
                             />
                           </svg>
-                          {user.role === "company_admin" ? "Administrator" : user.role === "super_admin" ? "Super Admin" : "User"}
+                          {user.role === "company_admin"
+                            ? "Administrator"
+                            : user.role === "super_admin"
+                              ? "Super Admin"
+                              : "User"}
                         </div>
                       </div>
                     </div>
