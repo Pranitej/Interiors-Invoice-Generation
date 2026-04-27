@@ -8,6 +8,22 @@ function escapeRegex(str) {
   return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
+function validateRooms(rooms) {
+  for (const [rIdx, room] of rooms.entries()) {
+    const roomLabel = room.name?.trim() ? `"${room.name}"` : `Room ${rIdx + 1}`;
+    if (!room.name?.trim())
+      throw new AppError(400, `Room ${rIdx + 1} is missing a name`);
+    for (const [iIdx, item] of (room.items || []).entries()) {
+      if (!item.name?.trim())
+        throw new AppError(400, `${roomLabel}: item ${iIdx + 1} is missing a name`);
+    }
+    for (const [aIdx, acc] of (room.accessories || []).entries()) {
+      if (!acc.name?.trim())
+        throw new AppError(400, `${roomLabel}: accessory ${aIdx + 1} is missing a name`);
+    }
+  }
+}
+
 export async function createInvoice({ body, companyId, userId }) {
   const { client, pricing, rooms } = body;
 
@@ -17,6 +33,7 @@ export async function createInvoice({ body, companyId, userId }) {
     throw new AppError(400, "pricing.frameRate and pricing.boxRate (numbers) are required");
   if (!Array.isArray(rooms))
     throw new AppError(400, "rooms must be an array");
+  validateRooms(rooms);
 
   const invoice = new Invoice({ ...body, companyId, createdBy: userId });
   await invoice.save();
@@ -82,6 +99,8 @@ export async function updateInvoice(id, companyId, data, ownerId = null) {
   }
   if (data.rooms !== undefined && !Array.isArray(data.rooms))
     throw new AppError(400, "rooms must be an array");
+  if (Array.isArray(data.rooms))
+    validateRooms(data.rooms);
 
   const { companyId: _c, createdBy: _u, _id: _i, ...safeData } = data;
   const filter = { _id: id, deletedAt: null };

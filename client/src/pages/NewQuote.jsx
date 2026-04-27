@@ -391,14 +391,28 @@ export default function NewQuote() {
     };
   };
 
+  const getValidationError = () => {
+    if (!client.siteAddress.trim()) return "Site address is required to save the invoice.";
+    for (const [rIdx, room] of rooms.entries()) {
+      if (!room.name?.trim()) return `Room ${rIdx + 1} is missing a name. Please fill it in or remove it.`;
+      for (const [iIdx, item] of (room.items || []).entries()) {
+        if (!item.name?.trim())
+          return `"${room.name}": item ${iIdx + 1} has no name. Please fill it in or remove it.`;
+      }
+    }
+    return null;
+  };
+
   const handleSaveInvoice = async () => {
     if (subscriptionStatus && !subscriptionStatus.canCreateInvoices) {
       setSaveStatus({ type: "error", message: "Company suspended. Contact admin." });
       setTimeout(() => setSaveStatus(null), 5000);
       return;
     }
-    if (!client.siteAddress.trim()) {
-      alert("Site address is required to save the invoice.");
+    const validationError = getValidationError();
+    if (validationError) {
+      setSaveStatus({ type: "error", message: validationError });
+      setTimeout(() => setSaveStatus(null), 5000);
       return;
     }
 
@@ -443,8 +457,10 @@ export default function NewQuote() {
       setTimeout(() => setSaveStatus(null), 5000);
       return;
     }
-    if (!client.siteAddress.trim()) {
-      alert("Site address is required to save the invoice.");
+    const validationError = getValidationError();
+    if (validationError) {
+      setSaveStatus({ type: "error", message: validationError });
+      setTimeout(() => setSaveStatus(null), 5000);
       return;
     }
 
