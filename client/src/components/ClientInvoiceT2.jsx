@@ -1043,7 +1043,7 @@ const ClientInvoiceT2 = forwardRef(({ invoice, company }, ref) => {
                           <div style={s.extraDetailRow}>
                             <span style={s.extraDetailLabel}>Surfaces</span>
                             <span style={s.extraDetailValue}>
-                              {inputs.surfaces.length} surface(s)
+                              {inputs.surfaces.map((surf) => surf.label).join(", ")}
                             </span>
                           </div>
                         )}
