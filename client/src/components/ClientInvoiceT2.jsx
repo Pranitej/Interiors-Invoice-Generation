@@ -632,10 +632,10 @@ const ClientInvoiceT2 = forwardRef(({ invoice, company }, ref) => {
 
   // Column width definitions for tables
   const accessoriesCols = {
-    name: "40%",
-    qty: "20%",
-    rate: "20%",
-    amount: "20%",
+    name: "45%",
+    qty: "15%",
+    rate: "15%",
+    amount: "25%",
   };
 
   return (
