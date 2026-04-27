@@ -553,31 +553,31 @@ export default function History() {
                         {formatINR(invoice.finalPayableAfterDiscount)}
                       </div>
                     </div>
-                    <div className="flex-shrink-0 px-4 min-w-[180px]">
+                    <div className="flex-shrink-0 px-4 min-w-[120px]">
                       <div className="flex items-center justify-end gap-2">
                         <button
-                          onClick={() => handleDownload(invoice._id, "client")}
-                          disabled={
-                            isDownloading && activeInvoice === invoice._id
-                          }
-                          className="inline-flex items-center gap-1 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/20 dark:hover:bg-blue-900/40 text-blue-600 dark:text-blue-400 text-sm font-medium rounded transition-colors disabled:opacity-50 whitespace-nowrap"
+                          onClick={() => handlePreview(invoice._id)}
+                          disabled={previewLoading === invoice._id}
+                          className="p-1.5 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded transition-colors flex-shrink-0 disabled:opacity-50"
+                          title="Preview"
                         >
-                          {isDownloading && activeInvoice === invoice._id ? (
-                            <Loader2 size={14} className="animate-spin" />
+                          {previewLoading === invoice._id ? (
+                            <Loader2 size={16} className="animate-spin" />
                           ) : (
-                            <Download size={14} />
+                            <Eye size={16} />
                           )}
-                          Client
                         </button>
                         <button
-                          onClick={() => handleDownload(invoice._id, "admin")}
-                          disabled={
-                            isDownloading && activeInvoice === invoice._id
-                          }
-                          className="inline-flex items-center gap-1 px-3 py-1.5 bg-purple-50 hover:bg-purple-100 dark:bg-purple-900/20 dark:hover:bg-purple-900/40 text-purple-600 dark:text-purple-400 text-sm font-medium rounded transition-colors disabled:opacity-50 whitespace-nowrap"
+                          onClick={() => setDownloadTarget(invoice._id)}
+                          disabled={isDownloading && activeInvoice === invoice._id}
+                          className="p-1.5 text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 rounded transition-colors flex-shrink-0 disabled:opacity-50"
+                          title="Download"
                         >
-                          <Download size={14} />
-                          Admin
+                          {isDownloading && activeInvoice === invoice._id ? (
+                            <Loader2 size={16} className="animate-spin" />
+                          ) : (
+                            <Download size={16} />
+                          )}
                         </button>
                         {canEditInvoice(invoice) && (
                           <button
