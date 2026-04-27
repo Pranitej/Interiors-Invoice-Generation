@@ -16,6 +16,7 @@ const userSchema = new mongoose.Schema(
       default: null,
     },
     deletedAt: { type: Date, default: null },
+    tokenVersion: { type: Number, default: 0 },
   },
   { timestamps: true }
 );

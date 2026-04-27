@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import Company from "../models/Company.js";
+import User from "../models/User.js";
 import AppError from "../utils/AppError.js";
 import config from "../config.js";
 
@@ -26,6 +27,10 @@ export default async function authenticate(req, res, next) {
         .lean();
       if (!company) return next(new AppError(401, "Your company account no longer exists"));
       if (company.loginBlocked) return next(new AppError(403, "Login has been disabled for your account. Please contact Administrator."));
+
+      const user = await User.findById(decoded.userId).select("deletedAt tokenVersion").lean();
+      if (!user || user.deletedAt) return next(new AppError(401, "Your account no longer exists"));
+      if (user.tokenVersion !== decoded.tokenVersion) return next(new AppError(401, "Session expired, please log in again"));
     }
 
     next();

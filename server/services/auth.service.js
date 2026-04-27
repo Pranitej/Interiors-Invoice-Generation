@@ -33,7 +33,7 @@ export async function login(username, password) {
   }
 
   const token = jwt.sign(
-    { userId: user._id, role: user.role, companyId: user.companyId ?? null },
+    { userId: user._id, role: user.role, companyId: user.companyId ?? null, tokenVersion: user.tokenVersion },
     jwtSecret,
     { expiresIn: `${jwtExpiresInDays}d` },
   );
@@ -114,7 +114,7 @@ export async function updateUser(id, companyId, body) {
   const filter = { _id: id };
   if (companyId) filter.companyId = companyId;
 
-  const user = await User.findOneAndUpdate(filter, updateData, {
+  const user = await User.findOneAndUpdate(filter, { ...updateData, $inc: { tokenVersion: 1 } }, {
     new: true,
   }).select("-password");
   if (!user) throw new AppError(404, "User not found");
@@ -136,7 +136,7 @@ export async function deleteUser(id, companyId) {
   const invoiceCount = await Invoice.countDocuments({ createdBy: id });
 
   if (invoiceCount > 0) {
-    await User.findOneAndUpdate(filter, { deletedAt: new Date() });
+    await User.findOneAndUpdate(filter, { deletedAt: new Date(), $inc: { tokenVersion: 1 } });
   } else {
     await User.findOneAndDelete(filter);
   }
