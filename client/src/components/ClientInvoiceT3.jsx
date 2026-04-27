@@ -828,15 +828,6 @@ const ClientInvoiceT3 = forwardRef(({ invoice, company }, ref) => {
 
           {rooms.map((room, idx) => {
             const agg = roomsTotals[idx] || {};
-            const roomFrameRate =
-              typeof room.frameRate === "number" &&
-              !Number.isNaN(room.frameRate)
-                ? room.frameRate
-                : frameworkRate || 0;
-            const roomBoxRate =
-              typeof room.boxRate === "number" && !Number.isNaN(room.boxRate)
-                ? room.boxRate
-                : boxRate || roomFrameRate * 1.4;
             const isLastRoom = idx === rooms.length - 1;
 
             return (
