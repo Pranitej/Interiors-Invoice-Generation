@@ -6,6 +6,7 @@ import fs from "fs/promises";
 import path from "path";
 import { promisify } from "util";
 import config from "../config.js";
+import logger from "../utils/logger.js";
 
 const execAsync = promisify(exec);
 
@@ -24,7 +25,7 @@ export async function runDbBackup() {
   const { stderr } = await execAsync(
     `mongodump --uri="${mongoUri}" --out="${outDir}"`,
   );
-  if (stderr) console.warn("[DbBackup] mongodump stderr:", stderr);
+  if (stderr) logger.warn(`[DbBackup] mongodump stderr: ${stderr}`);
 
   const cleaned = await cleanOldBackups(dir, retentionDays);
 

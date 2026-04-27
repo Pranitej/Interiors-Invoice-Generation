@@ -13,6 +13,7 @@ import uploadRouter from "./routes/upload.routes.js";
 import subscriptionRouter from "./routes/subscription.routes.js";
 import errorHandler from "./middleware/errorHandler.js";
 import { startScheduler } from "./crons/scheduler.js";
+import logger from "./utils/logger.js";
 import { sendSuccess } from "./utils/response.js";
 import config from "./config.js";
 import mongoSanitize from "express-mongo-sanitize";
@@ -107,5 +108,5 @@ app.use((_req, _res, next) => {
 app.use(errorHandler);
 
 app.listen(config.server.port, () =>
-  console.log(`Server running on port ${config.server.port}`)
+  logger.info(`Server running on port ${config.server.port}`)
 );

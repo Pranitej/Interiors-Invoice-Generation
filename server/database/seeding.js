@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import User from "../models/User.js";
 import Invoice from "../models/Invoice.js";
 import config from "../config.js";
+import logger from "../utils/logger.js";
 
 const { username, password } = config.superAdmin;
 const { bcryptRounds } = config.auth;
@@ -23,7 +24,7 @@ export default async function seedDatabase() {
         role: SUPER_ADMIN,
         companyId: null,
       });
-      console.log("Super admin seeded...");
+      logger.info("Super admin seeded");
     }
 
     // Backfill deletedAt: null on invoices created before soft-delete was added
@@ -32,9 +33,9 @@ export default async function seedDatabase() {
       { $set: { deletedAt: null } }
     );
     if (modifiedCount > 0)
-      console.log(`Backfilled deletedAt on ${modifiedCount} invoice(s).`);
+      logger.info(`Backfilled deletedAt on ${modifiedCount} invoice(s)`);
   } catch (error) {
-    console.error("Seeding error:", error);
+    logger.error(`Seeding error — ${error.message}`);
     process.exit(1);
   }
 }

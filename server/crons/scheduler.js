@@ -10,8 +10,19 @@ import config from "../config.js";
 import { runExpiryCheck, runTrashCleanup } from "../services/subscription.service.js";
 import { runImageCleanup } from "../services/imageCleanup.service.js";
 import { runDbBackup } from "../services/dbBackup.service.js";
+import logger from "../utils/logger.js";
 
 const { dailySchedule, backupSchedule, timezone } = config.cron;
+
+function formatResult(result) {
+  if (!result || typeof result !== "object") return "";
+  return Object.entries(result)
+    .map(([k, v]) => {
+      if (Array.isArray(v)) return `${k}: ${v.length ? v.join(", ") : "none"}`;
+      return `${k}: ${v}`;
+    })
+    .join(" | ");
+}
 
 function wrap(name, fn, retries = 3) {
   return async () => {
@@ -19,14 +30,14 @@ function wrap(name, fn, retries = 3) {
     for (let attempt = 1; attempt <= retries; attempt++) {
       try {
         const result = await fn();
-        console.log(`[Cron:${name}] completed in ${Date.now() - start}ms`, result);
+        logger.info(`[Cron:${name}] completed in ${Date.now() - start}ms — ${formatResult(result)}`);
         return;
       } catch (err) {
-        console.error(`[Cron:${name}] attempt ${attempt}/${retries} failed:`, err.message);
+        logger.error(`[Cron:${name}] attempt ${attempt}/${retries} failed — ${err.message}`);
         if (attempt < retries) {
           await new Promise((r) => setTimeout(r, attempt * 5000));
         } else {
-          console.error(`[Cron:${name}] all ${retries} attempts failed — skipping this run`);
+          logger.error(`[Cron:${name}] all ${retries} attempts failed — skipping this run`);
         }
       }
     }
@@ -47,7 +58,7 @@ export async function startScheduler() {
   // Backup runs on its own schedule and never on startup (avoids backup on every restart)
   cron.schedule(backupSchedule, wrap("DbBackup", runDbBackup, 1), { timezone, scheduled: true });
 
-  console.log(`[Cron] Scheduler started — running daily at midnight (${timezone})`);
+  logger.info(`[Cron] Scheduler started — running daily at midnight (${timezone})`);
 
   await Promise.allSettled(jobs.map(({ name, fn }) => wrap(name, fn)()));
 }

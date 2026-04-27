@@ -1,6 +1,7 @@
 // server/database/db.js
 import mongoose from "mongoose";
 import config from "../config.js";
+import logger from "../utils/logger.js";
 
 const { uri, maxPoolSize, serverSelectionTimeoutSec, socketTimeoutSec } = config.db;
 
@@ -28,11 +29,11 @@ export default async function connectDB() {
 
   try {
     cached.conn = await cached.promise;
-    console.log("MongoDB connected (edge safe)");
+    logger.info("MongoDB connected");
     return cached.conn;
   } catch (error) {
     cached.promise = null;
-    console.error("MongoDB edge connection failed:", error);
+    logger.error(`MongoDB connection failed — ${error.message}`);
     throw error;
   }
 }

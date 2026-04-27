@@ -5,6 +5,7 @@ import SubscriptionTransaction from "../models/SubscriptionTransaction.js";
 import PlatformSettings from "../models/PlatformSettings.js";
 import AppError from "../utils/AppError.js";
 import config from "../config.js";
+import logger from "../utils/logger.js";
 
 const { warningDaysBeforeExpiry } = config.subscription;
 
@@ -315,7 +316,7 @@ export async function runExpiryCheck() {
     { $set: { isActive: false, inactiveRemarks: remark } },
   );
 
-  console.log(`[Cron] Auto-expired ${expired.length} subscription(s)`);
+  logger.info(`[Cron] Auto-expired ${expired.length} subscription(s)`);
   return { processed: expired.length };
 }
 
@@ -329,9 +330,7 @@ export async function runTrashCleanup() {
   const result = await Invoice.deleteMany({
     deletedAt: { $ne: null, $lte: cutoff },
   });
-  console.log(
-    `[Cron] Permanently deleted ${result.deletedCount} trashed invoice(s)`,
-  );
+  logger.info(`[Cron] Permanently deleted ${result.deletedCount} trashed invoice(s)`);
   return { deleted: result.deletedCount };
 }
 

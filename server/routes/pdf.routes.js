@@ -5,6 +5,7 @@ import * as PdfController from "../controllers/pdf.controller.js";
 import authenticate from "../middleware/authenticate.js";
 import { requireDownloadAccess } from "../middleware/checkSubscription.js";
 import { sendError, sendSuccess } from "../utils/response.js";
+import logger from "../utils/logger.js";
 
 const router = express.Router();
 
@@ -25,7 +26,7 @@ const validatePayload = (req, res, next) => {
 
 const concurrencyGuard = (req, res, next) => {
   if (renderState.isBusy()) {
-    console.warn(`[PDF] Rejected — active: ${renderState.active}/${renderState.maxConcurrent}`);
+    logger.warn(`[PDF] Rejected — active: ${renderState.active}/${renderState.maxConcurrent}`);
     return res.status(429).json({
       success: false,
       message: "PDF generation in progress, please try again in a moment",

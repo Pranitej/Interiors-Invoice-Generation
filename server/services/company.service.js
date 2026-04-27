@@ -8,6 +8,7 @@ import AppError from "../utils/AppError.js";
 import config from "../config.js";
 import fs from "fs";
 import path from "path";
+import logger from "../utils/logger.js";
 import { fileURLToPath } from "url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -126,7 +127,7 @@ export async function updateCompanyLogo(companyId, newFilename) {
     const oldPath = path.join(PUBLIC_DIR, oldFile);
     fs.unlink(oldPath, (err) => {
       if (err && err.code !== "ENOENT")
-        console.warn(`[Logo] Failed to delete old logo ${oldFile}:`, err.message);
+        logger.warn(`[Logo] Failed to delete old logo ${oldFile} — ${err.message}`);
     });
   }
 

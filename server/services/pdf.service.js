@@ -4,6 +4,7 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import config from "../config.js";
+import logger from "../utils/logger.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PUBLIC_DIR = path.resolve(__dirname, "..", "public");
@@ -120,7 +121,7 @@ async function generatePDF(html, retries = retryCount) {
       await page.close();
       return pdfBuffer;
     } catch (err) {
-      console.error(`[PDF] Attempt ${attempt}/${retries} failed: ${err.message}`);
+      logger.error(`[PDF] Attempt ${attempt}/${retries} failed — ${err.message}`);
       if (page) {
         try { await page.close(); } catch (_) {}
       }
