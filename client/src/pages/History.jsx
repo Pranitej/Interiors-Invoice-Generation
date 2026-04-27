@@ -241,6 +241,18 @@ export default function History() {
     }
   };
 
+  const handlePreview = async (id) => {
+    try {
+      setPreviewLoading(id);
+      const invoice = (await api.get(`/invoices/${id}`)).data.data;
+      setPreviewInvoice(invoice);
+    } catch (err) {
+      console.error("Preview failed:", err);
+    } finally {
+      setPreviewLoading(null);
+    }
+  };
+
   const canEditInvoice = (inv) =>
     user?.role === config.roles.COMPANY_ADMIN ||
     (user?.role === config.roles.COMPANY_USER &&
