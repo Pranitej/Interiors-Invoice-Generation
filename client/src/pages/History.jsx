@@ -30,7 +30,11 @@ import {
   Copy,
   Check,
   Loader2,
+  Eye,
+  Shield,
+  X,
 } from "lucide-react";
+import InvoicePreviewModal from "../components/InvoicePreviewModal";
 
 // -------------------------
 // Helpers
@@ -77,6 +81,9 @@ export default function History() {
   const [showPermDeleteConfirm, setShowPermDeleteConfirm] = useState(false);
   const [permDeleteTarget, setPermDeleteTarget] = useState(null);
   const [fetchError, setFetchError] = useState(null);
+  const [previewInvoice, setPreviewInvoice] = useState(null);
+  const [previewLoading, setPreviewLoading] = useState(null);
+  const [downloadTarget, setDownloadTarget] = useState(null);
 
   const navigate = useNavigate();
 
