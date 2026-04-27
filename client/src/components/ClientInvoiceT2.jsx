@@ -160,7 +160,7 @@ const ClientInvoiceT2 = forwardRef(({ invoice, company }, ref) => {
     companyName: {
       fontSize: "16px",
       fontWeight: "700",
-      color: colors.gray[900],
+      color: "#1d3254",
       margin: 0,
     },
     companyDetail: {
