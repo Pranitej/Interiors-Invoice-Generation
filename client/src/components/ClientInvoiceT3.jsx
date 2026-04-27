@@ -860,42 +860,84 @@ const ClientInvoiceT3 = forwardRef(({ invoice, company }, ref) => {
                   <div style={s.tableContainer}>
                     <table style={s.table}>
                       <colgroup>
-                        <col style={{ width: "40%" }} />
-                        <col style={{ width: "20%" }} />
-                        <col style={{ width: "20%" }} />
-                        <col style={{ width: "20%" }} />
+                        <col style={{ width: "30%" }} />
+                        <col style={{ width: "15%" }} />
+                        <col style={{ width: "15%" }} />
+                        <col style={{ width: "15%" }} />
+                        <col style={{ width: "25%" }} />
                       </colgroup>
                       <thead>
                         <tr style={s.tableHeader}>
-                          <th style={s.th}>Description</th>
+                          <th style={s.th}>Item</th>
+                          <th style={s.th}>Type</th>
                           <th style={s.thRight}>Area (sqft)</th>
                           <th style={s.thRight}>Rate</th>
                           <th style={s.thRight}>Amount</th>
                         </tr>
                       </thead>
                       <tbody>
-                        <tr>
-                          <td style={s.td}>Frame Work</td>
-                          <td style={s.tdRight}>
-                            {agg.frameAreaTotal?.toFixed(2) || "0.00"}
-                          </td>
-                          <td style={s.tdRight}>{formatINR(roomFrameRate)}</td>
-                          <td style={s.tdRight}>
-                            {formatINR(agg.framePriceTotal || 0)}
-                          </td>
-                        </tr>
-                        <tr>
-                          <td style={s.td}>Box Work</td>
-                          <td style={s.tdRight}>
-                            {agg.boxAreaTotal?.toFixed(2) || "0.00"}
-                          </td>
-                          <td style={s.tdRight}>{formatINR(roomBoxRate)}</td>
-                          <td style={s.tdRight}>
-                            {formatINR(agg.boxPriceTotal || 0)}
-                          </td>
-                        </tr>
+                        {(room.items || []).map((item, itemIndex) => {
+                          const hasFrame =
+                            item.frame && Number(item.frame.area) > 0;
+                          const hasBox =
+                            item.box && Number(item.box.area) > 0;
+                          const itemTotal =
+                            (Number(item.frame?.price) || 0) +
+                            (Number(item.box?.price) || 0);
+                          const rowSpan = hasFrame && hasBox ? 2 : 1;
+                          return (
+                            <React.Fragment key={itemIndex}>
+                              {hasFrame && (
+                                <tr>
+                                  {rowSpan > 1 ? (
+                                    <td style={s.td} rowSpan={rowSpan}>
+                                      {item.name}
+                                    </td>
+                                  ) : (
+                                    <td style={s.td}>{item.name}</td>
+                                  )}
+                                  <td style={s.td}>Frame</td>
+                                  <td style={s.tdRight}>
+                                    {Number(item.frame.area).toFixed(2)}
+                                  </td>
+                                  <td style={s.tdRight}>
+                                    {formatINR(item.frame.price)}
+                                  </td>
+                                  {rowSpan > 1 ? (
+                                    <td style={s.tdRight} rowSpan={rowSpan}>
+                                      {formatINR(itemTotal)}
+                                    </td>
+                                  ) : (
+                                    <td style={s.tdRight}>
+                                      {formatINR(itemTotal)}
+                                    </td>
+                                  )}
+                                </tr>
+                              )}
+                              {hasBox && (
+                                <tr>
+                                  {!hasFrame && (
+                                    <td style={s.td}>{item.name}</td>
+                                  )}
+                                  <td style={s.td}>Box</td>
+                                  <td style={s.tdRight}>
+                                    {Number(item.box.area).toFixed(2)}
+                                  </td>
+                                  <td style={s.tdRight}>
+                                    {formatINR(item.box.price)}
+                                  </td>
+                                  {!hasFrame && (
+                                    <td style={s.tdRight}>
+                                      {formatINR(itemTotal)}
+                                    </td>
+                                  )}
+                                </tr>
+                              )}
+                            </React.Fragment>
+                          );
+                        })}
                         <tr style={s.subtotalRow}>
-                          <td style={s.subtotalLabel} colSpan="3">
+                          <td style={s.subtotalLabel} colSpan="4">
                             Room Items Subtotal
                           </td>
                           <td style={s.subtotalValue}>
