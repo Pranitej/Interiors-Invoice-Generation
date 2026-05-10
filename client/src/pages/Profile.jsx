@@ -46,7 +46,7 @@ const _tailwindSafelist =
   "bg-pink-50 dark:bg-pink-900/20 text-pink-600 dark:text-pink-400 border-pink-200 dark:border-pink-800";
 
 export default function Profile() {
-  const { user: currentUser, setUser: setCurrentUser, company, setCompany, subscriptionStatus } =
+  const { user: currentUser, setUser: setCurrentUser, company, setCompany, subscriptionStatus, logout } =
     useContext(AuthContext);
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("profile");
@@ -72,6 +72,9 @@ export default function Profile() {
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleting, setDeleting] = useState(false);
   const [showCreateUserModal, setShowCreateUserModal] = useState(false);
+  const [showReloginModal, setShowReloginModal] = useState(false);
+  const [usersLoading, setUsersLoading] = useState(false);
+  const [usersError, setUsersError] = useState("");
   const [subscriptionData, setSubscriptionData] = useState(null);
   const [subscriptionTransactions, setSubscriptionTransactions] = useState([]);
   const [subscriptionLoading, setSubscriptionLoading] = useState(false);
@@ -100,27 +103,19 @@ export default function Profile() {
     newUser: false,
   });
 
+  // Redirect if logged out; keep username in sync if currentUser changes
   useEffect(() => {
     if (!currentUser) {
       navigate("/");
       return;
     }
-
-    // Load current user profile
-    setProfileForm({
-      username: currentUser.username,
-      currentPassword: "",
-      newPassword: "",
-      confirmPassword: "",
-    });
-
-    // Load all users if admin
-    if (currentUser.role === config.roles.COMPANY_ADMIN) {
-      fetchUsers();
-    } else {
-      setLoading(false);
-    }
+    setProfileForm((prev) => ({ ...prev, username: currentUser.username }));
   }, [currentUser, navigate]);
+
+  // Resolve the page spinner immediately — users are loaded lazily on tab open
+  useEffect(() => {
+    setLoading(false);
+  }, []);
 
   useEffect(() => {
     if (!company) return;
@@ -132,15 +127,17 @@ export default function Profile() {
   }, [company]);
 
   const fetchUsers = async () => {
+    setUsersError("");
+    setUsersLoading(true);
     try {
-      setLoading(true);
       const response = await api.get("/auth/users");
       setUsers(response.data.data || []);
     } catch (error) {
-      console.error("Failed to fetch users:", error);
-      setMessage({ type: "error", text: "Failed to load users" });
+      if (error.response?.status !== 401) {
+        setUsersError("Failed to load users. Please try again.");
+      }
     } finally {
-      setLoading(false);
+      setUsersLoading(false);
     }
   };
 
@@ -205,50 +202,71 @@ export default function Profile() {
     }
   };
 
-  const handleProfileUpdate = async (e) => {
+  const handleProfileUpdate = (e) => {
     e.preventDefault();
     setMessage({ type: "", text: "" });
 
-    // Validate password change
+    const trimmedUsername = profileForm.username.trim();
+    if (!trimmedUsername) {
+      setMessage({ type: "error", text: "Username cannot be empty." });
+      return;
+    }
+    if (profileForm.username.includes(" ")) {
+      setMessage({ type: "error", text: "Username must not contain spaces." });
+      return;
+    }
+
     if (profileForm.newPassword) {
+      if (profileForm.newPassword.includes(" ")) {
+        setMessage({ type: "error", text: "Password must not contain spaces." });
+        return;
+      }
       if (profileForm.newPassword !== profileForm.confirmPassword) {
-        setMessage({ type: "error", text: "New passwords do not match" });
+        setMessage({ type: "error", text: "New passwords do not match." });
         return;
       }
       if (profileForm.newPassword.length < 4) {
-        setMessage({
-          type: "error",
-          text: "Password must be at least 4 characters",
-        });
+        setMessage({ type: "error", text: "Password must be at least 4 characters." });
         return;
       }
     }
 
+    if (trimmedUsername === currentUser?.username && !profileForm.newPassword) {
+      setMessage({ type: "success", text: "No changes to save." });
+      return;
+    }
+
+    const credentialsChanged =
+      trimmedUsername !== currentUser?.username || !!profileForm.newPassword;
+
+    if (credentialsChanged) {
+      setShowReloginModal(true);
+      return;
+    }
+
+    doProfileSave(false);
+  };
+
+  const doProfileSave = async (willLogout) => {
+    setShowReloginModal(false);
     try {
       const payload = {
         username: profileForm.username,
-        ...(profileForm.newPassword && {
-          password: profileForm.newPassword, // ✅ ONLY send password
-        }),
+        ...(profileForm.newPassword && { password: profileForm.newPassword }),
       };
 
       const response = await api.put(`/auth/users/${currentUser._id}`, payload);
 
+      if (willLogout) {
+        logout();
+        return;
+      }
+
       setCurrentUser(response.data.data);
       localStorage.setItem("user", JSON.stringify(response.data.data));
-
-      setMessage({
-        type: "success",
-        text: "Profile updated successfully!",
-      });
-
-      setProfileForm({
-        ...profileForm,
-        newPassword: "",
-        confirmPassword: "",
-      });
+      setMessage({ type: "success", text: "Profile updated successfully!" });
+      setProfileForm({ ...profileForm, newPassword: "", confirmPassword: "" });
     } catch (error) {
-      console.error("Update failed:", error);
       setMessage({
         type: "error",
         text: error.response?.data?.message || "Failed to update profile",
@@ -260,16 +278,21 @@ export default function Profile() {
     e?.preventDefault();
     setMessage({ type: "", text: "" });
 
-    if (!newUserForm.username.trim()) {
-      setMessage({ type: "error", text: "Username is required" });
+    const trimmedUsername = newUserForm.username.trim();
+    if (!trimmedUsername) {
+      setMessage({ type: "error", text: "Username is required." });
       return;
     }
-
+    if (newUserForm.username.includes(" ")) {
+      setMessage({ type: "error", text: "Username must not contain spaces." });
+      return;
+    }
+    if (newUserForm.password.includes(" ")) {
+      setMessage({ type: "error", text: "Password must not contain spaces." });
+      return;
+    }
     if (newUserForm.password.length < 6) {
-      setMessage({
-        type: "error",
-        text: "Password must be at least 6 characters",
-      });
+      setMessage({ type: "error", text: "Password must be at least 6 characters." });
       return;
     }
 
@@ -433,6 +456,7 @@ export default function Profile() {
                   if (tab.id === "company") fetchCompany();
                   if (tab.id === "invoice-styles") fetchCompany();
                   if (tab.id === "subscription") fetchSubscription();
+                  if (tab.id === "users") fetchUsers();
                 }}
                 className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all border ${
                   activeTab === tab.id
@@ -458,7 +482,9 @@ export default function Profile() {
                     onClick={() => {
                       setActiveTab(tab.id);
                       if (tab.id === "company") fetchCompany();
+                      if (tab.id === "invoice-styles") fetchCompany();
                       if (tab.id === "subscription") fetchSubscription();
+                      if (tab.id === "users") fetchUsers();
                     }}
                     className={`w-full flex cursor-pointer items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 text-sm ${
                       activeTab === tab.id
@@ -1263,6 +1289,27 @@ export default function Profile() {
                     </div>
                   </div>
 
+                  {usersLoading && (
+                    <div className="flex items-center justify-center py-10">
+                      <div className="w-6 h-6 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
+                    </div>
+                  )}
+
+                  {!usersLoading && usersError && (
+                    <div className="flex flex-col items-center gap-3 py-8 text-center">
+                      <AlertCircle className="w-8 h-8 text-red-400" />
+                      <p className="text-sm text-red-600 dark:text-red-400">{usersError}</p>
+                      <button
+                        onClick={fetchUsers}
+                        className="px-4 py-1.5 text-xs font-medium bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-lg hover:bg-purple-200 dark:hover:bg-purple-900/60 transition-colors"
+                      >
+                        Retry
+                      </button>
+                    </div>
+                  )}
+
+                  {!usersLoading && !usersError && (
+                  <>
                   <div className="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700">
                     <table className="w-full">
                       <thead className="bg-gray-50 dark:bg-gray-900/50">
@@ -1355,6 +1402,8 @@ export default function Profile() {
                         Click "Add User" above to create your first user
                       </p>
                     </div>
+                  )}
+                  </>
                   )}
                 </div>
               </div>
@@ -1552,6 +1601,49 @@ export default function Profile() {
             <p className="text-xs text-center text-gray-500 dark:text-gray-400">
               After payment, contact your administrator to activate your subscription.
             </p>
+          </div>
+        </div>
+      )}
+
+      {/* Re-login Confirmation Modal */}
+      {showReloginModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-gray-800 w-full max-w-sm rounded-2xl border border-gray-200 dark:border-gray-700 shadow-2xl">
+            <div className="p-6 text-center">
+              <div className="mx-auto w-14 h-14 bg-amber-100 dark:bg-amber-900/30 rounded-full flex items-center justify-center mb-4">
+                <LogIn className="w-7 h-7 text-amber-600 dark:text-amber-400" />
+              </div>
+              <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
+                You will be logged out
+              </h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
+                Changing your{" "}
+                {profileForm.username !== currentUser?.username && profileForm.newPassword
+                  ? "username and password"
+                  : profileForm.username !== currentUser?.username
+                  ? "username"
+                  : "password"}{" "}
+                will end your current session.
+              </p>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
+                You will need to sign in again with your new credentials.
+              </p>
+              <div className="flex flex-col gap-2.5">
+                <button
+                  onClick={() => doProfileSave(true)}
+                  className="w-full flex items-center justify-center gap-2 px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-white text-sm font-semibold rounded-xl transition-colors"
+                >
+                  <LogIn className="w-4 h-4" />
+                  Yes, save and log me out
+                </button>
+                <button
+                  onClick={() => setShowReloginModal(false)}
+                  className="w-full px-5 py-2.5 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-xl text-sm font-medium transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}

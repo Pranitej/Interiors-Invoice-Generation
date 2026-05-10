@@ -14,7 +14,7 @@ API.interceptors.response.use(
     if (error.response?.status === 401 && !isLoginCall) {
       localStorage.removeItem("user");
       localStorage.removeItem("company");
-      window.location.href = "/";
+      window.location.href = import.meta.env.BASE_URL;
     }
     return Promise.reject(error);
   }

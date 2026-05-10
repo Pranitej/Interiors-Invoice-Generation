@@ -20,9 +20,30 @@ export default function EditUserModal({ user, onSave, onClose }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+
+    const trimmedUsername = form.username.trim();
+    if (!trimmedUsername) {
+      setError("Username cannot be empty.");
+      return;
+    }
+    if (form.username.includes(" ")) {
+      setError("Username must not contain spaces.");
+      return;
+    }
+    if (form.password) {
+      if (form.password.includes(" ")) {
+        setError("Password must not contain spaces.");
+        return;
+      }
+      if (form.password.length < 6) {
+        setError("Password must be at least 6 characters.");
+        return;
+      }
+    }
+
     setSubmitting(true);
     try {
-      const payload = { username: form.username };
+      const payload = { username: trimmedUsername };
       if (form.password) payload.password = form.password;
       const res = await api.put(`/auth/users/${user._id}`, payload);
       onSave(res.data.data);

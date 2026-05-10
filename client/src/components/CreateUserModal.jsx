@@ -40,10 +40,29 @@ export default function CreateUserModal({ companyId, onSave, onClose }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+
+    const trimmedUsername = form.username.trim();
+    if (!trimmedUsername) {
+      setError("Username is required.");
+      return;
+    }
+    if (form.username.includes(" ")) {
+      setError("Username must not contain spaces.");
+      return;
+    }
+    if (form.password.includes(" ")) {
+      setError("Password must not contain spaces.");
+      return;
+    }
+    if (form.password.length < 4) {
+      setError("Password must be at least 4 characters.");
+      return;
+    }
+
     setSubmitting(true);
     try {
       const res = await api.post("/auth/users", {
-        username: form.username,
+        username: trimmedUsername,
         password: form.password,
         role: form.role,
         companyId,

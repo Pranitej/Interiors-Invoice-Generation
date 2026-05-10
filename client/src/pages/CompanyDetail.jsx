@@ -295,8 +295,8 @@ export default function CompanyDetail() {
               Add User
             </button>
           </div>
-          <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
-            <table className="w-full text-sm">
+          <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-x-auto">
+            <table className="w-full text-sm min-w-[480px]">
               <thead className="bg-gray-50 dark:bg-gray-900/50 border-b border-gray-200 dark:border-gray-700">
                 <tr>
                   {["Username", "Role", "Created", "Actions"].map((h) => (
@@ -341,8 +341,8 @@ export default function CompanyDetail() {
 
       {/* Invoices Tab */}
       {tab === "invoices" && (
-        <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
-          <table className="w-full text-sm">
+        <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-x-auto">
+          <table className="w-full text-sm min-w-[560px]">
             <thead className="bg-gray-50 dark:bg-gray-900/50 border-b border-gray-200 dark:border-gray-700">
               <tr>
                 {["Client", "Amount", "Type", "Date", "Actions"].map((h) => (
