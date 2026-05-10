@@ -392,6 +392,7 @@ export default function NewQuote() {
   };
 
   const getValidationError = () => {
+    if (!client.name.trim()) return "Client name is required to save the invoice.";
     if (!client.siteAddress.trim()) return "Site address is required to save the invoice.";
     for (const [rIdx, room] of rooms.entries()) {
       if (!room.name?.trim()) return `Room ${rIdx + 1} is missing a name. Please fill it in or remove it.`;
